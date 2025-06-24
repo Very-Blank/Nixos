@@ -37,17 +37,17 @@
   programs.home-manager.enable = true;
 
   imports = [
-    ./git.nix
-    ./waybar/waybar.nix
-    ./niri/niri.nix
-    ./zsh.nix
-    ./mako.nix
-    ./fuzzel.nix
-    ./swaybg/swaybg.nix
-    ./ghostty.nix
-    ./firefox.nix
-    ./nvim/nvim.nix
-    ./stylix.nix
+    ./homeModules/git.nix
+    ./homeModules/waybar/waybar.nix
+    ./homeModules/niri/niri.nix
+    ./homeModules/zsh.nix
+    ./homeModules/mako.nix
+    ./homeModules/fuzzel.nix
+    ./homeModules/swaybg/swaybg.nix
+    ./homeModules/ghostty.nix
+    ./homeModules/firefox.nix
+    ./homeModules/nvim/nvim.nix
+    ./homeModules/stylix.nix
   ];
 
   xdg = {
