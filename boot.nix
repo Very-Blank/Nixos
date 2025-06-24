@@ -1,5 +1,0 @@
-{ ... }: 
-
-{
-  #System spesific stuff
-}
