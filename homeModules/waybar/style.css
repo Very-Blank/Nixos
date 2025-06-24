@@ -1,0 +1,160 @@
+/* waybar-template.css */
+@define-color base00 #__base00__;
+@define-color base01 #__base01__;
+@define-color base02 #__base02__;
+@define-color base03 #__base03__;
+@define-color base04 #__base04__;
+@define-color base05 #__base05__;
+@define-color base06 #__base06__;
+@define-color base07 #__base07__;
+@define-color base08 #__base08__;
+@define-color base09 #__base09__;
+@define-color base0A #__base0A__;
+@define-color base0B #__base0B__;
+@define-color base0C #__base0C__;
+@define-color base0D #__base0D__;
+@define-color base0E #__base0E__;
+@define-color base0F #__base0F__;
+
+* {
+    border: none;
+    border-radius: 0;
+    font-family: '0xProto Nerd Font';
+    font-weight: normal;
+    min-height: 20px;
+}
+
+window#waybar {
+    background: transparent;
+}
+
+window#waybar.hidden {
+    opacity: 0.2;
+}
+
+#workspaces {
+    margin-right: 8px;
+    border-radius: 10px;
+    transition: none;
+    background: @base00;
+}
+
+#workspaces button {
+    transition: none;
+    color: @base03;
+    background: transparent;
+    padding: 5px;
+    font-size: 18px;
+}
+
+#workspaces button.persistent {
+    color: @base03;
+    font-size: 12px;
+}
+
+#workspaces button:hover {
+    transition: none;
+    box-shadow: inherit;
+    text-shadow: inherit;
+    border-radius: inherit;
+    color: @base00;
+    background: @base03;
+}
+
+#workspaces button.active {
+    background: @base01;
+    color: @base05;
+    border-radius: inherit;
+}
+
+#language {
+    padding-left: 16px;
+    padding-right: 8px;
+    border-radius: 10px 0 0 10px;
+    transition: none;
+    color: @base05;
+    background: @base00;
+}
+
+#keyboard-state {
+    margin-right: 8px;
+    padding-right: 16px;
+    border-radius: 0 10px 10px 0;
+    transition: none;
+    color: @base05;
+    background: @base00;
+}
+
+#custom-poweroff, #custom-hibernate, #custom-reboot {
+    padding-left: 14px;
+    margin-right: 8px;
+    padding-right: 18px;
+    border-radius: 10px;
+    transition: none;
+    color: @base05;
+    background: @base00;
+}
+
+#custom-pacman {
+    padding-left: 16px;
+    padding-right: 8px;
+    border-radius: 10px 0 0 10px;
+    transition: none;
+    color: @base05;
+    background: @base00;
+}
+
+#custom-mail {
+    margin-right: 8px;
+    padding-right: 16px;
+    border-radius: 0 10px 10px 0;
+    transition: none;
+    color: @base05;
+    background: @base00;
+}
+
+#submap, #clock, #pulseaudio, #custom-mem, #cpu, #memory, #temperature, #backlight, #battery, #tray {
+    margin-right: 8px;
+    padding-left: 16px;
+    padding-right: 16px;
+    border-radius: 10px;
+    transition: none;
+    color: @base05;
+    background: @base00;
+}
+
+#pulseaudio.muted {
+    background-color: @base0A;
+    color: @base00;
+}
+
+#temperature.critical {
+    background-color: @base08;
+}
+
+#battery.charging {
+    background-color: @base0B;
+    color: @base00;
+}
+
+#battery.warning:not(.charging) {
+    background-color: @base0A;
+    color: @base00;
+}
+
+#battery.critical:not(.charging) {
+    background-color: @base08;
+    color: @base00;
+    animation-name: blink;
+    animation-duration: 0.5s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+@keyframes blink {
+    to {
+        background-color: @base05;
+        color: @base00;
+    }
+}
