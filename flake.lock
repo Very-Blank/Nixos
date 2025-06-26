@@ -375,11 +375,11 @@
     "nvim": {
       "flake": false,
       "locked": {
-        "lastModified": 1750877409,
-        "narHash": "sha256-Hh5nlt7+rCCiy6nE/OgicYAKf9acX9i4tnbsz57MGQY=",
+        "lastModified": 1750927231,
+        "narHash": "sha256-Nqj4WeHPwwLyu8aen+oKDoIJhdKAeqEP1Xt572ZrXL4=",
         "owner": "Very-Blank",
         "repo": "nvim",
-        "rev": "fc6a4c9be5e9345dce4f3a359492f9c96353487b",
+        "rev": "365dabc973dcf7a76662e559940d52b5923064e3",
         "type": "github"
       },
       "original": {
