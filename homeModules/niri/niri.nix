@@ -1,10 +1,11 @@
 {config, ...}:
 
 {
-    imports = [
-      ./extra.nix
-    ];
+  imports = [
+    ./extra.nix
+  ];
 
+  programs.niri = {
     settings = {
       input = {
         keyboard = {
