@@ -15,6 +15,7 @@
       pkgs.neofetch
       pkgs.python3
       pkgs.gnumake
+      pkgs.godot
     ];
 
     pointerCursor = {
