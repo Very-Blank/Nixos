@@ -3,7 +3,7 @@
 {
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
-      "minecraft"
+      "minecraft-launcher"
     ];
 
   home = {
