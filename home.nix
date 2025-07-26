@@ -1,14 +1,15 @@
 { pkgs, lib,... }:
 
 {
+  nixpkgs.config.allowUnfreePredicate = pkg:
+    builtins.elem (lib.getName pkg) [
+      "minecraft"
+    ];
+
   home = {
     username = "blank";
     homeDirectory = "/home/blank";
 
-    nixpkgs.config.allowUnfreePredicate = pkg:
-      builtins.elem (lib.getName pkg) [
-        "minecraft"
-      ];
 
     packages = [
       pkgs.cmake
