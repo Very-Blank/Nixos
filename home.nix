@@ -1,9 +1,15 @@
-{ pkgs, ... }:
+{ pkgs, lib,... }:
 
 {
   home = {
     username = "blank";
     homeDirectory = "/home/blank";
+
+    nixpkgs.config.allowUnfreePredicate = pkg:
+      builtins.elem (lib.getName pkg) [
+        "minecraft"
+      ];
+
     packages = [
       pkgs.cmake
       pkgs.zig
@@ -16,6 +22,8 @@
       pkgs.python3
       pkgs.gnumake
       pkgs.godot
+      pkgs.ferium
+      pkgs.minecraft
     ];
 
     pointerCursor = {
