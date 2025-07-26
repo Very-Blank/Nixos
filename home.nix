@@ -1,11 +1,6 @@
-{ pkgs, lib,... }:
+{ pkgs,... }:
 
 {
-  nixpkgs.config.allowUnfreePredicate = pkg:
-    builtins.elem (lib.getName pkg) [
-      "minecraft-launcher"
-    ];
-
   home = {
     username = "blank";
     homeDirectory = "/home/blank";
@@ -24,7 +19,7 @@
       pkgs.gnumake
       pkgs.godot
       pkgs.ferium
-      pkgs.minecraft
+      pkgs.prismlauncher
     ];
 
     pointerCursor = {
