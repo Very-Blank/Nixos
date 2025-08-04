@@ -79,6 +79,15 @@
       enable = true;
     };
 
+    tmux = {
+      enable = true;
+      extraConfig = ''
+        set -g prefix C-a
+        unbind C-b
+        bind C-a send-prefix
+      '';
+    };
+
     steam = {
       enable = true;
       remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play

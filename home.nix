@@ -18,7 +18,6 @@
       pkgs.python3
       pkgs.gnumake
       pkgs.godot
-      pkgs.prismlauncher
     ];
 
     pointerCursor = {
