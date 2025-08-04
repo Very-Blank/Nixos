@@ -82,6 +82,7 @@
     tmux = {
       enable = true;
       extraConfig = ''
+        set-option -g default-shell $SHELL
         set -g prefix C-a
         unbind C-b
         bind C-a send-prefix
