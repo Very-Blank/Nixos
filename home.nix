@@ -5,7 +5,6 @@
     username = "blank";
     homeDirectory = "/home/blank";
 
-
     packages = [
       pkgs.cmake
       pkgs.zig
@@ -18,6 +17,7 @@
       pkgs.python3
       pkgs.gnumake
       pkgs.godot
+      pkgs.obsidian
     ];
 
     pointerCursor = {
