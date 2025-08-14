@@ -16,7 +16,9 @@
     "steam-original"
     "steam-unwrapped"
     "steam-run"
+	  "obsidian"
   ];
+
 
   nix.gc = {
     automatic = true;
