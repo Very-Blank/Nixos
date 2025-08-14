@@ -1,9 +1,13 @@
-{ pkgs,... }:
+{ pkgs, lib, ... }:
 
 {
   home = {
     username = "blank";
     homeDirectory = "/home/blank";
+
+    nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+        "obsidian"
+    ];
 
     packages = [
       pkgs.cmake
