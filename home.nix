@@ -22,7 +22,7 @@
       pkgs.gnumake
       pkgs.godot
       pkgs.obsidian
-      pkgs.dolphin
+      pkgs.kdePackages.dolphin
     ];
 
     pointerCursor = {
