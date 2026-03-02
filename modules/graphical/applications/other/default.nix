@@ -4,5 +4,6 @@
     ./obsidian
     ./obs
     ./nextcloud
+    ./mumble
   ];
 }
