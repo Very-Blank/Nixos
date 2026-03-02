@@ -58,6 +58,7 @@
           "obs"
           "nextcloud"
           "mumble"
+          "sable"
         ];
       };
 
