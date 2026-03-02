@@ -23,6 +23,49 @@
 
   config = let
     cfg = config.modules.server.nginx;
+
+    # https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html
+    # https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html
+
+    cspOptions = [
+      "child-src 'none';"
+      "connect-src 'none';"
+      "font-src 'none';"
+      "img-src 'self';"
+      "manifest-src 'none';"
+      "media-src 'none';"
+      "prefetch-src 'none';"
+      "object-src 'none';"
+      "script-src 'none';"
+      "script-src-elem 'none';"
+      "script-src-attr 'none';"
+      "style-src 'self';"
+      "style-src-elem 'self';"
+      "style-src-attr 'self';"
+      "default-src 'self';"
+      "base-uri 'none';"
+      "plugin-types 'none';"
+      "form-action 'none';"
+      "frame-ancestors 'none';"
+    ];
+
+    httpSecurityHeaders = ''
+      add_header "X-Frame-Options" "DENY" always;
+
+      add_header "X-Content-Type-Options" "nosniff" always;
+
+      add_header "Strict-Transport-Security" "max-age=31536000" always;
+
+      add_header "Content-Security-Policy" "${lib.strings.intersperse " " cspOptions}" always;
+
+      add_header "Cross-Origin-Opener-Policy" "same-origin" always;
+
+      add_header "Cross-Origin-Embedder-Policy" "require-corp" always;
+
+      add_header "Cross-Origin-Resource-Policy" "same-site" always;
+
+      add_header "Permissions-Policy" "geolocation=(), camera=(), microphone=(), interest-cohort=()" always;
+    '';
   in
     lib.mkIf cfg.enable {
       sops.secrets."acme/token" = {
@@ -52,36 +95,31 @@
         sslCiphers = "AES256+EECDH:AES256+EDH:!aNULL";
 
         appendHttpConfig = ''
-          limit_req_zone $binary_remote_addr zone=general:10m rate=10r/s;
+          limit_req_zone $binary_remote_addr zone=ip:10m rate=5r/s;
         '';
 
         virtualHosts.${config.modules.server.domain.main} = {
           useACMEHost = config.modules.server.domain.main;
-
           forceSSL = true;
-          reuseport = true;
 
           root = inputs.sefirah.packages.${pkgs.stdenv.system}.default;
 
-          extraConfig = ''
-            limit_req zone=general burst=10 nodelay;
-            limit_req_status 429;
-            add_header Strict-Transport-Security "max-age=31536000" always;
-            add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none';" always;
-            add_header 'Referrer-Policy' 'origin-when-cross-origin';
-            add_header X-Frame-Options DENY;
-            add_header X-Content-Type-Options nosniff;
-            proxy_cookie_path / "/; secure; HttpOnly; SameSite=strict";
-          '';
+          extraConfig = httpSecurityHeaders;
 
           locations."/" = {
             index = "index.html";
             tryFiles = "$uri $uri/ /index.html";
+
+            extraConfig = ''
+              limit_req zone=ip burst=12 delay=8;
+              limit_req_status 418;
+            '';
           };
         };
 
         virtualHosts."*.${config.modules.server.domain.main}" = {
           forceSSL = true;
+          extraConfig = httpSecurityHeaders;
           useACMEHost = config.modules.server.domain.main;
           globalRedirect = config.modules.server.domain.main;
         };

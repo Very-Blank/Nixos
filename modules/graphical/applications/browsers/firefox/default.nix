@@ -199,6 +199,16 @@
                 "sidebar.verticalTabs" = true;
                 "sidebar.verticalTabs.dragToPinPromo.dismissed" = true;
                 "sidebar.main.tools" = "bookmarks,{446900e4-71c2-419f-a6a7-df9c091e268b}";
+                "browser.newtabpage.pinned" = [
+                  {
+                    title = "Ouroboros";
+                    url = "https://taildevourer.com/";
+                  }
+                  {
+                    title = "Ouroboros";
+                    url = "https://cloud.taildevourer.com/";
+                  }
+                ];
 
                 "browser.uiCustomization.state" = {
                   placements = {
