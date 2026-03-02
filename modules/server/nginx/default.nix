@@ -93,6 +93,9 @@
 
         appendHttpConfig = ''
           limit_req_zone $binary_remote_addr zone=ip:10m rate=5r/s;
+        '';
+
+        appendConfig = ''
           add_header "Strict-Transport-Security" "max-age=31536000; includeSubDomains; preload" always;
         '';
 
