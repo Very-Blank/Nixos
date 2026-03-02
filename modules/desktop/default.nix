@@ -75,6 +75,7 @@
               "nextcloud"
               "obs"
               "steam"
+              "mumble"
             ]);
         };
       };

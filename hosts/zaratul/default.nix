@@ -57,6 +57,7 @@
           "obsidian"
           "obs"
           "nextcloud"
+          "mumble"
         ];
       };
 
