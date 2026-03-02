@@ -92,8 +92,6 @@
         recommendedProxySettings = true;
         recommendedTlsSettings = true;
 
-        sslCiphers = "AES256+EECDH:AES256+EDH:!aNULL";
-
         appendHttpConfig = ''
           limit_req_zone $binary_remote_addr zone=ip:10m rate=5r/s;
         '';
