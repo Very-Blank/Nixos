@@ -76,7 +76,6 @@
               "obs"
               "steam"
               "mumble"
-              "sable"
             ]);
         };
       };
