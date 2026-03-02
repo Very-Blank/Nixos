@@ -56,7 +56,7 @@
 
       add_header "Strict-Transport-Security" "max-age=31536000" always;
 
-      add_header "Content-Security-Policy" "${lib.strings.intersperse " " cspOptions}" always;
+      add_header "Content-Security-Policy" "${lib.strings.concatStringsSep " " cspOptions}" always;
 
       add_header "Cross-Origin-Opener-Policy" "same-origin" always;
 
