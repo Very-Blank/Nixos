@@ -298,6 +298,7 @@
                     icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
                     definedAliases = ["@gg"];
                   };
+
                   "Youtube" = {
                     urls = [
                       {
@@ -384,6 +385,26 @@
                     ];
                     icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
                     definedAliases = ["@nw"];
+                  };
+
+                  "Home Manager Options" = {
+                    urls = [
+                      {
+                        template = "https://home-manager-options.extranix.com/";
+                        params = [
+                          {
+                            name = "release";
+                            value = "master";
+                          }
+                          {
+                            name = "?query";
+                            value = "{searchTerms}";
+                          }
+                        ];
+                      }
+                    ];
+                    icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+                    definedAliases = ["@nh"];
                   };
                 };
               };
