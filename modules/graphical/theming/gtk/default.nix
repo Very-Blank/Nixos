@@ -30,7 +30,7 @@
         in {
           enable = true;
 
-          gtk.colorScheme = "dark";
+          colorScheme = "dark";
 
           theme = {
             package = pkgs.adw-gtk3;
