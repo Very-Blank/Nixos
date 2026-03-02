@@ -5,5 +5,6 @@
     ./obs
     ./nextcloud
     ./mumble
+    ./sable
   ];
 }
