@@ -49,12 +49,11 @@
       "frame-ancestors 'none';"
     ];
 
+    # add_header "Strict-Transport-Security" "max-age=31536000" always;
     httpSecurityHeaders = ''
       add_header "X-Frame-Options" "DENY" always;
 
       add_header "X-Content-Type-Options" "nosniff" always;
-
-      add_header "Strict-Transport-Security" "max-age=31536000" always;
 
       add_header "Content-Security-Policy" "${lib.strings.concatStringsSep " " cspOptions}" always;
 
@@ -94,6 +93,7 @@
 
         appendHttpConfig = ''
           limit_req_zone $binary_remote_addr zone=ip:10m rate=5r/s;
+          add_header "Strict-Transport-Security" "max-age=31536000; includeSubDomains; preload" always;
         '';
 
         virtualHosts.${config.modules.server.domain.main} = {
