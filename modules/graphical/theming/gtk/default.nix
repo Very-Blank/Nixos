@@ -28,6 +28,10 @@
             theme = config.colors.palette;
           };
         in {
+          enable = true;
+
+          gtk.colorScheme = "dark";
+
           theme = {
             package = pkgs.adw-gtk3;
             name = "adw-gtk3";
