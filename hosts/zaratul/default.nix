@@ -82,7 +82,7 @@
                 mode = {
                   width = 1920;
                   height = 1080;
-                  refresh = 164.955;
+                  refresh = 143.998;
                 };
 
                 focus-at-startup = true;
