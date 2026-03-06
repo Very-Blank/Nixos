@@ -1,6 +1,7 @@
 {
-  config,
   lib,
+  pkgs,
+  config,
   ...
 }: {
   options = {
@@ -17,11 +18,7 @@
     cfg = config.modules.hardware.backlight;
   in
     lib.mkIf cfg.enable {
-      programs = {
-        light = {
-          enable = true;
-        };
-      };
+      environment.systemPackages = [pkgs.brightnessctl];
 
       services = {
         actkbd = {
@@ -30,12 +27,12 @@
             {
               keys = [224];
               events = ["key"];
-              command = "/run/current-system/sw/bin/light -U 5";
+              command = "/run/current-system/sw/bin/brightnessctl set 5%-";
             }
             {
               keys = [225];
               events = ["key"];
-              command = "/run/current-system/sw/bin/light -A 5";
+              command = "/run/current-system/sw/bin/brightnessctl set +5%";
             }
           ];
         };
