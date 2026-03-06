@@ -24,13 +24,16 @@
       services.nextcloud = {
         enable = true;
         package = pkgs.nextcloud33;
-
         hostName = "${subdomainName}.${config.modules.server.domain.main}";
+
+        extraApps = {
+          inherit (config.services.nextcloud.package.packages.apps) calendar tasks;
+        };
+
         https = true;
+        extraAppsEnable = true;
         configureRedis = true;
-
         maxUploadSize = "1G";
-
         database.createLocally = true;
 
         config = {
