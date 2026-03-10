@@ -397,7 +397,7 @@
                             value = "master";
                           }
                           {
-                            name = "?query";
+                            name = "query";
                             value = "{searchTerms}";
                           }
                         ];
