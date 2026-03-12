@@ -27,7 +27,7 @@
         hostName = "${subdomainName}.${config.modules.server.domain.main}";
 
         extraApps = {
-          inherit (config.services.nextcloud.package.packages.apps) calendar tasks;
+          inherit (config.services.nextcloud.package.packages.apps) calendar tasks bookmarks;
         };
 
         https = true;
