@@ -36,6 +36,12 @@
         maxUploadSize = "1G";
         database.createLocally = true;
 
+        # A value of 2, e.g.,
+        # will only run these background jobs between 02:00am UTC and 06:00am UTC.
+        settings = {
+          maintenance_window_start = 2;
+        };
+
         phpOptions = {
           "opcache.interned_strings_buffer" = "16";
         };
@@ -44,10 +50,6 @@
           adminuser = config.hostname;
           adminpassFile = config.sops.secrets."nextcloud/adminpass".path;
           dbtype = "pgsql";
-
-          maintenance_window_start = 2;
-          # A value of 2, e.g.,
-          # will only run these background jobs between 02:00am UTC and 06:00am UTC.
         };
       };
 
