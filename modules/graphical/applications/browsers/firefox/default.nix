@@ -97,6 +97,12 @@
             in {
               "*".installation_mode = "blocked";
 
+              "floccus@handmadeideas.org" = {
+                install_url = moz "floccus";
+                installation_mode = "force_installed";
+                updates_disabled = true;
+              };
+
               "uBlock0@raymondhill.net" = {
                 install_url = moz "ublock-origin";
                 installation_mode = "force_installed";
