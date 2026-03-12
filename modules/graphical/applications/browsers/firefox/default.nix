@@ -48,6 +48,8 @@
             AppAutoUpdate = false;
             BackgroundAppUpdate = false;
 
+            NoDefaultBookmarks = true;
+
             # Feature Disabling
             DisableFirefoxStudies = true;
             DisableFirefoxAccounts = true;
