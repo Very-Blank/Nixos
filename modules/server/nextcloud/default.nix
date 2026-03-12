@@ -36,10 +36,18 @@
         maxUploadSize = "1G";
         database.createLocally = true;
 
+        phpOptions = {
+          "opcache.interned_strings_buffer" = "16";
+        };
+
         config = {
           adminuser = config.hostname;
           adminpassFile = config.sops.secrets."nextcloud/adminpass".path;
           dbtype = "pgsql";
+
+          maintenance_window_start = 2;
+          # A value of 2, e.g.,
+          # will only run these background jobs between 02:00am UTC and 06:00am UTC.
         };
       };
 
@@ -87,6 +95,14 @@
       services.nginx.virtualHosts.${"${subdomainName}.${config.modules.server.domain.main}"} = {
         useACMEHost = config.modules.server.domain.main;
         forceSSL = true;
+
+        extraConfig = ''
+          add_header "X-Robots-Tag" "noindex,nofollow" always;
+          add_header "X-Frame-Options" "sameorigin" always;
+          add_header "X-Permitted-Cross-Domain-Policies" "none" always;
+          add_header "X-Permitted-Cross-Domain-Policies" "none" always;
+          add_header "Referrer-Policy" "no-referrer" always;
+        '';
       };
     };
 }
