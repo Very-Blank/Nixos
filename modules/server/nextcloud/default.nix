@@ -102,7 +102,6 @@
           add_header "X-Robots-Tag" "noindex,nofollow" always;
           add_header "X-Frame-Options" "sameorigin" always;
           add_header "X-Permitted-Cross-Domain-Policies" "none" always;
-          add_header "X-Permitted-Cross-Domain-Policies" "none" always;
           add_header "Referrer-Policy" "no-referrer" always;
         '';
       };
