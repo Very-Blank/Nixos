@@ -64,6 +64,17 @@
         nextcloud.enable = true;
         ddclient.enable = true;
 
+        borg = {
+          enable = true;
+          rootPath = "ssh://xb350ci0@xb350ci0.repo.borgbase.com/./repo";
+
+          passCommand = "echo test";
+
+          environment = {
+            BORG_RSH = "ssh -i /home/blank/.ssh/borgbase";
+          };
+        };
+
         nginx = {
           enable = true;
           acme.email = "aapeli.saarelainen.76@gmail.com";

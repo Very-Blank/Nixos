@@ -40,7 +40,7 @@
       ];
 
       services.borgbackup.jobs."vaultwarden" = lib.mkIf config.modules.server.borg.enable {
-        repo = "${config.modules.server.borg.rootPath}${config.hostname}/vaultwarden";
+        repo = "${config.modules.server.borg.rootPath}/${config.hostname}/vaultwarden";
 
         encryption = {
           mode = config.modules.server.borg.encryption.mode;
