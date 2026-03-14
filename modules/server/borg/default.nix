@@ -62,14 +62,6 @@
         "borg/password" = {
           sopsFile = ../../../secrets/other/. + "/${config.hostname}.yaml";
         };
-
-        "borg/sshKey" = {
-          sopsFile = ../../../secrets/other/. + "/${config.hostname}.yaml";
-        };
-      };
-
-      cfg.environment = {
-        BORG_RSH = "ssh -i ${config.sops.secrets."borg/sshkey".path}";
       };
 
       cfg.passCommand = "cat ${config.sops.secrets."borg/password".path}";
