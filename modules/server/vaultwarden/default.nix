@@ -54,7 +54,9 @@
         preHook = ''
           mkdir /tmp/vaultwarden/
           ${pkgs.sqlite}/bin/sqlite3 /var/lib/vaultwarden/db.sqlite3 "VACUUM INTO '/tmp/vaultwarden/db.sqlite3'"
-          cp -r /var/lib/vaultwarden/attachments /tmp/vaultwarden/attachments
+          if [ -d /var/lib/vaultwarden/attachments ]; then
+              cp -r /var/lib/vaultwarden/attachments /tmp/vaultwarden/attachments
+          fi
         '';
 
         # Backup /tmp/vaultwarden/, but strip path prefix using the slashdot hack
