@@ -58,12 +58,12 @@
     cfg = config.modules.server.borg;
   in
     lib.mkIf cfg.enable {
-      sops.secrets = {
-        "borg/password" = {
-          sopsFile = ../../../secrets/other/. + "/${config.hostname}.yaml";
-        };
-      };
-
-      cfg.passCommand = "cat ${config.sops.secrets."borg/password".path}";
+      # sops.secrets = {
+      #   "borg/password" = {
+      #     sopsFile = ../../../secrets/other/. + "/${config.hostname}.yaml";
+      #   };
+      # };
+      #
+      # cfg.passCommand = "cat ${config.sops.secrets."borg/password".path}";
     };
 }
