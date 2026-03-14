@@ -36,7 +36,7 @@
       };
 
       environment.systemPackages = [
-        pkgs.sqlite3
+        pkgs.sqlite
       ];
 
       services.borgbackup.jobs."vaultwarden" = lib.mkIf config.modules.server.borg.enable {
