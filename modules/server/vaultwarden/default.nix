@@ -1,5 +1,6 @@
 {
   lib,
+  pkgs,
   config,
   ...
 }: {
@@ -34,21 +35,29 @@
         };
       };
 
+      environment.systemPackages = [
+        pkgs.sqlite3
+      ];
+
       services.borgbackup.jobs."vaultwarden" = lib.mkIf config.modules.server.borg.enable {
-        repo = "user@machine:/path/to/repo";
+        repo = "${config.modules.server.borg.rootPath}${config.hostname}/vaultwarden";
+
         encryption = {
-          mode = "filekey-blake2";
-          passCommand = "cat /path/to/passphrase_file";
+          mode = config.modules.server.borg.encryption.mode;
+          passCommand = config.modules.server.borg.encryption.passCommand;
         };
+
+        environment = config.modules.server.borg.environment;
 
         privateTmp = true;
 
         preHook = ''
           mkdir /tmp/vaultwarden/
           sqlite3 /var/lib/vaultwarden/db.sqlite3 "VACUUM INTO '/tmp/vaultwarden/db.sqlite3'"
-          cp -r /var/lib/vaultwarden/attachments /tmp/vaultwarden/attachments/
+          cp -r /var/lib/vaultwarden/attachments /tmp/vaultwarden/attachments
         '';
 
+        # Backup /tmp/vaultwarden/, but strip path prefix using the slashdot hack
         paths = ["/tmp/./vaultwarden/"];
 
         postHook = ''

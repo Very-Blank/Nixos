@@ -8,6 +8,47 @@
       server = {
         borg = {
           enable = lib.mkEnableOption "Enables the borg module.";
+
+          rootPath = lib.mkOption {
+            description = "This is the root path for the repo.";
+            type = lib.types.nonEmptyStr;
+          };
+
+          encryption = {
+            mode = lib.mkOption {
+              type = lib.types.enum [
+                "keyfile"
+                "keyfile-blake2"
+              ];
+              description = ''
+                Encryption mode to use. Setting a mode
+                other than `"none"` requires
+                you to specify a {option}`passCommand`
+                or a {option}`passphrase`.
+              '';
+              default = "keyfile";
+              example = "keyfile-blake2";
+            };
+
+            passCommand = lib.mkOption {
+              type = with lib.types; nullOr str;
+              description = ''
+                A command which prints the passphrase to stdout.
+              '';
+              example = "cat /path/to/passphrase_file";
+            };
+          };
+
+          environment = lib.mkOption {
+            type = with lib.types; attrsOf str;
+            description = ''
+              Environment variables passed to the backup script.
+              You can for example specify which SSH key to use.
+            '';
+            example = {
+              BORG_RSH = "ssh -i /path/to/key";
+            };
+          };
         };
       };
     };
@@ -17,6 +58,20 @@
     cfg = config.modules.server.borg;
   in
     lib.mkIf cfg.enable {
-      services = {};
+      sops.secrets = {
+        "borg/password" = {
+          sopsFile = ../../../secrets/other/. + "/${config.hostname}.yaml";
+        };
+
+        "borg/sshKey" = {
+          sopsFile = ../../../secrets/other/. + "/${config.hostname}.yaml";
+        };
+      };
+
+      cfg.environment = {
+        BORG_RSH = "ssh -i ${config.sops.secrets."borg/sshkey".path}";
+      };
+
+      cfg.passCommand = "cat ${config.sops.secrets."borg/password".path}";
     };
 }
