@@ -66,7 +66,7 @@
 
         borg = {
           enable = true;
-          repo = "ssh://xb350ci0@xb350ci0.repo.borgbase.com/./repo";
+          repo = "xb350ci0@xb350ci0.repo.borgbase.com:repo";
 
           encryption.passCommand = "echo test";
 
