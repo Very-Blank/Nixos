@@ -9,8 +9,8 @@
         borg = {
           enable = lib.mkEnableOption "Enables the borg module.";
 
-          rootPath = lib.mkOption {
-            description = "This is the root path for the repo.";
+          repo = lib.mkOption {
+            description = "Path to the repo.";
             type = lib.types.nonEmptyStr;
           };
 
