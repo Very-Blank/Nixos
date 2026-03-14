@@ -68,7 +68,7 @@
           enable = true;
           rootPath = "ssh://xb350ci0@xb350ci0.repo.borgbase.com/./repo";
 
-          passCommand = "echo test";
+          encryption.passCommand = "echo test";
 
           environment = {
             BORG_RSH = "ssh -i /home/blank/.ssh/borgbase";
