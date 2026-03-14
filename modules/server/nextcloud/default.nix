@@ -94,7 +94,7 @@
         '');
       };
 
-      services.nginx.virtualHosts.${"${subdomainName}.${config.modules.server.domain.main}"} = {
+      services.nginx.virtualHosts.${"${subdomainName}.${config.modules.server.domain.main}"} = lib.mkIf config.modules.server.nginx.enable {
         useACMEHost = config.modules.server.domain.main;
         forceSSL = true;
       };

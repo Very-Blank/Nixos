@@ -34,7 +34,29 @@
         };
       };
 
-      services.nginx.virtualHosts.${"${subdomainName}.${config.modules.server.domain.main}"} = {
+      services.borgbackup.jobs."vaultwarden" = lib.mkIf config.modules.server.borg.enable {
+        repo = "user@machine:/path/to/repo";
+        encryption = {
+          mode = "filekey-blake2";
+          passCommand = "cat /path/to/passphrase_file";
+        };
+
+        privateTmp = true;
+
+        preHook = ''
+          mkdir /tmp/vaultwarden/
+          sqlite3 /var/lib/vaultwarden/db.sqlite3 "VACUUM INTO '/tmp/vaultwarden/db.sqlite3'"
+          cp -r /var/lib/vaultwarden/attachments /tmp/vaultwarden/attachments/
+        '';
+
+        paths = ["/tmp/./vaultwarden/"];
+
+        postHook = ''
+          rm -r /tmp/vaultwarden/
+        '';
+      };
+
+      services.nginx.virtualHosts.${"${subdomainName}.${config.modules.server.domain.main}"} = lib.mkIf config.modules.server.nginx.enable {
         useACMEHost = config.modules.server.domain.main;
         forceSSL = true;
 

@@ -6,5 +6,6 @@
     ./ddclient
     ./domain
     ./nextcloud
+    ./borg
   ];
 }
