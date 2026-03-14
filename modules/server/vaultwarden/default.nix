@@ -53,7 +53,7 @@
 
         preHook = ''
           mkdir /tmp/vaultwarden/
-          sqlite3 /var/lib/vaultwarden/db.sqlite3 "VACUUM INTO '/tmp/vaultwarden/db.sqlite3'"
+          ${pkgs.sqlite}/bin/sqlite3 /var/lib/vaultwarden/db.sqlite3 "VACUUM INTO '/tmp/vaultwarden/db.sqlite3'"
           cp -r /var/lib/vaultwarden/attachments /tmp/vaultwarden/attachments
         '';
 
