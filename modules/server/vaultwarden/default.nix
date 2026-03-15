@@ -49,6 +49,7 @@
               rm -rf /var/lib/vaultwarden/attachments
               cd /var/lib/vaultwarden/
               export BORG_PASSCOMMAND='${config.modules.server.borg.encryption.passCommand}'
+              ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: value: "export ${name}='${value}'") config.modules.server.borg.environment)}
               borg extract ${config.modules.server.borg.repo}::${archiveName}
           '';
         };
