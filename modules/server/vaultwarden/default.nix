@@ -40,7 +40,7 @@
         baseSetup = x: ''
           rm -f /var/lib/vaultwarden/db.sqlite3*
           rm -rf /var/lib/vaultwarden/attachments
-          cd /var/lib/vaultwarden/
+          cd /var/lib/
 
           borg-job-vaultwarden extract ::"${x}"
         '';
