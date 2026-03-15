@@ -14,6 +14,13 @@
       HandleLidSwitchDocked = "ignore";
     };
 
+    programs.ssh.knownHosts = {
+      hetzner-storagebox = {
+        hostNames = ["[u561700.your-storagebox.de]:23"];
+        publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIICf9svRenC/PLKIL9nk6K/pxQgoiFC41wTNvoIncOxs";
+      };
+    };
+
     modules = {
       terminal = {
         tmux.enable = true;
@@ -47,13 +54,6 @@
 
         info = {
           battery = true;
-        };
-      };
-
-      programs.ssh.knownHosts = {
-        hetzner-storagebox = {
-          hostNames = ["[u561700.your-storagebox.de]:23"];
-          publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIICf9svRenC/PLKIL9nk6K/pxQgoiFC41wTNvoIncOxs";
         };
       };
 
