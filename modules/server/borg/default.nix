@@ -64,6 +64,6 @@
         };
       };
 
-      cfg.passCommand = "cat ${config.sops.secrets."borg/password".path}";
+      modules.server.borg.passCommand = "cat ${config.sops.secrets."borg/password".path}";
     };
 }
