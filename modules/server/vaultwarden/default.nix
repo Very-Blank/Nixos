@@ -42,7 +42,7 @@
           rm -rf /var/lib/vaultwarden/attachments
           cd /var/lib/vaultwarden/
 
-          borg-job-vaultwarden extract ${x}
+          borg-job-vaultwarden extract "${x}"
         '';
 
         checkRoot = ''
@@ -76,7 +76,7 @@
             + ''
               ARCHIVE="$(borg-job-vaultwarden list --last 1 --short)"
             ''
-            + (baseSetup ''"$ARCHIVE"'');
+            + (baseSetup "$ARCHIVE");
         };
       in [restoreVaultScript restoreLatestVaultScript];
 
