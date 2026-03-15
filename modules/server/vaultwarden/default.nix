@@ -42,7 +42,7 @@
           rm -rf /var/lib/vaultwarden/attachments
           cd /var/lib/vaultwarden/
 
-          borg-job-vaultwarden extract "${x}"
+          borg-job-vaultwarden extract ::"${x}"
         '';
 
         checkRoot = ''
