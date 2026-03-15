@@ -17,7 +17,6 @@
   config = let
     cfg = config.modules.server.vaultwarden;
     subdomainName = "vault";
-    archiveName = "vaultwarden-backup";
   in
     lib.mkIf cfg.enable {
       sops.secrets."vaultwarden/env".sopsFile = ../../../secrets/other/. + "/${config.hostname}.yaml";
@@ -52,7 +51,7 @@
           fi
         '';
 
-        # This could be made even more
+        # Wrapper to a wrapper lol
         restoreVaultScript = pkgs.writeShellApplication {
           name = "vaultwarden-restore";
           runtimeInputs = [pkgs.borgbackup];
@@ -82,7 +81,7 @@
 
       services.borgbackup.jobs."vaultwarden" = lib.mkIf config.modules.server.borg.enable {
         repo = config.modules.server.borg.repo;
-        archiveBaseName = archiveName;
+        archiveBaseName = "vaultwarden-backup";
 
         encryption = {
           mode = config.modules.server.borg.encryption.mode;
