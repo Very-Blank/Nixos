@@ -37,23 +37,48 @@
       };
 
       environment.systemPackages = let
+        baseSetup = x: ''
+          rm -f /var/lib/vaultwarden/db.sqlite3*
+          rm -rf /var/lib/vaultwarden/attachments
+          cd /var/lib/vaultwarden/
+
+          borg-job-vaultwarden extract ${x}
+        '';
+
+        checkRoot = ''
+          if [[ $EUID -ne 0 ]]; then
+            echo "Restore must be run as root." >&2
+            exit 1
+          fi
+        '';
+
+        # This could be made even more
         restoreVaultScript = pkgs.writeShellApplication {
           name = "vaultwarden-restore";
           runtimeInputs = [pkgs.borgbackup];
-          text = ''
-            if [[ $EUID -ne 0 ]]; then
-              echo "Restore must be run as root." >&2
-              exit 1
-            fi
-              rm -f /var/lib/vaultwarden/db.sqlite3*
-              rm -rf /var/lib/vaultwarden/attachments
-              cd /var/lib/vaultwarden/
-              export BORG_PASSCOMMAND='${config.modules.server.borg.encryption.passCommand}'
-              ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: value: "export ${name}='${value}'") config.modules.server.borg.environment)}
-              borg extract ${config.modules.server.borg.repo}::${archiveName}
-          '';
+          text =
+            checkRoot
+            + ''
+              if [ "$#" -ne 1 ]; then
+                echo "Illegal number of parameters."
+                echo "Usage: vaultwarden-restore ARCHIVE"
+                exit 1
+              fi
+            ''
+            + (baseSetup "$1");
         };
-      in [restoreVaultScript];
+
+        restoreLatestVaultScript = pkgs.writeShellApplication {
+          name = "vaultwarden-restore-latest";
+          runtimeInputs = [pkgs.borgbackup];
+          text =
+            checkRoot
+            + ''
+              ARCHIVE="$(borg-job-vaultwarden list --last 1 --short)"
+            ''
+            + (baseSetup ''"$ARCHIVE"'');
+        };
+      in [restoreVaultScript restoreLatestVaultScript];
 
       services.borgbackup.jobs."vaultwarden" = lib.mkIf config.modules.server.borg.enable {
         repo = config.modules.server.borg.repo;
