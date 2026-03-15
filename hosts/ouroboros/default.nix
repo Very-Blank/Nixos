@@ -76,7 +76,7 @@
           repo = "ssh://u561700@u561700.your-storagebox.de:23/./Backup";
 
           environment = {
-            BORG_RSH = "ssh -i /home/${config.modules.home.user.name}/.ssh/hetzner";
+            BORG_RSH = "ssh -i /root/.ssh/hetzner";
           };
         };
 
