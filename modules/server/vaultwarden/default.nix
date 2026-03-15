@@ -48,7 +48,7 @@
               rm -f /var/lib/vaultwarden/db.sqlite3*
               rm -rf /var/lib/vaultwarden/attachments
               cd /var/lib/vaultwarden/
-              export BORG_PASSCOMMAND='${config.modules.server.borg.passCommand}'
+              export BORG_PASSCOMMAND='${config.modules.server.borg.encryption.passCommand}'
               borg extract ${config.modules.server.borg.repo}::${archiveName}
           '';
         };
