@@ -17,6 +17,7 @@
   config = let
     cfg = config.modules.server.vaultwarden;
     subdomainName = "vault";
+    archiveName = "vaultwarden-backup";
   in
     lib.mkIf cfg.enable {
       sops.secrets."vaultwarden/env".sopsFile = ../../../secrets/other/. + "/${config.hostname}.yaml";
@@ -35,13 +36,27 @@
         };
       };
 
-      environment.systemPackages = [
-        pkgs.sqlite
-      ];
+      environment.systemPackages = let
+        restoreVaultScript = pkgs.writeShellApplication {
+          name = "vaultwarden-restore";
+          runtimeInputs = [pkgs.borgbackup];
+          text = ''
+            if [[ $EUID -ne 0 ]]; then
+              echo "Restore must be run as root." >&2
+              exit 1
+            fi
+              rm -f /var/lib/vaultwarden/db.sqlite3*
+              rm -rf /var/lib/vaultwarden/attachments
+              cd /var/lib/vaultwarden/
+              export BORG_PASSCOMMAND='${config.modules.server.borg.passCommand}'
+              borg extract ${config.modules.server.borg.repo}::${archiveName}
+          '';
+        };
+      in [restoreVaultScript];
 
       services.borgbackup.jobs."vaultwarden" = lib.mkIf config.modules.server.borg.enable {
         repo = config.modules.server.borg.repo;
-        archiveBaseName = "vaultwarden-backup";
+        archiveBaseName = archiveName;
 
         encryption = {
           mode = config.modules.server.borg.encryption.mode;
