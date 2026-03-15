@@ -1,4 +1,4 @@
-{...}: {
+{config, ...}: {
   imports = [
     ./hardware-configuration.nix
     ../../modules
@@ -50,6 +50,13 @@
         };
       };
 
+      programs.ssh.knownHosts = {
+        hetzner-storagebox = {
+          hostNames = ["[u561700.your-storagebox.de]:23"];
+          publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIICf9svRenC/PLKIL9nk6K/pxQgoiFC41wTNvoIncOxs";
+        };
+      };
+
       server = {
         openssh = {
           enable = true;
@@ -69,7 +76,7 @@
           repo = "ssh://u561700@u561700.your-storagebox.de:23/./Backup";
 
           environment = {
-            BORG_RSH = "ssh -i /home/blank/.ssh/hetzner";
+            BORG_RSH = "ssh -i /home/${config.modules.home.user.name}/.ssh/hetzner";
           };
         };
 
