@@ -60,6 +60,7 @@
           fi
         '';
 
+        # https://borgbackup.readthedocs.io/en/stable/usage/create.html
         # Backup /tmp/vaultwarden/, but strip path prefix using the slashdot hack
         paths = ["/tmp/./vaultwarden/"];
 
