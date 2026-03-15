@@ -64,16 +64,14 @@
         nextcloud.enable = true;
         ddclient.enable = true;
 
-        # borg = {
-        #   enable = true;
-        #   repo = "xb350ci0@xb350ci0.repo.borgbase.com:repo";
-        #
-        #   encryption.passCommand = "echo test";
-        #
-        #   environment = {
-        #     BORG_RSH = "ssh -i /home/blank/.ssh/borgbase";
-        #   };
-        # };
+        borg = {
+          enable = true;
+          repo = "ssh://u561700@u561700.your-storagebox.de:23/./Backup";
+
+          environment = {
+            BORG_RSH = "ssh -i /home/blank/.ssh/hetzner";
+          };
+        };
 
         nginx = {
           enable = true;
