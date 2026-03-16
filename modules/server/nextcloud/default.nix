@@ -53,11 +53,12 @@
         };
       };
 
+      # https://docs.nextcloud.com/server/stable/admin_manual/maintenance/backup.html
       services.borgbackup.jobs."nextcloud" = lib.mkIf config.modules.server.borg.enable {
         repo = config.modules.server.borg.repo "nextcloud-backup";
         archiveBaseName = "nextcloud-archive";
 
-        doInit = true; # This just makes things easier.
+        doInit = true;
         startAt = "*-*-* 3:00:00";
 
         encryption = {
@@ -69,15 +70,28 @@
 
         privateTmp = true;
 
+        # Because borg doesn't seem to have an option to ignore symlinks,
+        # we filter them ourself.
         preHook = ''
-          mkdir /tmp/nextcloud/
+          nextcloud-occ maintenance:mode --on
+
+          mkdir /tmp/nextcloud
+          cp -rf /var/lib/nextcloud/config /tmp/nextcloud/
+          find /tmp/nextcloud/config/ -type l -delete
+
+          runuser -l nextcloud -c 'pg_dump psql -U nextcloud -d nextcloud > /tmp/nextcloud/nextcloud-database.bak'
         '';
 
-        # https://borgbackup.readthedocs.io/en/stable/usage/create.html
-        # Backup /tmp/nextcloud/, but strip path prefix using the slashdot hack
-        paths = ["/tmp/./nextcloud/"];
+        paths = [
+          "/tmp/./nextcloud/"
+          "/var/lib/./nextcloud/data/"
+          "/var/lib/./nextcloud/themes/"
+          "/var/lib/./nextcloud/store-apps/"
+        ];
 
         postHook = ''
+          nextcloud-occ maintenance:mode --off
+
           rm -r /tmp/nextcloud
         '';
       };
