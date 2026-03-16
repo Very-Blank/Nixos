@@ -45,7 +45,7 @@
         '';
 
         safetyCheck = ''
-          if [[$(systemctl is-active --quiet vaultwarden.service) -e 0]]; then
+          if [[ $(systemctl is-active --quiet vaultwarden.service) -e 0 ]]; then
             echo "Vaultwarden service is active!"
             echo "Stopping vaultwarden service."
 
