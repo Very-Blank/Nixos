@@ -73,7 +73,7 @@
         # Because borg doesn't seem to have an option to ignore symlinks,
         # we filter them ourself.
         preHook = ''
-          ${config.services.nextcloud.occ} maintenance:mode --on
+          ${lib.getExe config.services.nextcloud.occ} maintenance:mode --on
 
           mkdir /tmp/nextcloud
           cp -rf /var/lib/nextcloud/config /tmp/nextcloud/
