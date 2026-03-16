@@ -73,7 +73,7 @@
 
         borg = {
           enable = true;
-          repo = "ssh://u561700@u561700.your-storagebox.de:23/./Backup";
+          repo = name: "ssh://u561700@u561700.your-storagebox.de:23/./${name}";
 
           environment = {
             BORG_RSH = "ssh -i /root/.ssh/hetzner";

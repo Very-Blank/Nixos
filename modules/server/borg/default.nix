@@ -10,8 +10,10 @@
           enable = lib.mkEnableOption "Enables the borg module.";
 
           repo = lib.mkOption {
-            description = "Path to the repo.";
-            type = lib.types.nonEmptyStr;
+            description = "Path to the repos.";
+            type = lib.types.functionTo lib.types.nonEmptyStr;
+            default = name: name;
+            example = name: "/var/repos/${name}";
           };
 
           encryption = {

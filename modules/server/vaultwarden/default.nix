@@ -51,7 +51,7 @@
           fi
         '';
 
-        # Wrapper to a wrapper lol
+        # A script wrapper to a wrapper lol
         restoreVaultScript = pkgs.writeShellApplication {
           name = "vaultwarden-restore";
           runtimeInputs = [pkgs.borgbackup];
@@ -80,8 +80,8 @@
       in [restoreVaultScript restoreLatestVaultScript];
 
       services.borgbackup.jobs."vaultwarden" = lib.mkIf config.modules.server.borg.enable {
-        repo = config.modules.server.borg.repo;
-        archiveBaseName = "vaultwarden-backup";
+        repo = config.modules.server.borg.repo "vaultwarden-backup";
+        archiveBaseName = "vaultwarden-archive";
 
         encryption = {
           mode = config.modules.server.borg.encryption.mode;
@@ -105,7 +105,7 @@
         paths = ["/tmp/./vaultwarden/"];
 
         postHook = ''
-          rm -r /tmp/vaultwarden/
+          rm -r /tmp/vaultwarden
         '';
       };
 
