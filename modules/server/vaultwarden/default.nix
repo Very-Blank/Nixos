@@ -83,6 +83,9 @@
         repo = config.modules.server.borg.repo "vaultwarden-backup";
         archiveBaseName = "vaultwarden-archive";
 
+        # This just makes things easier.
+        doInit = true;
+
         encryption = {
           mode = config.modules.server.borg.encryption.mode;
           passCommand = config.modules.server.borg.encryption.passCommand;
