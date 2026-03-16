@@ -79,7 +79,7 @@
           cp -rf /var/lib/nextcloud/config /tmp/nextcloud/
           find /tmp/nextcloud/config/ -type l -delete
 
-          ${lib.getExe' pkgs.util-linux "runuser"} -l postgres -c '${lib.getExe' pkgs.postgresql "pg_dump"} -U nextcloud -d nextcloud > /tmp/nextcloud/nextcloud-database.bak'
+          ${lib.getExe' pkgs.util-linux "runuser"} -l postgres -c '${lib.getExe' pkgs.postgresql "pg_dump"} -U nextcloud -d nextcloud' > /tmp/nextcloud/nextcloud-database.bak
         '';
 
         paths = [
