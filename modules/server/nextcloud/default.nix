@@ -73,7 +73,7 @@
         # Because borg doesn't seem to have an option to ignore symlinks,
         # we filter them ourself.
         preHook = ''
-          nextcloud-occ maintenance:mode --on
+          ${config.services.nextcloud.occ} maintenance:mode --on
 
           mkdir /tmp/nextcloud
           cp -rf /var/lib/nextcloud/config /tmp/nextcloud/
@@ -90,7 +90,7 @@
         ];
 
         postHook = ''
-          nextcloud-occ maintenance:mode --off
+          ${config.services.nextcloud.occ} maintenance:mode --off
 
           rm -r /tmp/nextcloud
         '';
