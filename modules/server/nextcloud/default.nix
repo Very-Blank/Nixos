@@ -53,15 +53,34 @@
         };
       };
 
-      # services.postgresql = {
-      #   enable = true;
-      #   ensureDatabases = ["nextcloud"];
-      #   ensureUsers = {
-      #     nextcloud = {
-      #       password = "your_password_here";
-      #     };
-      #   };
-      # };
+      services.borgbackup.jobs."nextcloud" = lib.mkIf config.modules.server.borg.enable {
+        repo = config.modules.server.borg.repo "nextcloud-backup";
+        archiveBaseName = "nextcloud-archive";
+
+        doInit = true; # This just makes things easier.
+        startAt = "*-*-* 3:00:00";
+
+        encryption = {
+          mode = config.modules.server.borg.encryption.mode;
+          passCommand = config.modules.server.borg.encryption.passCommand;
+        };
+
+        environment = config.modules.server.borg.environment;
+
+        privateTmp = true;
+
+        preHook = ''
+          mkdir /tmp/nextcloud/
+        '';
+
+        # https://borgbackup.readthedocs.io/en/stable/usage/create.html
+        # Backup /tmp/nextcloud/, but strip path prefix using the slashdot hack
+        paths = ["/tmp/./nextcloud/"];
+
+        postHook = ''
+          rm -r /tmp/nextcloud
+        '';
+      };
 
       services.fail2ban = {
         enable = true;

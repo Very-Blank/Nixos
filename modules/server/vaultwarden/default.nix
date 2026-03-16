@@ -19,6 +19,19 @@
     subdomainName = "vault";
   in
     lib.mkIf cfg.enable {
+      assertions =
+        if config.modules.server.borg.enable
+        then [
+          {
+            assertion = let wrapper = config.services.borgbackup.jobs."vaultwarden".wrapper; in (wrapper != null || wrapper != "");
+            message = ''
+              The wrapper is is needed for restore commands,
+              it also makes things a lot easier.
+            '';
+          }
+        ]
+        else [];
+
       sops.secrets."vaultwarden/env".sopsFile = ../../../secrets/other/. + "/${config.hostname}.yaml";
 
       services.vaultwarden = {
@@ -36,29 +49,33 @@
       };
 
       environment.systemPackages = let
-        baseSetup = x: ''
-          rm -f /var/lib/vaultwarden/db.sqlite3*
-          rm -rf /var/lib/vaultwarden/attachments
-          cd /var/lib/
-
-          borg-job-vaultwarden extract ::"${x}"
-        '';
-
         safetyCheck = ''
+          if [[ $EUID -ne 0 ]]; then
+            echo "Restore must be run as root." >&2
+            exit 1
+          fi
+
           if [[ $(systemctl is-active --quiet vaultwarden.service) -eq 0 ]]; then
             echo "Vaultwarden service is active!"
             echo "Stopping vaultwarden service."
 
             systemctl stop vaultwarden.service
           fi
+        '';
 
-          if [[ $EUID -ne 0 ]]; then
-            echo "Restore must be run as root." >&2
-            exit 1
-          fi
+        # https://search.nixos.org/options?channel=unstable&query=borgbackup&show=services.borgbackup.jobs.%3Cname%3E.wrapper
+        wrapper = config.services.borgbackup.jobs."vaultwarden".wrapper;
+
+        baseSetup = x: ''
+          rm -f /var/lib/vaultwarden/db.sqlite3*
+          rm -rf /var/lib/vaultwarden/attachments
+          cd /var/lib/
+
+          ${wrapper} extract ::"${x}"
         '';
 
         # A script wrapper to a wrapper lol
+        # FIXME:  Should prob remove runtimeInputs!
         restoreVaultScript = pkgs.writeShellApplication {
           name = "vaultwarden-restore";
           runtimeInputs = [pkgs.borgbackup];
@@ -80,11 +97,12 @@
           text =
             safetyCheck
             + ''
-              ARCHIVE="$(borg-job-vaultwarden list --last 1 --short)"
+              ARCHIVE="$(${wrapper} list --last 1 --short)"
             ''
             + (baseSetup "$ARCHIVE");
         };
-      in [restoreVaultScript restoreLatestVaultScript];
+      in
+        lib.mkIf config.modules.server.borg.enable [restoreVaultScript restoreLatestVaultScript];
 
       services.borgbackup.jobs."vaultwarden" = lib.mkIf config.modules.server.borg.enable {
         repo = config.modules.server.borg.repo "vaultwarden-backup";
