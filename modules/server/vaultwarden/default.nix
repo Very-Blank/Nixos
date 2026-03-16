@@ -44,7 +44,12 @@
           borg-job-vaultwarden extract ::"${x}"
         '';
 
-        checkRoot = ''
+        safetyCheck = ''
+          if [[$(systemctl is-active --quiet vaultwarden.service) -n 0]]; then
+            echo "Vaultwarden service is active!"
+            exit 1
+          fi
+
           if [[ $EUID -ne 0 ]]; then
             echo "Restore must be run as root." >&2
             exit 1
@@ -56,9 +61,9 @@
           name = "vaultwarden-restore";
           runtimeInputs = [pkgs.borgbackup];
           text =
-            checkRoot
+            safetyCheck
             + ''
-              if [ "$#" -ne 1 ]; then
+              if [[ "$#" -ne 1 ]]; then
                 echo "Illegal number of parameters."
                 echo "Usage: vaultwarden-restore ARCHIVE"
                 exit 1
@@ -71,7 +76,7 @@
           name = "vaultwarden-restore-latest";
           runtimeInputs = [pkgs.borgbackup];
           text =
-            checkRoot
+            safetyCheck
             + ''
               ARCHIVE="$(borg-job-vaultwarden list --last 1 --short)"
             ''
@@ -85,6 +90,7 @@
 
         # This just makes things easier.
         doInit = true;
+        startAt = "*-*-* 3:00:00";
 
         encryption = {
           mode = config.modules.server.borg.encryption.mode;
