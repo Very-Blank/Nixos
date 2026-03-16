@@ -79,7 +79,7 @@
           cp -rf /var/lib/nextcloud/config /tmp/nextcloud/
           find /tmp/nextcloud/config/ -type l -delete
 
-          pg_dump -U nextcloud -d nextcloud > /tmp/nextcloud/nextcloud-database.bak
+          ${lib.getExe' pkgs.postgresql "pg_dump"} -U nextcloud -d nextcloud > /tmp/nextcloud/nextcloud-database.bak
         '';
 
         paths = [
@@ -90,7 +90,7 @@
         ];
 
         postHook = ''
-          ${config.services.nextcloud.occ} maintenance:mode --off
+          ${lib.getExe config.services.nextcloud.occ} maintenance:mode --off
 
           rm -r /tmp/nextcloud
         '';
