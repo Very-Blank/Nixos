@@ -68,7 +68,7 @@
 
         environment = config.modules.server.borg.environment;
 
-        privateTmp = true;
+        # privateTmp = true;
 
         # Because borg doesn't seem to have an option to ignore symlinks,
         # we filter them ourself.
@@ -79,7 +79,7 @@
           cp -rf /var/lib/nextcloud/config /tmp/nextcloud/
           find /tmp/nextcloud/config/ -type l -delete
 
-          ${lib.getExe' pkgs.util-linux "runuser"} -l postgres -c '${lib.getExe' pkgs.postgresql "pg_dump"} -U nextcloud -d nextcloud > /tmp/nextcloud/nextcloud-database.bak'
+          $(${lib.getExe' pkgs.util-linux "runuser"} -l postgres -c '${lib.getExe' pkgs.postgresql "pg_dump"} -U nextcloud -d nextcloud') > /tmp/nextcloud/nextcloud-database.bak
         '';
 
         paths = [
