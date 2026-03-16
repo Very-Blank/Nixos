@@ -45,9 +45,11 @@
         '';
 
         safetyCheck = ''
-          if [[$(systemctl is-active --quiet vaultwarden.service) -n 0]]; then
+          if [[$(systemctl is-active --quiet vaultwarden.service) -e 0]]; then
             echo "Vaultwarden service is active!"
-            exit 1
+            echo "Stopping vaultwarden service."
+
+            systemctl stop vaultwarden.service
           fi
 
           if [[ $EUID -ne 0 ]]; then
@@ -88,8 +90,7 @@
         repo = config.modules.server.borg.repo "vaultwarden-backup";
         archiveBaseName = "vaultwarden-archive";
 
-        # This just makes things easier.
-        doInit = true;
+        doInit = true; # This just makes things easier.
         startAt = "*-*-* 3:00:00";
 
         encryption = {
