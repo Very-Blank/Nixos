@@ -84,7 +84,7 @@
           rm -rf /var/lib/nextcloud/data
           rm -rf /var/lib/nextcloud/store-apps
 
-          find /var/lib/nextcloud/config/ \! -type l -delete
+          find /var/lib/nextcloud/config/ \! -type l -and \! -type d -delete
 
           cd /var/lib/
           ${wrapper} extract ::"${x}"
