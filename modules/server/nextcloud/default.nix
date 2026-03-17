@@ -62,11 +62,9 @@
 
           if [[ $(systemctl is-active --quiet nextcloud.service) -eq 0 ]]; then
             echo "Nextcloud service is active!"
-            echo "Putting nextcloud service into maintenance and stopping it."
+            echo "Putting nextcloud service into maintenance mode."
 
             ${lib.getExe config.services.nextcloud.occ} maintenance:mode --on
-
-            systemctl stop nextcloud.service
           fi
         '';
 
