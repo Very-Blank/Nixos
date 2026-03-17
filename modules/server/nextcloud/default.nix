@@ -98,8 +98,8 @@
 
         # A script wrapper to a wrapper lol
         # FIXME:  Should prob remove runtimeInputs!
-        restoreVaultScript = pkgs.writeShellApplication {
-          name = "vaultwarden-restore";
+        restoreNextcloudScript = pkgs.writeShellApplication {
+          name = "nextcloud-restore";
           runtimeInputs = [pkgs.borgbackup];
           text =
             ''
@@ -114,7 +114,7 @@
         };
 
         restoreLatestVaultScript = pkgs.writeShellApplication {
-          name = "vaultwarden-restore-latest";
+          name = "nextcloud-restore-latest";
           runtimeInputs = [pkgs.borgbackup];
           text =
             safetyCheck
@@ -124,7 +124,7 @@
             + (baseSetup "$ARCHIVE");
         };
       in
-        lib.mkIf config.modules.server.borg.enable [restoreVaultScript restoreLatestVaultScript];
+        lib.mkIf config.modules.server.borg.enable [restoreNextcloudScript restoreLatestVaultScript];
 
       # https://docs.nextcloud.com/server/stable/admin_manual/maintenance/backup.html
       services.borgbackup.jobs."nextcloud" = lib.mkIf config.modules.server.borg.enable {
