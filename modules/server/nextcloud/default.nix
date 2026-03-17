@@ -68,7 +68,7 @@
 
         environment = config.modules.server.borg.environment;
 
-        # privateTmp = true;
+        privateTmp = true;
 
         # Because borg doesn't seem to have an option to ignore symlinks,
         # we filter them ourself.
