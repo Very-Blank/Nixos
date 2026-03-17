@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{...}: {
   imports = [
     ./hardware-configuration.nix
     ../../modules
@@ -6,15 +6,6 @@
 
   config = {
     hostname = "zaratul";
-
-    services.printing = {
-      enable = true;
-      drivers = with pkgs; [
-        cups-filters
-        cups-browsed
-        brlaser
-      ];
-    };
 
     modules = {
       terminal = {
