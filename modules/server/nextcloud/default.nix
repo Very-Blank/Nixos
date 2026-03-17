@@ -72,14 +72,14 @@
         wrapper = config.services.borgbackup.jobs."nextcloud".wrapper;
 
         baseSetup = x: let
-          base = "${lib.getExe' pkgs.postgresql "psql"} -d nextcloud";
+          command = lib.getExe' pkgs.postgresql "psql";
 
-          databaseCommand = sql: "${base} -c \"${sql}\"";
+          databaseCommand = sql: "${command} -d template1 -c \"${sql}\"";
 
           dropDatabaseCommand = databaseCommand "DROP DATABASE \"nextcloud\";";
           createDatabaseCommand = databaseCommand "CREATE DATABASE \"nextcloud\";";
 
-          copyData = "${base} -d nextcloud -f /var/lib/nextcloud/nextcloud-database.bak";
+          pastData = "${command} -d nextcloud -f /var/lib/nextcloud/nextcloud-database.bak";
         in ''
           rm -rf /var/lib/nextcloud/data
           rm -rf /var/lib/nextcloud/store-apps
@@ -89,7 +89,7 @@
           cd /var/lib/
           ${wrapper} extract ::"${x}"
 
-          ${lib.getExe' pkgs.util-linux "runuser"} -l postgres -c '${dropDatabaseCommand} ; ${createDatabaseCommand} ; ${copyData}'
+          ${lib.getExe' pkgs.util-linux "runuser"} -l postgres -c '${dropDatabaseCommand} ; ${createDatabaseCommand} ; ${pastData}'
 
           rm -rf /var/lib/nextcloud/nextcloud-database.bak
         '';
