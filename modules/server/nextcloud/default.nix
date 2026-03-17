@@ -81,7 +81,7 @@
 
           ${lib.getExe' pkgs.util-linux "runuser"} -l postgres -c '${lib.getExe' pkgs.postgresql "pg_dump"} -d nextcloud' > /tmp/nextcloud/nextcloud-database.bak
 
-          sudo chown -R nextcloud:nextcloud /tmp/nextcloud
+          chown -R nextcloud:nextcloud /tmp/nextcloud
         '';
 
         # Missing: "/var/lib/./nextcloud/themes/"
