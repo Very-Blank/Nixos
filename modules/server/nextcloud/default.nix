@@ -80,12 +80,15 @@
           find /tmp/nextcloud/config/ -type l -delete
 
           ${lib.getExe' pkgs.util-linux "runuser"} -l postgres -c '${lib.getExe' pkgs.postgresql "pg_dump"} -d nextcloud' > /tmp/nextcloud/nextcloud-database.bak
+
+          sudo chown -R nextcloud:nextcloud /tmp/nextcloud
         '';
 
+        # Missing: "/var/lib/./nextcloud/themes/"
+        # As I don't have it, and it's creating errors when it's missing.
         paths = [
           "/tmp/./nextcloud/"
           "/var/lib/./nextcloud/data/"
-          "/var/lib/./nextcloud/themes/"
           "/var/lib/./nextcloud/store-apps/"
         ];
 
