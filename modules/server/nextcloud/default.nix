@@ -78,7 +78,6 @@
 
           dropDatabaseCommand = databaseCommand "DROP DATABASE \"nextcloud\";";
           createDatabaseCommand = databaseCommand "CREATE DATABASE \"nextcloud\";";
-
           copyDataToDatabase = "${command} -d nextcloud -f /var/lib/nextcloud/nextcloud-database.bak";
         in ''
           rm -rf /var/lib/nextcloud/data
@@ -89,7 +88,7 @@
           cd /var/lib/
           ${wrapper} extract ::"${x}"
 
-          ${lib.getExe' pkgs.util-linux "runuser"} -l postgres -c '${dropDatabaseCommand} ; ${createDatabaseCommand} ; ${copyDataToDatabase}'
+          ${lib.getExe' pkgs.util-linux "runuser"} -l postgres -c '${dropDatabaseCommand} ; ${createDatabaseCommand} ; ${copyDataToDatabase}' > /dev/null
 
           rm -rf /var/lib/nextcloud/nextcloud-database.bak
         '';
