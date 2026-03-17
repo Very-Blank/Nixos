@@ -126,6 +126,8 @@
           if [ -d /var/lib/vaultwarden/attachments ]; then
               cp -r /var/lib/vaultwarden/attachments /tmp/vaultwarden/attachments
           fi
+
+          chown -R vaultwarden:vaultwarden /tmp/vaultwarden
         '';
 
         # https://borgbackup.readthedocs.io/en/stable/usage/create.html
