@@ -70,6 +70,10 @@
 
         privateTmp = true;
 
+        # https://search.nixos.org/options?channel=unstable&query=borgbackup&show=services.borgbackup.jobs.%3Cname%3E.readWritePaths
+        # Truning on maintance mode is done by writing to config.php
+        readWritePaths = ["/var/lib/nextcloud/config/"];
+
         # Because borg doesn't seem to have an option to ignore symlinks,
         # we filter them ourself.
         preHook = ''
@@ -85,7 +89,7 @@
         '';
 
         # Missing: "/var/lib/./nextcloud/themes/"
-        # As I don't have it, and it's creating errors when it's missing.
+        # As I don't have it, and it's creating "failed" archives when it's missing.
         paths = [
           "/tmp/./nextcloud/"
           "/var/lib/./nextcloud/data/"
