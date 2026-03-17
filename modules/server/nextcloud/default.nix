@@ -110,7 +110,7 @@
             + (baseSetup "$1");
         };
 
-        restoreLatestVaultScript = pkgs.writeShellApplication {
+        restoreLatestNextcloudScript = pkgs.writeShellApplication {
           name = "nextcloud-restore-latest";
           runtimeInputs = [pkgs.borgbackup];
           text =
@@ -121,7 +121,7 @@
             + (baseSetup "$ARCHIVE");
         };
       in
-        lib.mkIf config.modules.server.borg.enable [restoreNextcloudScript restoreLatestVaultScript];
+        lib.mkIf config.modules.server.borg.enable [restoreNextcloudScript restoreLatestNextcloudScript];
 
       # https://docs.nextcloud.com/server/stable/admin_manual/maintenance/backup.html
       services.borgbackup.jobs."nextcloud" = lib.mkIf config.modules.server.borg.enable {
