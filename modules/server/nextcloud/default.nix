@@ -74,7 +74,7 @@
         baseSetup = x: let
           base = "${lib.getExe' pkgs.postgresql "psql"} -d nextcloud";
 
-          databaseCommand = sql: "${base} -c ${sql}";
+          databaseCommand = sql: "${base} -c \"${sql}\"";
 
           dropDatabaseCommand = databaseCommand "DROP DATABASE \"nextcloud\";";
           createDatabaseCommand = databaseCommand "CREATE DATABASE \"nextcloud\";";
