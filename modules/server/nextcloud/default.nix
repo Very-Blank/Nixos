@@ -53,6 +53,79 @@
         };
       };
 
+      environment.systemPackages = let
+        safetyCheck = ''
+          if [[ $EUID -ne 0 ]]; then
+            echo "Restore must be run as root." >&2
+            exit 1
+          fi
+
+          if [[ $(systemctl is-active --quiet nextcloud.service) -eq 0 ]]; then
+            echo "Nextcloud service is active!"
+            echo "Putting nextcloud service into maintenance and stopping it."
+
+            ${lib.getExe config.services.nextcloud.occ} maintenance:mode --on
+
+            systemctl stop nextcloud.service
+          fi
+        '';
+
+        # https://search.nixos.org/options?channel=unstable&query=borgbackup&show=services.borgbackup.jobs.%3Cname%3E.wrapper
+        wrapper = config.services.borgbackup.jobs."nextcloud".wrapper;
+
+        baseSetup = x: let
+          base = "${lib.getExe' pkgs.postgresql "psql"} -d nextcloud";
+
+          databaseCommand = sql: "${base} -c ${sql}";
+
+          dropDatabaseCommand = databaseCommand "DROP DATABASE \"nextcloud\";";
+          createDatabaseCommand = databaseCommand "CREATE DATABASE \"nextcloud\";";
+
+          copyData = "${base} -d nextcloud -f /var/lib/nextcloud/nextcloud-database.bak";
+        in ''
+          rm -rf /var/lib/nextcloud/data
+          rm -rf /var/lib/nextcloud/store-apps
+
+          find /var/lib/nextcloud/config/ \! -type l -delete
+
+          cd /var/lib/
+          ${wrapper} extract ::"${x}"
+
+          ${lib.getExe' pkgs.util-linux "runuser"} -l postgres -c '${dropDatabaseCommand} ; ${createDatabaseCommand} ; ${copyData}'
+
+          rm -rf /var/lib/nextcloud/nextcloud-database.bak
+        '';
+
+        # A script wrapper to a wrapper lol
+        # FIXME:  Should prob remove runtimeInputs!
+        restoreVaultScript = pkgs.writeShellApplication {
+          name = "vaultwarden-restore";
+          runtimeInputs = [pkgs.borgbackup];
+          text =
+            ''
+              if [[ "$#" -ne 1 ]]; then
+                echo "Illegal number of parameters."
+                echo "Usage: vaultwarden-restore ARCHIVE"
+                exit 1
+              fi
+            ''
+            + safetyCheck
+            + (baseSetup "$1");
+        };
+
+        restoreLatestVaultScript = pkgs.writeShellApplication {
+          name = "vaultwarden-restore-latest";
+          runtimeInputs = [pkgs.borgbackup];
+          text =
+            safetyCheck
+            + ''
+              ARCHIVE="$(${wrapper} list --last 1 --short)"
+            ''
+            + (baseSetup "$ARCHIVE");
+        };
+      in
+        lib.mkIf config.modules.server.borg.enable [restoreVaultScript restoreLatestVaultScript];
+
       # https://docs.nextcloud.com/server/stable/admin_manual/maintenance/backup.html
       services.borgbackup.jobs."nextcloud" = lib.mkIf config.modules.server.borg.enable {
         repo = config.modules.server.borg.repo "nextcloud-backup";
