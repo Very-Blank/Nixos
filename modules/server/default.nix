@@ -7,5 +7,7 @@
     ./domain
     ./nextcloud
     ./borg
+    ./authelia
+    ./navidrome
   ];
 }
