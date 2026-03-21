@@ -19,6 +19,19 @@
     subdomainName = "cloud";
   in
     lib.mkIf cfg.enable {
+      assertions =
+        if config.modules.server.borg.enable
+        then [
+          {
+            assertion = let wrapper = config.services.borgbackup.jobs."nextcloud".wrapper; in (wrapper != null || wrapper != "");
+            message = ''
+              The wrapper is is needed for restore commands,
+              it also makes things a lot easier.
+            '';
+          }
+        ]
+        else [];
+
       sops.secrets."nextcloud/adminpass".sopsFile = ../../../secrets/other/. + "/${config.hostname}.yaml";
 
       services.nextcloud = {
