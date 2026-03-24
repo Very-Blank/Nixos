@@ -397,6 +397,7 @@
 
                   "Mod+R".action = switch-preset-column-width;
                   "Mod+F".action = maximize-column;
+                  "Mod+Shift+F".action = fullscreen-window;
 
                   "Mod+C".action = center-column;
                   "Mod+V".action = toggle-window-floating;
