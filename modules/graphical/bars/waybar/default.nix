@@ -115,7 +115,7 @@
 
               "pulseaudio" = lib.mkIf config.modules.hardware.audio.enable {
                 reverse-scrolling = 1;
-                format = "{volume}% {icon} {format_source}";
+                format = "{volume}% {icon}  {format_source}";
                 format-bluetooth = "{volume}% {icon} {format_source}";
                 format-bluetooth-muted = " {icon} {format_source}";
                 format-muted = " {format_source}";
