@@ -73,16 +73,16 @@
                 };
 
                 position = {
-                  x = 1920;
+                  x = 2560;
                   y = 0;
                 };
               };
 
-              "Samsung Electric Company LS32AG32x H9JT200575   " = {
+              "PNP(AOC) Q27G3XMN 1APRBJA000045" = {
                 mode = {
-                  width = 1920;
-                  height = 1080;
-                  refresh = 143.998;
+                  width = 2560;
+                  height = 1440;
+                  refresh = 180.002;
                 };
 
                 focus-at-startup = true;
