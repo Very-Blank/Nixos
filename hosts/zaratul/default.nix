@@ -73,19 +73,19 @@
                 };
 
                 position = {
-                  x = 1920;
+                  x = 2560;
                   y = 0;
                 };
               };
 
               "PNP(AOC) Q27G3XMN 1APRBJA000045" = {
                 mode = {
-                  width = 2560;
+                  width = 2327;
                   height = 1440;
                   refresh = 180.002;
                 };
 
-                scale = 1.15;
+                scale = 1.1;
 
                 position = {
                   x = 0;
