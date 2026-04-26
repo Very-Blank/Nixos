@@ -73,7 +73,7 @@
                 };
 
                 position = {
-                  x = 2560;
+                  x = 1920;
                   y = 0;
                 };
               };
@@ -85,11 +85,14 @@
                   refresh = 180.002;
                 };
 
-                focus-at-startup = true;
+                scale = 1.33;
+
                 position = {
                   x = 0;
                   y = 0;
                 };
+
+                focus-at-startup = true;
               };
             };
           };

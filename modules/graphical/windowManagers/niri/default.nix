@@ -40,6 +40,12 @@
                       description = "Display mode configuration";
                     };
 
+                    scale = lib.mkOption {
+                      type = lib.types.float;
+                      description = "The scale of this output, which represents how many physical pixels fit in one logical pixel.";
+                      default = 1.0;
+                    };
+
                     position = lib.mkOption {
                       type = lib.types.submodule {
                         options = {
