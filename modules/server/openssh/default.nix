@@ -48,7 +48,7 @@
 
             AllowUsers = [config.modules.home.user.name];
 
-            Banner = pkgs.writeText "Banner" ''
+            Banner = "${pkgs.writeText "Banner" ''
 
                ██████╗ ██╗   ██╗██████╗  ██████╗ ██████╗  ██████╗ ██████╗  ██████╗ ███████╗
               ██╔═══██╗██║   ██║██╔══██╗██╔═══██╗██╔══██╗██╔═══██╗██╔══██╗██╔═══██╗██╔════╝
@@ -60,7 +60,7 @@
                                          Authorized users only,
                                                thank you.
 
-            '';
+            ''}";
           };
         };
 
