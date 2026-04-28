@@ -79,7 +79,7 @@
         certs.${config.modules.server.domain.main} = {
           extraDomainNames = ["*.${config.modules.server.domain.main}"];
           dnsProvider = "cloudflare";
-          credentialsFile = config.sops.secrets."acme/token".path;
+          credentialsFiles = config.sops.secrets."acme/token".path;
         };
       };
 
