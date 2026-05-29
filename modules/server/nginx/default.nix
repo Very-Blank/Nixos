@@ -68,19 +68,19 @@
     '';
   in
     lib.mkIf cfg.enable {
-      sops.secrets."acme/token" = {
+      sops.secrets."dns/token" = {
         sopsFile = ../../../secrets/other/. + "/${config.hostname}.yaml";
       };
 
       security.acme = {
         acceptTerms = true;
         defaults.email = cfg.acme.email;
-
+        # CLOUDFLARE_EMAIL,CLOUDFLARE_API_KEY or some credentials information are missing: CLOUDFLARE_DNS_API_TOKEN,CLOUDFLARE_ZONE_API_TOKEN
         certs.${config.modules.server.domain.main} = {
           extraDomainNames = ["*.${config.modules.server.domain.main}"];
           dnsProvider = "cloudflare";
           credentialFiles = {
-            "CLOUDFLARE_API_KEY_FILE" = config.sops.secrets."acme/token".path;
+            "CLOUDFLARE_DNS_API_TOKEN_FILE" = config.sops.secrets."dns/token".path;
           };
         };
       };
