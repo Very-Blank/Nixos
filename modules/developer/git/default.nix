@@ -20,12 +20,13 @@
       userHome = {
         programs.git = {
           enable = true;
+
+          ignores = [
+            "dev.nix"
+          ];
+
           settings = {
             init.defaultBranch = "main";
-
-            ignores = [
-              "dev.nix"
-            ];
 
             user = {
               name = "very-blank";
