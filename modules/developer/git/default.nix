@@ -23,6 +23,10 @@
           settings = {
             init.defaultBranch = "main";
 
+            ignores = [
+              "dev.nix"
+            ];
+
             user = {
               name = "very-blank";
               email = "aapeli.saarelainen.76@gmail.com";
