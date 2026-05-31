@@ -192,6 +192,17 @@
               "browser.newtabpage.activity-stream.system.showSponsored" = lock-false;
               "browser.newtabpage.activity-stream.showSponsoredTopSites" = lock-false;
 
+              "sidebar.verticalTabs" = lock-true;
+              "sidebar.verticalTabs.dragToPinPromo.dismissed" = lock-true;
+
+              "sidebar.main.tools" = {
+                Value = "bookmarks,{446900e4-71c2-419f-a6a7-df9c091e268b}";
+                Locked = "Locked";
+              };
+
+              "middlemouse.paste" = lock-false;
+              "sidebar.revamp" = lock-true;
+
               "browser.toolbars.bookmarks.visibility" = {
                 Value = "never";
                 Locked = "locked";
@@ -201,86 +212,6 @@
 
           profiles = {
             default = {
-              settings = {
-                "middlemouse.paste" = false;
-                "sidebar.revamp" = true;
-                "sidebar.verticalTabs" = true;
-                "sidebar.verticalTabs.dragToPinPromo.dismissed" = true;
-                "sidebar.main.tools" = "bookmarks,{446900e4-71c2-419f-a6a7-df9c091e268b}";
-                "browser.newtabpage.pinned" = [
-                  {
-                    title = "Ouroboros";
-                    url = "https://taildevourer.com/";
-                  }
-                  {
-                    title = "Ouroboros";
-                    url = "https://cloud.taildevourer.com/";
-                  }
-                ];
-
-                "browser.uiCustomization.state" = {
-                  placements = {
-                    widget-overflow-fixed-list = [];
-
-                    unified-extensions-area = [
-                      "leechblockng_proginosko_com-browser-action"
-                      "_446900e4-71c2-419f-a6a7-df9c091e268b_-browser-action"
-                    ];
-
-                    nav-bar = [
-                      "back-button"
-                      "forward-button"
-                      "stop-reload-button"
-                      "sidebar-button"
-                      "privatebrowsing-button"
-                      "customizableui-special-spring1"
-                      "urlbar-container"
-                      "customizableui-special-spring2"
-                      "downloads-button"
-                      "vertical-spacer"
-                      "_73a6fe31-595d-460b-a920-fcc0f8843232_-browser-action"
-                      "ublock0_raymondhill_net-browser-action"
-                      "unified-extensions-button"
-                    ];
-
-                    toolbar-menubar = [
-                      "menubar-items"
-                    ];
-
-                    TabsToolbar = [];
-
-                    vertical-tabs = [
-                      "tabbrowser-tabs"
-                    ];
-
-                    PersonalToolbar = [
-                      "personal-bookmarks"
-                    ];
-                  };
-
-                  seen = [
-                    "addon_darkreader_org-browser-action"
-                    "leechblockng_proginosko_com-browser-action"
-                    "ublock0_raymondhill_net-browser-action"
-                    "_446900e4-71c2-419f-a6a7-df9c091e268b_-browser-action"
-                    "_73a6fe31-595d-460b-a920-fcc0f8843232_-browser-action"
-                    "developer-button"
-                  ];
-
-                  dirtyAreaCache = [
-                    "unified-extensions-area"
-                    "nav-bar"
-                    "toolbar-menubar"
-                    "TabsToolbar"
-                    "vertical-tabs"
-                    "PersonalToolbar"
-                  ];
-
-                  currentVersion = 23;
-                  newElementCount = 2;
-                };
-              };
-
               search = {
                 force = true;
                 default = "NonAIGoogle";
