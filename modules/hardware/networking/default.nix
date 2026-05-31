@@ -8,13 +8,6 @@
     networking = {
       hostName = config.hostname;
       networkmanager.enable = true;
-
-      hosts = let
-        topLevelDomains = ["com" "ai" "net"];
-        subdomains = ["chatgpt" "claude" "copilot.microsoft" "gemini.google" "perplexity" "deepseek" "chat.deepseek" "cursor" "tiktok" "facebook" "instagram"];
-      in {
-        "0.0.0.0" = lib.mkMerge (map (domain: map (x: "${x}.${domain}") subdomains) topLevelDomains);
-      };
     };
 
     # FIXME: move these:
