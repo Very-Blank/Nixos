@@ -214,11 +214,11 @@
         "nvf": "nvf"
       },
       "locked": {
-        "lastModified": 1781458632,
-        "narHash": "sha256-56H2je9g/SMst/WeFLY7yd1skdL7OcUBtVBES3cu6Lg=",
+        "lastModified": 1786038484,
+        "narHash": "sha256-B+dFyTKPiuhNVtp+cnBxqWpdYj69dBAZ+ipW8lAboXU=",
         "owner": "Very-Blank",
         "repo": "NixNvim",
-        "rev": "7abf17748f69b45f3b6e3a66d8d82a6ce6cd2897",
+        "rev": "ccc89e6bd6d706fad969fd201951a539234aaad8",
         "type": "github"
       },
       "original": {

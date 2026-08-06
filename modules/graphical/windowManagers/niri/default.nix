@@ -209,7 +209,7 @@
           pkgs.xwayland-satellite-unstable
 
           pkgs.wtype
-          pkgs.wl-clipboard
+          pkgs.wl-clipboard-rs
           pkgs.libsecret
           pkgs.cage
           pkgs.gamescope
