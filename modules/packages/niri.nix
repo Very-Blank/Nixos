@@ -14,8 +14,10 @@ in {
     packages.niri = lib.makeOverridable ({
       terminal ? null,
       launcher ? null,
+      screenshot-path ? null,
     }: let
       niri-unstable = inputs.niri.packages.${system}.niri-unstable;
+      xwayland-satellite-unstable = inputs.niri.packages.${system}.xwayland-satellite-unstable;
 
       mkNiriConfig = settings:
         (lib.evalModules {
@@ -41,12 +43,12 @@ in {
         #   size = cursorSize;
         # };
 
-        screenshot-path = "~/Pictures/Screenshots/Screenshot%Y_%m_%d_%H_%M_%S.png";
+        screenshot-path = lib.mkIf screenshot-path != null screenshot-path;
 
         prefer-no-csd = true;
 
         spawn-at-startup = [
-          {command = ["xwayland-satellite"];}
+          {command = ["${lib.getExe xwayland-satellite-unstable}"];}
         ];
 
         environment = {
@@ -70,7 +72,7 @@ in {
           focus-ring = {
             active = {
               gradient = {
-                to = "rgb(127 200 255)";
+                to = "rgb(255 200 255)";
                 from = "rgb(120 000 200)";
                 angle = 45;
               };
@@ -131,9 +133,6 @@ in {
             "Mod+C".action.center-column = {};
             "Mod+V".action.toggle-window-floating = {};
 
-            "Mod+Shift+S".action.screenshot = {};
-            "Print".action.screenshot-screen = {};
-
             "Mod+Q".action.close-window = {};
             "Mod+Shift+E".action.quit = {};
 
@@ -171,6 +170,11 @@ in {
             {
               "Mod+D".action.spawn = "${lib.getExe launcher}";
             })
+
+          (lib.mkIf (screenshot-path != null) {
+            "Mod+Shift+S".action.screenshot = {};
+            "Print".action.screenshot-screen = {};
+          })
         ];
       };
 
