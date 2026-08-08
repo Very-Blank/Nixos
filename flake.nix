@@ -1,8 +1,12 @@
 {
-  description = "My system configuration";
+  description = "My NixOS stuffs";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    # NOTE: These should help make things more organized.
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    import-tree.url = "github:denful/import-tree";
 
     home-manager = {
       url = "github:nix-community/home-manager/master";
@@ -36,40 +40,8 @@
     };
   };
 
-  outputs = inputs: let
-    inherit (inputs) nixpkgs;
-
-    mkNixosConfig = {
-      name,
-      system,
-    }:
-      nixpkgs.lib.nixosSystem {
-        system = system;
-
-        specialArgs = {
-          inherit inputs;
-        };
-
-        modules = [
-          ./hosts/${name}
-        ];
-      };
-  in {
-    nixosConfigurations = {
-      zaratul = mkNixosConfig {
-        name = "zaratul";
-        system = "x86_64-linux";
-      };
-
-      ouroboros = mkNixosConfig {
-        name = "ouroboros";
-        system = "x86_64-linux";
-      };
-
-      hermes = mkNixosConfig {
-        name = "hermes";
-        system = "x86_64-linux";
-      };
-    };
-  };
+  outputs = inputs:
+    inputs.flake-parts.lib.mkFlake
+    {inherit inputs;}
+    (inputs.import-tree ./modules);
 }
