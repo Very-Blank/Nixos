@@ -1,191 +1,196 @@
 {
-  self,
+  # self,
   inputs,
   ...
-}: let
-in {
+}: {
   perSystem = {
     pkgs,
     lib,
-    system,
+    # system,
     # self',
     ...
   }: {
     packages.niri = lib.makeOverridable ({
       terminal ? null,
       launcher ? null,
-      screenshot-path ? null,
+      screenshotPath ? null,
+      audio ? false,
+      brightness ? false,
+      cursor ? null,
     }: let
-      niri-unstable = inputs.niri.packages.${system}.niri-unstable;
-      xwayland-satellite-unstable = inputs.niri.packages.${system}.xwayland-satellite-unstable;
-
-      mkNiriConfig = settings:
-        (lib.evalModules {
-          modules = [
-            inputs.niri.lib.internal.settings-module
-            {config.programs.niri.settings = settings;}
-          ];
-        }).config.programs.niri.finalConfig;
-
-      config = mkNiriConfig {
-        input = {
-          keyboard = {
-            repeat-delay = 150;
-          };
-        };
-
-        hotkey-overlay = {
-          skip-at-startup = true;
-        };
-
-        # cursor = let in {
-        #   theme = cursorName;
-        #   size = cursorSize;
-        # };
-
-        screenshot-path = lib.mkIf screenshot-path != null screenshot-path;
-
-        prefer-no-csd = true;
-
-        spawn-at-startup = [
-          {command = ["${lib.getExe xwayland-satellite-unstable}"];}
-        ];
-
-        environment = {
-          DISPLAY = ":0";
-        };
-
-        layout = {
-          gaps = 8;
-          center-focused-column = "never";
-
-          preset-column-widths = [
-            {proportion = 1.0 / 3.0;}
-            {proportion = 1.0 / 2.0;}
-            {proportion = 2.0 / 3.0;}
-          ];
-
-          default-column-width = {
-            proportion = 1.0 / 2.0;
+      config =
+        {
+          input = {
+            keyboard = {
+              repeat-delay = 150;
+            };
           };
 
-          focus-ring = {
-            active = {
-              gradient = {
+          hotkey-overlay = {
+            skip-at-startup = true;
+          };
+
+          prefer-no-csd = true;
+
+          spawn-at-startup = [
+            ["${lib.getExe pkgs.xwayland-satellite}"]
+          ];
+
+          environment = {
+            DISPLAY = ":0";
+          };
+
+          layout = {
+            gaps = 8;
+            center-focused-column = "never";
+
+            preset-column-widths._children = [
+              {proportion = 1.0 / 3.0;}
+              {proportion = 1.0 / 2.0;}
+              {proportion = 2.0 / 3.0;}
+            ];
+
+            default-column-width = {
+              proportion = 1.0 / 2.0;
+            };
+
+            focus-ring = {
+              active-gradient._props = {
                 to = "rgb(255 200 255)";
                 from = "rgb(120 000 200)";
                 angle = 45;
               };
+
+              inactive-color = "rgb(127 200 255)";
             };
 
-            inactive = {
-              color = "rgb(127 200 255)";
-            };
-          };
+            tab-indicator = {
+              width = 4;
+              gap = 4;
+              position = "top";
+              place-within-column = true;
 
-          tab-indicator = {
-            width = 4;
-            gap = 4;
-            position = "top";
-            place-within-column = true;
-
-            active = {
-              gradient = {
+              active-gradient._props = {
                 to = "rgb(127 200 255)";
                 from = "rgb(120 000 200)";
                 angle = 45;
               };
             };
           };
+
+          binds =
+            {
+              "Mod+H" = {focus-column-left = [];};
+              "Mod+J" = {focus-window-down = [];};
+              "Mod+K" = {focus-window-up = [];};
+              "Mod+L" = {focus-column-right = [];};
+
+              "Mod+Shift+H" = {move-column-left = [];};
+              "Mod+Shift+J" = {move-window-down = [];};
+              "Mod+Shift+K" = {move-window-up = [];};
+              "Mod+Shift+L" = {move-column-right = [];};
+
+              "Mod+Ctrl+H" = {focus-monitor-left = [];};
+              "Mod+Ctrl+J" = {focus-monitor-down = [];};
+              "Mod+Ctrl+K" = {focus-monitor-up = [];};
+              "Mod+Ctrl+L" = {focus-monitor-right = [];};
+
+              "Mod+Shift+Ctrl+H" = {move-column-to-monitor-left = [];};
+              "Mod+Shift+Ctrl+J" = {move-column-to-monitor-down = [];};
+              "Mod+Shift+Ctrl+K" = {move-column-to-monitor-up = [];};
+              "Mod+Shift+Ctrl+L" = {move-column-to-monitor-right = [];};
+
+              "Mod+Minus" = {set-column-width = "-10%";};
+              "Mod+Equal" = {set-column-width = "+10%";};
+              "Mod+Shift+Minus" = {set-window-height = "-10%";};
+              "Mod+Shift+Equal" = {set-window-height = "+10%";};
+
+              "Mod+R" = {switch-preset-column-width = [];};
+              "Mod+F" = {maximize-column = [];};
+              "Mod+Shift+F" = {fullscreen-window = [];};
+
+              "Mod+C" = {center-column = [];};
+              "Mod+V" = {toggle-window-floating = [];};
+
+              "Mod+Q" = {close-window = [];};
+              "Mod+Shift+E" = {quit = [];};
+
+              "Mod+Semicolon" = {
+                spawn = [
+                  "${lib.getExe pkgs.wtype}"
+                  "ö"
+                ];
+              };
+
+              "Mod+Apostrophe" = {
+                spawn = [
+                  "${lib.getExe pkgs.wtype}"
+                  "ä"
+                ];
+              };
+
+              "Mod+Shift+Semicolon" = {
+                spawn = [
+                  "${lib.getExe pkgs.wtype}"
+                  "Ö"
+                ];
+              };
+
+              "Mod+Shift+Apostrophe" = {
+                spawn = [
+                  "${lib.getExe pkgs.wtype}"
+                  "Ä"
+                ];
+              };
+            }
+            // (lib.listToAttrs (map (num: {
+              name = "Mod+${toString num}";
+              value.focus-workspace = num;
+            }) (lib.range 1 9)))
+            // (lib.optionalAttrs (terminal != null) {
+              "Mod+T" = {spawn = "${lib.getExe terminal}";};
+            })
+            // (lib.optionalAttrs (launcher != null) {
+              "Mod+D" = {spawn = "${lib.getExe launcher}";};
+            })
+            // (lib.optionalAttrs (screenshotPath != null) {
+              "Mod+Shift+S" = {screenshot = [];};
+              "Print" = {screenshot-screen = [];};
+            })
+            // (lib.optionalAttrs audio {
+              "XF86AudioRaiseVolume" = {
+                spawn = ["${lib.getExe' pkgs.wireplumber "wpctl"}" "set-volume" "@DEFAULT_AUDIO_SINK@" " 0.1+"];
+              };
+              "XF86AudioLowerVolume" = {
+                spawn = ["${lib.getExe' pkgs.wireplumber "wpctl"}" "set-volume" "@DEFAULT_AUDIO_SINK@" " 0.1+"];
+              };
+              "XF86AudioMute" = {
+                spawn = ["${lib.getExe' pkgs.wireplumber "wpctl"}" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];
+              };
+            })
+            // (lib.optionalAttrs brightness {
+              "XF86MonBrightnessUp" = {
+                spawn = ["${lib.getExe pkgs.brightnessctl}" "set" "5%+"];
+              };
+              "XF86MonBrightnessDown" = {
+                spawn = ["${lib.getExe pkgs.brightnessctl}" "set" "5%-"];
+              };
+            });
+        }
+        // (lib.optionalAttrs (screenshotPath != null) {
+          screenshot-path = screenshotPath;
+        })
+        // lib.optionalAttrs (cursor != null) {
+          cursor = {
+            xcursor-theme = cursor.theme;
+            xcursor-size = cursor.size;
+          };
         };
 
-        binds = lib.mkMerge [
-          {
-            "Mod+H".action.focus-column-left = {};
-            "Mod+J".action.focus-window-down = {};
-            "Mod+K".action.focus-window-up = {};
-            "Mod+L".action.focus-column-right = {};
-
-            "Mod+Shift+H".action.move-column-left = {};
-            "Mod+Shift+J".action.move-window-down = {};
-            "Mod+Shift+K".action.move-window-up = {};
-            "Mod+Shift+L".action.move-column-right = {};
-
-            "Mod+Ctrl+H".action.focus-monitor-left = {};
-            "Mod+Ctrl+J".action.focus-monitor-down = {};
-            "Mod+Ctrl+K".action.focus-monitor-up = {};
-            "Mod+Ctrl+L".action.focus-monitor-right = {};
-
-            "Mod+Shift+Ctrl+H".action.move-column-to-monitor-left = {};
-            "Mod+Shift+Ctrl+J".action.move-column-to-monitor-down = {};
-            "Mod+Shift+Ctrl+K".action.move-column-to-monitor-up = {};
-            "Mod+Shift+Ctrl+L".action.move-column-to-monitor-right = {};
-
-            "Mod+Minus".action.set-column-width = "-10%";
-            "Mod+Equal".action.set-column-width = "+10%";
-            "Mod+Shift+Minus".action.set-window-height = "-10%";
-            "Mod+Shift+Equal".action.set-window-height = "+10%";
-
-            "Mod+R".action.switch-preset-column-width = {};
-            "Mod+F".action.maximize-column = {};
-            "Mod+Shift+F".action.fullscreen-window = {};
-
-            "Mod+C".action.center-column = {};
-            "Mod+V".action.toggle-window-floating = {};
-
-            "Mod+Q".action.close-window = {};
-            "Mod+Shift+E".action.quit = {};
-
-            "Mod+Semicolon".action.spawn = [
-              "${lib.getExe pkgs.wtype}"
-              "ö"
-            ];
-
-            "Mod+Apostrophe".action.spawn = [
-              "${lib.getExe pkgs.wtype}"
-              "ä"
-            ];
-
-            "Mod+Shift+Semicolon".action.spawn = [
-              "${lib.getExe pkgs.wtype}"
-              "Ö"
-            ];
-
-            "Mod+Shift+Apostrophe".action.spawn = [
-              "${lib.getExe pkgs.wtype}"
-              "Ä"
-            ];
-          }
-          (lib.listToAttrs (map (num: {
-            name = "Mod+${toString num}";
-            value.action.focus-workspace = num;
-          }) (lib.range 1 9)))
-
-          (lib.mkIf (terminal != null)
-            {
-              "Mod+T".action.spawn = "${lib.getExe terminal}";
-            })
-
-          (lib.mkIf (launcher != null)
-            {
-              "Mod+D".action.spawn = "${lib.getExe launcher}";
-            })
-
-          (lib.mkIf (screenshot-path != null) {
-            "Mod+Shift+S".action.screenshot = {};
-            "Print".action.screenshot-screen = {};
-          })
-        ];
-      };
-
-      kdlConfig =
-        inputs.niri.lib.internal.validated-config-for
-        pkgs
-        niri-unstable
-        config;
+      kdlConfig = inputs.niri.lib.validatedConfigFor pkgs.niri (inputs.niri.lib.mkNiriKDL config);
     in (pkgs.symlinkJoin {
       name = "niri";
-      paths = [niri-unstable];
+      paths = [pkgs.niri];
       buildInputs = [pkgs.makeWrapper];
       postBuild = ''
         wrapProgram $out/bin/niri --add-flags "--config ${kdlConfig}"
@@ -194,18 +199,65 @@ in {
   };
 
   flake = {
-    nixosModules.niri = {
-      pkgs,
-      # lib,
-      ...
-    }: {
-      programs.niri = {
-        enable = true;
-        package = self.packages.${pkgs.stdenv.hostPlatform.system}.niri;
+    nixosModules.niri = {pkgs, ...}: {
+      environment = {
+        variables = {
+          NIXOS_OZONE_WL = "1";
+        };
+
+        systemPackages = [
+          pkgs.wayland-utils
+          pkgs.wl-clipboard-rs
+          pkgs.libsecret
+        ];
+      };
+
+      xdg.portal = {
+        xdgOpenUsePortal = true;
+        extraPortals = pkgs.xdg-desktop-portal-gtk;
       };
     };
 
-    homeModules.niri = {...}: {
+    homeModules.niri = {
+      self,
+      pkgs,
+      ...
+    }: let
+      cursor = {
+        theme = "Bibata-Modern-Classic";
+        size = 12;
+      };
+    in {
+      # terminal ? null,
+      # launcher ? null,
+      # screenshotPath ? null,
+      # audio ? false,
+      # brightness ? false,
+      # cursor ? null,
+      programs.niri = {
+        enable = true;
+        package = self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
+          screenshotPath = "~/Pictures/Screenshots/Screenshot%H_%M_%S_%d%m%Y.png";
+          audio = true;
+          brightness = true;
+          inherit cursor;
+        };
+      };
+
+      home = {
+        pointerCursor = {
+          name = cursor.theme;
+          package = pkgs.bibata-cursors;
+          size = cursor.size;
+          gtk.enable = true;
+          x11.enable = true;
+        };
+
+        sessionVariables = {
+          XCURSOR_THEME = cursor.theme;
+          XCURSOR_SIZE = toString cursor.size;
+        };
+      };
     };
   };
 }

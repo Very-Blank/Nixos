@@ -32,7 +32,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    niri.url = "github:sodiboo/niri-flake";
+    niri.url = "git+https://codeberg.org/BANanaD3V/niri-nix";
 
     nixnvim = {
       url = "github:Very-Blank/NixNvim";
