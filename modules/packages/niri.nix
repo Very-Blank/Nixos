@@ -1,6 +1,5 @@
 {
-  lib,
-  # self,
+  self,
   inputs,
   ...
 }: {
@@ -200,62 +199,61 @@
   };
 
   flake = {
-    combinedModule.niri = user:
-      assert builtins.isString user;
-        {
-          self,
-          pkgs,
-          # inputs,
-          ...
-        }: {...}: {
-          environment = {
-            variables = {
-              NIXOS_OZONE_WL = "1";
-            };
-
-            systemPackages = [
-              pkgs.wayland-utils
-              pkgs.wl-clipboard-rs
-              pkgs.libsecret
-            ];
+    combinedModule.niri = self.lib.mkCombinedModule {
+      nixosModule = {pkgs, ...}: {
+        environment = {
+          variables = {
+            NIXOS_OZONE_WL = "1";
           };
 
-          xdg.portal = {
-            xdgOpenUsePortal = true;
-            extraPortals = pkgs.xdg-desktop-portal-gtk;
-          };
+          systemPackages = [
+            pkgs.wayland-utils
+            pkgs.wl-clipboard-rs
+            pkgs.libsecret
+          ];
+        };
 
-          home-manager.users.${user} = let
-            cursor = {
-              theme = "Bibata-Modern-Classic";
-              size = 12;
-            };
-          in {
-            programs.niri = {
-              enable = true;
-              package = self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
-                screenshotPath = "~/Pictures/Screenshots/Screenshot%H_%M_%S_%d%m%Y.png";
-                audio = true;
-                brightness = true;
-                inherit cursor;
-              };
-            };
+        xdg.portal = {
+          xdgOpenUsePortal = true;
+          extraPortals = pkgs.xdg-desktop-portal-gtk;
+        };
+      };
 
-            home = {
-              pointerCursor = {
-                name = cursor.theme;
-                package = pkgs.bibata-cursors;
-                size = cursor.size;
-                gtk.enable = true;
-                x11.enable = true;
-              };
-
-              sessionVariables = {
-                XCURSOR_THEME = cursor.theme;
-                XCURSOR_SIZE = toString cursor.size;
-              };
-            };
+      homeModule = {
+        self,
+        pkgs,
+        ...
+      }: let
+        cursor = {
+          theme = "Bibata-Modern-Classic";
+          size = 12;
+        };
+      in {
+        programs.niri = {
+          enable = true;
+          package = self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
+            screenshotPath = "~/Pictures/Screenshots/Screenshot%H_%M_%S_%d%m%Y.png";
+            audio = true;
+            brightness = true;
+            inherit cursor;
           };
         };
+
+        home = {
+          pointerCursor = {
+            name = cursor.theme;
+            package = pkgs.bibata-cursors;
+            size = cursor.size;
+            gtk.enable = true;
+            x11.enable = true;
+          };
+
+          sessionVariables = {
+            XCURSOR_THEME = cursor.theme;
+            XCURSOR_SIZE = toString cursor.size;
+          };
+        };
+      };
+    };
   };
 }
