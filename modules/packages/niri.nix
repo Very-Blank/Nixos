@@ -1,4 +1,5 @@
 {
+  lib,
   # self,
   inputs,
   ...
@@ -199,65 +200,62 @@
   };
 
   flake = {
-    nixosModules.niri = {pkgs, ...}: {
-      environment = {
-        variables = {
-          NIXOS_OZONE_WL = "1";
+    combinedModule.niri = user:
+      assert builtins.isString user;
+        {
+          self,
+          pkgs,
+          # inputs,
+          ...
+        }: {...}: {
+          environment = {
+            variables = {
+              NIXOS_OZONE_WL = "1";
+            };
+
+            systemPackages = [
+              pkgs.wayland-utils
+              pkgs.wl-clipboard-rs
+              pkgs.libsecret
+            ];
+          };
+
+          xdg.portal = {
+            xdgOpenUsePortal = true;
+            extraPortals = pkgs.xdg-desktop-portal-gtk;
+          };
+
+          home-manager.users.${user} = let
+            cursor = {
+              theme = "Bibata-Modern-Classic";
+              size = 12;
+            };
+          in {
+            programs.niri = {
+              enable = true;
+              package = self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
+                screenshotPath = "~/Pictures/Screenshots/Screenshot%H_%M_%S_%d%m%Y.png";
+                audio = true;
+                brightness = true;
+                inherit cursor;
+              };
+            };
+
+            home = {
+              pointerCursor = {
+                name = cursor.theme;
+                package = pkgs.bibata-cursors;
+                size = cursor.size;
+                gtk.enable = true;
+                x11.enable = true;
+              };
+
+              sessionVariables = {
+                XCURSOR_THEME = cursor.theme;
+                XCURSOR_SIZE = toString cursor.size;
+              };
+            };
+          };
         };
-
-        systemPackages = [
-          pkgs.wayland-utils
-          pkgs.wl-clipboard-rs
-          pkgs.libsecret
-        ];
-      };
-
-      xdg.portal = {
-        xdgOpenUsePortal = true;
-        extraPortals = pkgs.xdg-desktop-portal-gtk;
-      };
-    };
-
-    homeModules.niri = {
-      self,
-      pkgs,
-      ...
-    }: let
-      cursor = {
-        theme = "Bibata-Modern-Classic";
-        size = 12;
-      };
-    in {
-      # terminal ? null,
-      # launcher ? null,
-      # screenshotPath ? null,
-      # audio ? false,
-      # brightness ? false,
-      # cursor ? null,
-      programs.niri = {
-        enable = true;
-        package = self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
-          screenshotPath = "~/Pictures/Screenshots/Screenshot%H_%M_%S_%d%m%Y.png";
-          audio = true;
-          brightness = true;
-          inherit cursor;
-        };
-      };
-
-      home = {
-        pointerCursor = {
-          name = cursor.theme;
-          package = pkgs.bibata-cursors;
-          size = cursor.size;
-          gtk.enable = true;
-          x11.enable = true;
-        };
-
-        sessionVariables = {
-          XCURSOR_THEME = cursor.theme;
-          XCURSOR_SIZE = toString cursor.size;
-        };
-      };
-    };
   };
 }
