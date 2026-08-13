@@ -1,5 +1,6 @@
 {
   self,
+  lib,
   inputs,
   ...
 }: {
@@ -199,8 +200,18 @@
   };
 
   flake = {
-    combinedModule.niri = self.lib.mkCombinedModule {
-      nixosModule = {pkgs, ...}: {
+    combinedModules.niri = self.lib.mkCombinedModule {
+      options = {
+        niri = {
+          enable = lib.mkEnableOption "Enable niri.";
+        };
+      };
+
+      nixosModule = {
+        config,
+        pkgs,
+        ...
+      }: {
         environment = {
           variables = {
             NIXOS_OZONE_WL = "1";
@@ -213,23 +224,19 @@
           ];
         };
 
-        xdg.portal = {
+        xdg.portal = lib.mkIf config.niri.enable {
           xdgOpenUsePortal = true;
           extraPortals = pkgs.xdg-desktop-portal-gtk;
         };
       };
 
-      homeModule = {
-        self,
-        pkgs,
-        ...
-      }: let
+      homeModule = {pkgs, ...}: let
         cursor = {
           theme = "Bibata-Modern-Classic";
           size = 12;
         };
       in {
-        programs.niri = {
+        wayland.windowManager.niri = {
           enable = true;
           package = self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
             screenshotPath = "~/Pictures/Screenshots/Screenshot%H_%M_%S_%d%m%Y.png";

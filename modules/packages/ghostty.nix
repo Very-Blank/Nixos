@@ -1,6 +1,6 @@
 {
-  # self,
-  inputs,
+  pkgs,
+  self,
   ...
 }: {
   perSystem = {
@@ -89,6 +89,7 @@
     nixosModules.ghostty = {...}: {
       programs.ghostty = {
         enable = true;
+        packages = self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty;
       };
     };
   };
