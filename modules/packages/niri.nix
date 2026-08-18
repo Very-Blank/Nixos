@@ -1,14 +1,11 @@
 {
   self,
-  lib,
   inputs,
   ...
 }: {
   perSystem = {
-    pkgs,
     lib,
-    # system,
-    # self',
+    pkgs,
     ...
   }: {
     packages.niri = lib.makeOverridable ({
@@ -201,18 +198,12 @@
 
   flake = {
     combinedModules.niri = self.lib.mkCombinedModule {
-      options = {
-        niri = {
-          enable = lib.mkEnableOption "Enable niri.";
-        };
-      };
-
-      nixosModule = {
-        config,
-        pkgs,
-        ...
-      }: {
+      nixosModule = {pkgs, ...}: {
         environment = {
+          pathsToLink = [
+            "/share/xdg-desktop-portal"
+          ];
+
           variables = {
             NIXOS_OZONE_WL = "1";
           };
@@ -224,7 +215,7 @@
           ];
         };
 
-        xdg.portal = lib.mkIf config.niri.enable {
+        xdg.portal = {
           xdgOpenUsePortal = true;
           extraPortals = pkgs.xdg-desktop-portal-gtk;
         };

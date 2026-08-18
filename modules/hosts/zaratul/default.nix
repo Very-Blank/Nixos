@@ -5,32 +5,30 @@
 }: {
   flake.nixosConfigurations.zaratul = inputs.nixpkgs.lib.nixosSystem {
     modules = [
+      inputs.home-manager.nixosModules.default
+      self.nixosModules.zaratulHardware
       self.nixosModules.zaratul
-      ./_hardware-configuration.nix
     ];
   };
 
   flake.nixosModules.zaratul = {pkgs, ...}: {
     imports = [
-      inputs.home-manager.nixosModules.default
+      self.nixosModules.home
+      self.nixosModules.grubBoot
       self.nixosModules.blank
     ];
 
-    config = {
-      users = {
-        mutableUsers = false;
-      };
+    features.grub.boot = "multi";
 
-      environment.systemPackages = [
-        pkgs.vim
-        pkgs.firefox
-      ];
-
-      home-manager = {
-        useGlobalPkgs = true;
-        useUserPackages = true;
-        extraSpecialArgs = {inherit inputs;};
-      };
+    users = {
+      mutableUsers = false;
     };
+
+    environment.systemPackages = [
+      pkgs.vim
+      pkgs.firefox
+    ];
+
+    system.stateVersion = "26.11";
   };
 }

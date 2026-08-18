@@ -2,7 +2,10 @@
   flake = {
     nixosModules.blank = self.lib.mkUserModule "blank" {
       nixosModule = user: {pkgs, ...}: {
-        imports = [(self.combinedModules.niri user)];
+        imports = [
+          (self.combinedModules.niri user)
+          (self.combinedModules.firefox user)
+        ];
 
         config = {
           users.users."${user}" = {
@@ -21,6 +24,10 @@
       };
 
       homeModule = user: {...}: {
+        imports = [
+          self.homeModules.nvim
+        ];
+
         xdg = {
           enable = true;
           userDirs.createDirectories = true;
