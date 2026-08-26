@@ -1,25 +1,20 @@
 {self, ...}: {
   flake = {
     nixosModules.blank = self.lib.mkUserModule "blank" {
-      nixosModule = user: {pkgs, ...}: {
-        imports = [
-          (self.combinedModules.niri user)
-          (self.combinedModules.firefox user)
-        ];
+      nixosModule = user: {...}: {
+        imports =
+          map (module: self.combinedModules."${module}" user)
+          ["niri" "firefox" "zsh"];
 
-        config = {
-          users.users."${user}" = {
-            shell = pkgs.zsh;
+        users.users."${user}" = {
+          isNormalUser = true;
 
-            isNormalUser = true;
-
-            extraGroups = [
-              "wheel"
-              "video"
-              "input"
-              "audio"
-            ];
-          };
+          extraGroups = [
+            "wheel"
+            "video"
+            "input"
+            "audio"
+          ];
         };
       };
 
@@ -30,11 +25,14 @@
 
         xdg = {
           enable = true;
-          userDirs.createDirectories = true;
+
+          userDirs = {
+            createDirectories = true;
+          };
         };
 
         home = {
-          stateVersion = "26.05";
+          stateVersion = "26.11";
         };
       };
     };

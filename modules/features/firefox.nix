@@ -1,6 +1,6 @@
-{self}: {
+{self, ...}: {
   flake.combinedModules.firefox = self.lib.mkCombinedModule {
-    nixosModule = {pkgs}: {
+    nixosModule = _: {pkgs, ...}: {
       fonts = {
         packages = [
           pkgs.noto-fonts
@@ -9,9 +9,10 @@
       };
     };
 
-    homeModule = {
+    homeModule = _: {
       lib,
       pkgs,
+      ...
     }: {
       programs.firefox = {
         enable = true;
@@ -127,7 +128,7 @@
               userSettings = {
                 uiTheme = "dark";
                 uiAccentCustom = true;
-                uiAccentCustom0 = "#${config.colors.palette.base00}";
+                uiAccentCustom0 = "#${self.globals.theme.palette.base00}";
                 cloudStorageEnabled = lib.mkForce false;
               };
             };

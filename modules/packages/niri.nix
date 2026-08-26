@@ -38,7 +38,9 @@
             DISPLAY = ":0";
           };
 
-          layout = {
+          layout = let
+            palette = inputs.colors.lib.withHash self.globals.theme.palette;
+          in {
             gaps = 8;
             center-focused-column = "never";
 
@@ -54,12 +56,12 @@
 
             focus-ring = {
               active-gradient._props = {
-                to = "rgb(255 200 255)";
-                from = "rgb(120 000 200)";
+                to = "${palette.base0E}";
+                from = "${palette.base0D}";
                 angle = 45;
               };
 
-              inactive-color = "rgb(127 200 255)";
+              inactive-color = "${palette.base04}";
             };
 
             tab-indicator = {
@@ -69,8 +71,8 @@
               place-within-column = true;
 
               active-gradient._props = {
-                to = "rgb(127 200 255)";
-                from = "rgb(120 000 200)";
+                to = "${palette.base04}";
+                from = "${palette.base0D}";
                 angle = 45;
               };
             };
@@ -198,7 +200,7 @@
 
   flake = {
     combinedModules.niri = self.lib.mkCombinedModule {
-      nixosModule = {pkgs, ...}: {
+      nixosModule = _: {pkgs, ...}: {
         environment = {
           pathsToLink = [
             "/share/xdg-desktop-portal"
@@ -221,7 +223,7 @@
         };
       };
 
-      homeModule = {pkgs, ...}: let
+      homeModule = _: {pkgs, ...}: let
         cursor = {
           theme = "Bibata-Modern-Classic";
           size = 12;

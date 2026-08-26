@@ -6,10 +6,10 @@
     }: user:
       assert builtins.isString user;
         {...}: {
-          imports = [nixosModule];
+          imports = [(nixosModule user)];
 
           config = {
-            home-manager.users."${user}" = homeModule;
+            home-manager.users."${user}" = homeModule user;
           };
         };
 

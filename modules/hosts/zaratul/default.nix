@@ -5,9 +5,8 @@
 }: {
   flake.nixosConfigurations.zaratul = inputs.nixpkgs.lib.nixosSystem {
     modules = [
-      inputs.home-manager.nixosModules.default
-      self.nixosModules.zaratulHardware
       self.nixosModules.zaratul
+      self.nixosModules.zaratulHardware
     ];
   };
 
