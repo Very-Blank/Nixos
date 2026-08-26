@@ -14,6 +14,7 @@
     imports = [
       self.nixosModules.home
       self.nixosModules.grubBoot
+      self.nixosModules.greeter
       self.nixosModules.blank
     ];
 
