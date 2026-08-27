@@ -2,11 +2,11 @@
   "nodes": {
     "colors": {
       "locked": {
-        "lastModified": 1787496530,
-        "narHash": "sha256-anfS9e8CM8zxNk15QDzmxta/DRslrYNtF63atMgcKjs=",
+        "lastModified": 1787827599,
+        "narHash": "sha256-O6crTjXQO7Gavtfm3ncG8OvsEvk9n3YpwTEF8X7id1A=",
         "owner": "Very-Blank",
         "repo": "colors",
-        "rev": "870a4cb5fe248fc8e94b1ac85a9d3a21b438e088",
+        "rev": "a43fc260ee5d8f76c36e6032a68862cba49c64a0",
         "type": "github"
       },
       "original": {

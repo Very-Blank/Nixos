@@ -3,6 +3,10 @@ keys:
   - &ouroboros age1q3y7cxkfw4t7ez2jmumh8ue8af0s7ttmvvph73zluazqvvdwx5lqr90hmy
   - &zaratul age1nrcqjdyert8sm4ug9g33tyhhp74n79wuda0p4kftyll5temgudwqd2vcpr
 creation_rules:
+  - path_regex: secrets/users/blank.yaml$
+    key_groups:
+      - age:
+        - *zaratul
   - path_regex: secrets/user/shared.yaml$
     key_groups:
       - age:

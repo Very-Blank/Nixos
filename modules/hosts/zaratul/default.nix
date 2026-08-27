@@ -1,9 +1,5 @@
-{
-  self,
-  inputs,
-  ...
-}: {
-  flake.nixosConfigurations.zaratul = inputs.nixpkgs.lib.nixosSystem {
+{self, ...}: {
+  flake.nixosConfigurations.zaratul = self.lib.mkNixosSystem {
     modules = [
       self.nixosModules.zaratul
       self.nixosModules.zaratulHardware
@@ -12,13 +8,19 @@
 
   flake.nixosModules.zaratul = {pkgs, ...}: {
     imports = [
-      self.nixosModules.home
       self.nixosModules.grubBoot
-      self.nixosModules.greeter
       self.nixosModules.blank
     ];
 
-    features.grub.boot = "multi";
+    features = {
+      host = {
+        name = "zaratul";
+      };
+
+      grub = {
+        boot = "multi";
+      };
+    };
 
     users = {
       mutableUsers = false;

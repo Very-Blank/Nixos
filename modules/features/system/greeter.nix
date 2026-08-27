@@ -43,11 +43,14 @@
         services = {
           getty = {
             greetingLine = "<< NixOS ${config.system.nixos.release} >>\n";
-            helpLine = lib.mkForce (
-              (lib.strings.toUpper (builtins.substring 0 1 config.hostname))
-              + (builtins.substring 1 (builtins.stringLength config.hostname) config.hostname)
-              + " at your service."
-            );
+            helpLine = let
+              name = config.features.host.name;
+            in
+              lib.mkForce (
+                (lib.strings.toUpper (builtins.substring 0 1 name))
+                + (builtins.substring 1 (builtins.stringLength name) name)
+                + " at your service."
+              );
           };
 
           greetd = {

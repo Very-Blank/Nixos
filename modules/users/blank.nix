@@ -15,10 +15,18 @@
         ];
 
         imports =
-          map (module: self.combinedModules."${module}" user)
-          ["niri" "firefox" "zsh"];
+          [self.nixosModules.steam]
+          ++ (map (module: self.combinedModules."${module}" user)
+            ["niri" "firefox" "zsh" "obsidian"]);
+
+        sops.secrets."users/${user}/password-hash" = {
+          sopsFile = ../../../secrets/users/. + "./${user}.yaml";
+          neededForUsers = true;
+        };
 
         users.users."${user}" = {
+          hashedPasswordFile = config.sops.secrets."users/${user}/password-hash".path;
+
           isNormalUser = true;
 
           extraGroups = [
@@ -34,7 +42,7 @@
             commands = [
               {
                 inherit user;
-                cmd = "${lib.getExe config.home-manager.users."${user}".wayland.windowManager.niri.package}";
+                cmd = "${lib.getExe' config.home-manager.users."${user}".wayland.windowManager.niri.package "niri"}";
               }
             ];
           };
@@ -44,6 +52,7 @@
       homeModule = user: {...}: {
         imports = [
           self.homeModules.nvim
+          self.homeModules.obs
         ];
 
         xdg = {

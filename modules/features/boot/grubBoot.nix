@@ -1,9 +1,9 @@
-{
-  self,
-  config,
-  ...
-}: {
-  flake.nixosModules.grubBoot = {lib, ...}: {
+{self, ...}: {
+  flake.nixosModules.grubBoot = {
+    lib,
+    config,
+    ...
+  }: {
     imports = [self.nixosModules.boot];
 
     options = {

@@ -11,7 +11,16 @@
     homeModules.nvim = {pkgs, ...}: {
       programs.neovim = {
         enable = true;
-        package = self.packages.${pkgs.stdenv.hostPlatform.system}.nvim;
+        package =
+          self.packages.${pkgs.stdenv.hostPlatform.system}.nvim
+          // {
+            meta = {
+              description = "My nvim.";
+              mainProgram = "nvim";
+              platforms = pkgs.lib.platforms.linux;
+              license = pkgs.lib.licenses.mit;
+            };
+          };
       };
 
       home.sessionVariables = {
