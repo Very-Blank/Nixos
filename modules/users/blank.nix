@@ -5,7 +5,15 @@
         imports =
           [self.nixosModules.steam]
           ++ (map (module: self.combinedModules."${module}" user)
-            ["niri" "firefox" "zsh" "obsidian"]);
+            ["niri" "zsh"]);
+
+        core = {
+          unfree = {
+            packages = [
+              "obsidian"
+            ];
+          };
+        };
 
         sops.secrets."users/${user}/password-hash" = {
           sopsFile = ../../secrets/users/. + "/${user}.yaml";
@@ -28,13 +36,16 @@
 
       homeModule = user: {
         lib,
+        pkgs,
         config,
         ...
       }: {
         imports = with self.homeModules; [
+          greeter
+          waybar
           networkingTray
           bluetoothTray
-          greeter
+          firefox
           nvim
           obs
         ];
@@ -53,6 +64,17 @@
 
           greeter = {
             cmd = "${lib.getExe' config.wayland.windowManager.niri.package "niri"}";
+          };
+
+          waybar = {
+            features = [
+              "tray"
+              "audio"
+              "time"
+              "system-info"
+              "backlight"
+              "battery"
+            ];
           };
         };
 
@@ -82,6 +104,7 @@
         };
 
         home = {
+          packages = [pkgs.obsidian];
           stateVersion = "26.11";
         };
       };

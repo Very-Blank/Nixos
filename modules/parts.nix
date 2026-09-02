@@ -14,6 +14,12 @@
         default = {};
         description = "Modules that combined home and nixos modules into one.";
       };
+
+      css = lib.mkOption {
+        type = lib.types.lazyAttrsOf (lib.types.functionTo lib.types.str);
+        default = {};
+        description = "Css styles.";
+      };
     };
   };
 
