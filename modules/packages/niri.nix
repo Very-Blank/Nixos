@@ -278,8 +278,14 @@
               name = cursor.theme;
               package = pkgs.bibata-cursors;
               size = cursor.size;
-              gtk.enable = true;
-              x11.enable = true;
+
+              gtk = {
+                enable = true;
+              };
+
+              x11 = {
+                enable = true;
+              };
             };
 
             sessionVariables = {
