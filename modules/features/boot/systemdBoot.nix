@@ -1,7 +1,16 @@
-{self, ...}: {
+{
   flake.nixosModules.systemdBoot = {...}: {
-    imports = [self.nixosModules.boot];
+    boot = {
+      consoleLogLevel = 3;
+      loader = {
+        efi = {
+          canTouchEfiVariables = true;
+        };
 
-    boot.loader.systemd-boot.enable = true;
+        systemd-boot = {
+          enable = true;
+        };
+      };
+    };
   };
 }

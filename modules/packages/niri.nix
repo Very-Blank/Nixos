@@ -241,6 +241,7 @@
 
         home = {
           pointerCursor = {
+            enable = true;
             name = cursor.theme;
             package = pkgs.bibata-cursors;
             size = cursor.size;

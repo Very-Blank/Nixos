@@ -5,7 +5,7 @@
         enable = true;
       };
 
-      features.unfree.packages = [
+      core.unfree.packages = [
         "steam"
         "steam-original"
         "steam-unwrapped"

@@ -6,7 +6,7 @@
       ...
     }: {
       options = {
-        features = {
+        core = {
           unfree = {
             packages = lib.mkOption {
               type = with lib.types; listOf nonEmptyStr;
@@ -18,7 +18,7 @@
       };
 
       config = let
-        cfg = config.features.unfree;
+        cfg = config.core.unfree;
       in {
         nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) cfg.packages;
       };

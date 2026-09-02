@@ -7,7 +7,7 @@
       ...
     }: {
       options = {
-        features = {
+        modules = {
           greeter = {
             commands = lib.mkOption {
               type = lib.types.listOf (lib.types.submodule {
@@ -28,7 +28,7 @@
       };
 
       config = let
-        cfg = config.features.greeter;
+        cfg = config.modules.greeter;
       in {
         assertions = [
           {
@@ -44,7 +44,7 @@
           getty = {
             greetingLine = "<< NixOS ${config.system.nixos.release} >>\n";
             helpLine = let
-              name = config.features.host.name;
+              name = config.core.host.name;
             in
               lib.mkForce (
                 (lib.strings.toUpper (builtins.substring 0 1 name))

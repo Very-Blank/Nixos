@@ -2,7 +2,7 @@
   flake = {
     combinedModules.obsidian = self.lib.mkCombinedModule {
       nixosModule = _: {
-        features.unfree.packages = [
+        core.unfree.packages = [
           "obsidian"
         ];
       };

@@ -2,7 +2,7 @@
   flake = {
     nixosModules.host = {lib, ...}: {
       options = {
-        features = {
+        core = {
           host = {
             name = lib.mkOption {
               default = "nixos";

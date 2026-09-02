@@ -33,7 +33,7 @@
 
           shellAliases = {
             ns = "nix-shell --run zsh";
-            build-switch = "sudo nixos-rebuild switch --flake .#${osConfig.features.host.name}";
+            build-switch = "sudo nixos-rebuild switch --flake .#${osConfig.core.host.name}";
 
             ls = "ls --color=auto -h --group-directories-first";
             ll = "ls -l";

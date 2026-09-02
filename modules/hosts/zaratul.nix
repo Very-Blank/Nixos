@@ -1,4 +1,42 @@
-{...}: {
+{self, ...}: {
+  flake.nixosConfigurations.zaratul = self.lib.mkNixosSystem {
+    modules = [
+      self.nixosModules.zaratul
+      self.nixosModules.zaratulHardware
+    ];
+  };
+
+  flake.nixosModules.zaratul = {pkgs, ...}: {
+    imports = [
+      self.nixosModules.grubBoot
+      self.nixosModules.greeter
+      self.nixosModules.blank
+    ];
+
+    modules = {
+      grub = {
+        boot = "multi";
+      };
+    };
+
+    core = {
+      host = {
+        name = "zaratul";
+      };
+    };
+
+    users = {
+      mutableUsers = false;
+    };
+
+    environment.systemPackages = [
+      pkgs.vim
+      pkgs.firefox
+    ];
+
+    system.stateVersion = "26.11";
+  };
+
   flake.nixosModules.zaratulHardware = {
     config,
     lib,

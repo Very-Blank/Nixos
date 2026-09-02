@@ -12,7 +12,6 @@
               inputs.sops-nix.nixosModules.sops
               self.nixosModules.host
               self.nixosModules.home
-              self.nixosModules.greeter
               self.nixosModules.unfree
               {
                 sops = {

@@ -7,7 +7,7 @@
       ...
     }: {
       options = {
-        features = {
+        modules = {
           obs = {
             hardwareAcceleration = lib.mkOption {
               default = "none";
@@ -24,7 +24,7 @@
       };
 
       config = let
-        cfg = config.features.obs;
+        cfg = config.modules.obs;
       in {
         programs.obs-studio = {
           enable = true;
