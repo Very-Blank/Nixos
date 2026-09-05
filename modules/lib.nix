@@ -52,6 +52,17 @@
               };
             };
           };
+
+      mkFontsConf = pkgs: fontPackage:
+        pkgs.writeText "fonts.conf" ''
+          <?xml version='1.0'?>
+          <!DOCTYPE fontconfig SYSTEM 'urn:fontconfig:fonts.dtd'>
+          <fontconfig>
+            <dir>${fontPackage}</dir>
+            <cachedir>/var/cache/fontconfig</cachedir>
+            <cachedir prefix="xdg">fontconfig</cachedir>
+          </fontconfig>
+        '';
     };
   };
 }

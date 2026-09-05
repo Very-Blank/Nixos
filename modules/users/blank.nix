@@ -42,9 +42,11 @@
       }: {
         imports = with self.homeModules; [
           greeter
+          gtk
           waybar
           networkingTray
           bluetoothTray
+          vicinae
           firefox
           nvim
           obs
@@ -60,21 +62,25 @@
           niri = {
             audio = true;
             brightness = true;
+            terminal = "${lib.getExe' self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty "ghostty"}";
+            launcher = "${lib.getExe config.programs.vicinae.package}";
+            spawnAtStartUp = [
+              [
+                "${lib.getExe' (self.packages.${pkgs.stdenv.hostPlatform.system}.waybar.override {
+                  features = [
+                    "tray"
+                    "audio"
+                    "system-info"
+                    "backlight"
+                    "battery"
+                  ];
+                }) "ghostty"}"
+              ]
+            ];
           };
 
           greeter = {
             cmd = "${lib.getExe' config.wayland.windowManager.niri.package "niri"}";
-          };
-
-          waybar = {
-            features = [
-              "tray"
-              "audio"
-              "time"
-              "system-info"
-              "backlight"
-              "battery"
-            ];
           };
         };
 

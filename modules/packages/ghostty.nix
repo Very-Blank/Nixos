@@ -15,7 +15,10 @@
         width = "-10%";
       },
       title ? "Ghostty",
-      fontFamily ? null,
+      font ? {
+        package = pkgs.nerd-fonts._0xproto;
+        family = "0xProto Nerd Font";
+      },
       extraConfig ? null,
     }: let
       validate = ghostty-package: config:
@@ -36,10 +39,12 @@
           adjust-cell-width = ${cellAdjust.width}
           title = ${title}
         ''
-        + lib.optionalString (fontFamily != null) ''
-          font-family = ${fontFamily}
+        + lib.optionalString (font != null) ''
+          font-family = ${font.family}
         ''
         + lib.optionalString (extraConfig != null) extraConfig;
+
+      fontConfig = self.lib.mkFontsConf pkgs font.package;
 
       theme = let
         palette = inputs.colors.lib.withHash self.globals.theme.palette;
@@ -75,14 +80,30 @@
           "--config-file=${validate pkgs.ghostty config}"
           "--theme=${validate pkgs.ghostty theme}"
         ];
-      in ''
-        wrapProgram $out/bin/ghostty --add-flags "${lib.strings.concatStringsSep " " flags}"
-      '';
+      in
+        lib.strings.concatStringsSep " " (
+          [
+            "wrapProgram $out/bin/ghostty"
+            "--add-flags \"${lib.strings.concatStringsSep " " flags}\""
+          ]
+          ++ (
+            lib.optional
+            (font != null)
+            "--set FONTCONFIG_FILE ${fontConfig}"
+          )
+        );
     })) {};
   };
 
   flake = {
     nixosModules.ghostty = {...}: {
+      programs.ghostty = {
+        enable = true;
+        packages = self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty;
+      };
+    };
+
+    homeModules.ghostty = {...}: {
       programs.ghostty = {
         enable = true;
         packages = self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty;

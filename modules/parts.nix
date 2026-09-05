@@ -16,9 +16,15 @@
       };
 
       css = lib.mkOption {
-        type = lib.types.lazyAttrsOf (lib.types.functionTo lib.types.str);
+        type = lib.types.lazyAttrsOf (lib.types.either (lib.types.functionTo lib.types.str) lib.str);
         default = {};
         description = "Css styles.";
+      };
+
+      settings = lib.mkOption {
+        type = lib.types.lazyAttrsOf (lib.types.either (lib.types.functionTo lib.types.attrs) lib.types.attrs);
+        default = {};
+        description = "Settings.";
       };
     };
   };
