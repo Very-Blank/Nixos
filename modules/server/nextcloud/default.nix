@@ -36,7 +36,7 @@
 
       services.nextcloud = {
         enable = true;
-        package = pkgs.nextcloud34;
+        package = pkgs.nextcloud35;
         hostName = "${subdomainName}.${config.modules.server.domain.main}";
 
         extraApps = {
