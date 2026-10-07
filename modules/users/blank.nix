@@ -31,7 +31,6 @@
       homeModule = user: {
         lib,
         pkgs,
-        config,
         ...
       }: {
         imports = with self.homeModules; [
@@ -39,7 +38,6 @@
           gtk
           networkingTray
           bluetoothTray
-          vicinae
           firefox
           nvim
           obs
@@ -54,11 +52,13 @@
         modules = {
           greeter = {
             cmd = "${lib.getExe' (self.packages.niri.override {
-              niri = {
+              niri = let
+                launcher = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun "anyrun"}";
+              in {
                 audio = true;
                 brightness = true;
                 terminal = "${lib.getExe' self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty "ghostty"}";
-                launcher = "${lib.getExe config.programs.vicinae.package}";
+                inherit launcher;
 
                 screenshots = {
                   path = "~/Pictures/Screenshots/";
@@ -76,6 +76,10 @@
                         "battery"
                       ];
                     }) "waybar"}"
+                  ]
+                  [
+                    launcher
+                    "daemon"
                   ]
                 ];
               };

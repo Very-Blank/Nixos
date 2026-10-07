@@ -30,9 +30,11 @@
       height ? 1,
       hideIcons ? true,
       ignoreExclusiveZones ? false,
+      layer ? "Overlay",
       hidePluginInfo ? true,
       closeOnClick ? true,
       showResultsImmediately ? false,
+      maxEntries ? "None",
       font ? {
         package = pkgs.nerd-fonts._0xproto;
         family = "0xProto Nerd Font";
@@ -120,11 +122,11 @@
           height: ${numToString height},
           hide_icons: ${lib.boolToString hideIcons},
           ignore_exclusive_zones: ${lib.boolToString ignoreExclusiveZones},
-          layer: Overlay,
+          layer: ${layer},
           hide_plugin_info: ${lib.boolToString hidePluginInfo},
           close_on_click: ${lib.boolToString closeOnClick},
           show_results_immediately: ${lib.boolToString showResultsImmediately},
-          max_entries: None,
+          max_entries: ${maxEntries},
           plugins: [
             "${pkgs.anyrun}/lib/libapplications.so",
             "${pkgs.anyrun}/lib/libshell.so",
