@@ -12,10 +12,14 @@
       spawnAtStartUp ? [],
       terminal ? null,
       launcher ? null,
-      screenshotPath ? null,
+      screenshots ? null,
       audio ? false,
       brightness ? false,
-      cursor ? null,
+      cursor ? {
+        package = pkgs.bibata-cursors;
+        theme = "Bibata-Modern-Classic";
+        size = 12;
+      },
     }: let
       kdlConfig = inputs.niri.lib.validatedConfigFor pkgs.niri (inputs.niri.lib.mkNiriKDL (self.settings.niri {
         inherit lib;
@@ -23,14 +27,14 @@
         inherit spawnAtStartUp;
         inherit terminal;
         inherit launcher;
-        inherit screenshotPath;
+        inherit screenshots;
         inherit audio;
         inherit brightness;
         inherit cursor;
       }));
     in (pkgs.symlinkJoin {
       name = "niri";
-      paths = [pkgs.niri];
+      paths = [pkgs.niri cursor.package];
       buildInputs = [pkgs.makeWrapper];
       postBuild = ''
         wrapProgram $out/bin/niri --add-flags "--config ${kdlConfig}"
@@ -39,119 +43,26 @@
   };
 
   flake = {
-    combinedModules.niri = self.lib.mkCombinedModule {
-      nixosModule = _: {pkgs, ...}: {
-        environment = {
-          pathsToLink = [
-            "/share/xdg-desktop-portal"
-          ];
+    nixosModules.niri = {pkgs, ...}: {
+      environment = {
+        pathsToLink = [
+          "/share/xdg-desktop-portal"
+        ];
 
-          variables = {
-            NIXOS_OZONE_WL = "1";
-          };
-
-          systemPackages = [
-            pkgs.wayland-utils
-            pkgs.wl-clipboard-rs
-            pkgs.libsecret
-          ];
+        variables = {
+          NIXOS_OZONE_WL = "1";
         };
 
-        xdg.portal = {
-          xdgOpenUsePortal = true;
-          extraPortals = pkgs.xdg-desktop-portal-gtk;
-        };
+        systemPackages = [
+          pkgs.wayland-utils
+          pkgs.wl-clipboard-rs
+          pkgs.libsecret
+        ];
       };
 
-      homeModule = _: {
-        lib,
-        pkgs,
-        config,
-        ...
-      }: let
-        cursor = {
-          theme = "Bibata-Modern-Classic";
-          size = 12;
-        };
-      in {
-        options = {
-          modules = {
-            niri = {
-              audio = lib.mkEnableOption "audio";
-              brightness = lib.mkEnableOption "brightness";
-
-              spawnAtStartUp = lib.mkOption {
-                type = lib.types.listOf (lib.types.listOf lib.types.nonEmptyStr);
-                default = [];
-              };
-
-              screenshot = lib.mkOption {
-                type = lib.types.submodule {
-                  options = {
-                    path = lib.mkOption {
-                      default = "~/Pictures/Screenshots/";
-                      type = lib.types.nonEmptyStr;
-                    };
-
-                    format = lib.mkOption {
-                      default = "Screenshot%H_%M_%S_%d%m%Y.png";
-                      type = lib.types.nonEmptyStr;
-                    };
-                  };
-                };
-              };
-
-              terminal = lib.mkOption {
-                type = lib.types.nullOr lib.types.nonEmptyStr;
-                default = null;
-              };
-
-              launcher = lib.mkOption {
-                type = lib.types.nullOr lib.types.nonEmptyStr;
-                default = null;
-              };
-            };
-          };
-        };
-
-        config = let
-          cfg = config.modules.niri;
-        in {
-          wayland.windowManager.niri = {
-            enable = true;
-            package = self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
-              spawnAtStartUp = cfg.spawnAtStartUp;
-              screenshotPath = "${cfg.screenshot.path}${cfg.screenshot.format}";
-              terminal = cfg.terminal;
-              launcher = cfg.launcher;
-              audio = cfg.audio;
-              brightness = cfg.brightness;
-              inherit cursor;
-            };
-          };
-
-          home = {
-            pointerCursor = {
-              enable = true;
-              name = cursor.theme;
-              package = pkgs.bibata-cursors;
-              size = cursor.size;
-
-              gtk = {
-                enable = true;
-              };
-
-              x11 = {
-                enable = true;
-              };
-            };
-
-            sessionVariables = {
-              XCURSOR_THEME = cursor.theme;
-              XCURSOR_SIZE = toString cursor.size;
-            };
-          };
-        };
+      xdg.portal = {
+        xdgOpenUsePortal = true;
+        extraPortals = pkgs.xdg-desktop-portal-gtk;
       };
     };
 
@@ -161,7 +72,7 @@
       spawnAtStartUp ? [],
       terminal ? null,
       launcher ? null,
-      screenshotPath ? null,
+      screenshots ? null,
       audio ? false,
       brightness ? false,
       cursor ? null,
@@ -185,9 +96,23 @@
           ]
           ++ spawnAtStartUp;
 
-        environment = {
-          DISPLAY = ":0";
-        };
+        environment =
+          {
+            DISPLAY = ":0";
+          }
+          # FIXME: This might be unneeded.
+          // lib.optionalAttrs (cursor != null) {
+            XCURSOR_PATH = "${cursor.package}/share/icons";
+          };
+
+        cursor =
+          {
+            hide-when-typing = true;
+          }
+          // lib.optionalAttrs (cursor != null) {
+            xcursor-theme = cursor.theme;
+            xcursor-size = cursor.size;
+          };
 
         layout = let
           palette = inputs.colors.lib.withHash self.globals.theme.palette;
@@ -304,7 +229,7 @@
           // (lib.optionalAttrs (launcher != null) {
             "Mod+D" = {spawn = "${launcher}";};
           })
-          // (lib.optionalAttrs (screenshotPath != null) {
+          // (lib.optionalAttrs (screenshots != null) {
             "Mod+Shift+S" = {screenshot = [];};
             "Print" = {screenshot-screen = [];};
           })
@@ -328,14 +253,8 @@
             };
           });
       }
-      // (lib.optionalAttrs (screenshotPath != null) {
-        screenshot-path = screenshotPath;
-      })
-      // lib.optionalAttrs (cursor != null) {
-        cursor = {
-          xcursor-theme = cursor.theme;
-          xcursor-size = cursor.size;
-        };
-      };
+      // (lib.optionalAttrs (screenshots != null) {
+        screenshot-path = "${screenshots.path}${screenshots.format}";
+      });
   };
 }
