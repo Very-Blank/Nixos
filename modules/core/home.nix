@@ -6,6 +6,8 @@
 
     environment.pathsToLink = ["/share/applications"];
 
+    programs.dconf.enable = true;
+
     home-manager = {
       useGlobalPkgs = true;
       useUserPackages = true;

@@ -76,8 +76,7 @@
         };
 
         Service = {
-          Type = "simple";
-          ExecStart = "${lib.getExe' self.packages.${pkgs.stdenv.hostPlatform.system}.waybar "waybar"}";
+          ExecStart = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.waybar}";
           Restart = "on-failure";
           RestartSec = "1s";
           KillMode = "process";
