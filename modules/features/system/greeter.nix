@@ -10,13 +10,9 @@
         modules = {
           greeter = {
             users = lib.mkOption {
-              type = lib.types.attrsOf (lib.types.submodule {
-                options.cmd = lib.mkOption {
-                  type = lib.types.nonEmptyStr;
-                  description = "The command that will be run for this user.";
-                };
-              });
+              type = lib.types.attrsOf lib.types.nonEmptyStr;
               default = {};
+              description = "Command to run for that user at login.";
             };
           };
         };
@@ -24,29 +20,7 @@
 
       config = let
         cfg = config.modules.greeter;
-
-        userCommands =
-          lib.mapAttrsToList
-          (name: userCfg: {
-            user = name;
-            cmd = userCfg.modules.greeter.cmd;
-          })
-          (lib.filterAttrs
-            (name: userCfg: userCfg.modules.greeter.cmd != null)
-            config.home-manager.users);
-
-        allCommands = cfg.commands ++ userCommands;
       in {
-        assertions = [
-          {
-            assertion = lib.lists.allUnique (map (command: command.user) allCommands);
-            message = ''
-              The greeter nixos module has duplicate users in the config.
-              All user must be unique as it can't pick multiple commands for the same user.
-            '';
-          }
-        ];
-
         services = {
           getty = {
             greetingLine = "<< NixOS ${config.system.nixos.release} >>\n";
@@ -72,7 +46,7 @@
               default_session = let
                 commands =
                   lib.mapAttrsToList
-                  (user: userCfg: "${lib.escapeShellArg user}) exec ${userCfg.cmd} ;;")
+                  (user: cmd: "${lib.escapeShellArg user}) exec ${cmd} ;;")
                   cfg.users;
 
                 chooser = pkgs.writeShellScript "session-chooser" ''
@@ -85,19 +59,6 @@
                 command = "${lib.getExe' pkgs.greetd "agreety"} --max-failures 3 --cmd '${chooser}'";
                 user = "greeter";
               };
-            };
-          };
-        };
-      };
-    };
-
-    homeModules.greeter = {lib, ...}: {
-      options = {
-        modules = {
-          greeter = {
-            cmd = lib.mkOption {
-              type = lib.types.nonEmptyStr;
-              description = "The command that will be run for this user.";
             };
           };
         };

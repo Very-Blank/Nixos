@@ -45,7 +45,7 @@
 
         modules = {
           greeter = {
-            "${user}" = "${lib.getExe' niri "niri-session"}";
+            users."${user}" = "${lib.getExe' niri "niri-session"}";
           };
         };
 
@@ -57,7 +57,6 @@
 
       homeModule = user: {pkgs, ...}: {
         imports = with self.homeModules; [
-          greeter
           networkingTrayService
           bluetoothTrayService
           anyrunService

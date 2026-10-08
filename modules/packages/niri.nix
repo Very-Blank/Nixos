@@ -32,23 +32,6 @@
         inherit brightness;
         inherit cursor;
       }));
-
-      niriService = pkgs.writeText "niri.service" ''
-        [Unit]
-        Description=A scrollable-tiling Wayland compositor
-        BindsTo=graphical-session.target
-        Before=graphical-session.target
-        Wants=graphical-session-pre.target
-        After=graphical-session-pre.target
-
-        Wants=xdg-desktop-autostart.target
-        Before=xdg-desktop-autostart.target
-
-        [Service]
-        Slice=session.slice
-        Type=notify
-        ExecStart=niri --session
-      '';
     in (pkgs.symlinkJoin {
       name = "niri";
       paths = [pkgs.niri cursor.package];
