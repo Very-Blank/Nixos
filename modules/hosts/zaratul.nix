@@ -45,6 +45,19 @@
       system = {
         stateVersion = "26.11";
       };
+
+      nix = {
+        settings.experimental-features = [
+          "nix-command"
+          "flakes"
+        ];
+
+        gc = {
+          automatic = true;
+          dates = "weekly";
+          options = "--delete-older-than 2d";
+        };
+      };
     };
 
     nixosModules.zaratulHardware = {
