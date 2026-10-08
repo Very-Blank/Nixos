@@ -62,4 +62,32 @@
         ];
     })) {};
   };
+
+  flake = {
+    homeModules.makoService = {
+      lib,
+      pkgs,
+      ...
+    }: {
+      systemd.user.services.mako = {
+        Unit = {
+          Description = "Mako service";
+          PartOf = "graphical-session.target";
+          After = "graphical-session.target";
+        };
+
+        Service = {
+          Type = "simple";
+          ExecStart = "${lib.getExe' self.packages.${pkgs.stdenv.hostPlatform.system}.mako "mako"}";
+          Restart = "on-failure";
+          RestartSec = "1s";
+          KillMode = "process";
+        };
+
+        Install = {
+          WantedBy = ["graphical-session.target"];
+        };
+      };
+    };
+  };
 }

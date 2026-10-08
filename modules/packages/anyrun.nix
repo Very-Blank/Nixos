@@ -172,6 +172,32 @@
   };
 
   flake = {
+    homeModules.anyrunService = {
+      lib,
+      pkgs,
+      ...
+    }: {
+      systemd.user.services.anyrun = {
+        Unit = {
+          Description = "Anyrun service";
+          PartOf = "graphical-session.target";
+          After = "graphical-session.target";
+        };
+
+        Service = {
+          Type = "simple";
+          ExecStart = "${lib.getExe' self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun "anyrun"} deamon";
+          Restart = "on-failure";
+          RestartSec = "1s";
+          KillMode = "process";
+        };
+
+        Install = {
+          WantedBy = ["graphical-session.target"];
+        };
+      };
+    };
+
     css.anyrun = {
       palette,
       fontFamily,

@@ -61,34 +61,28 @@
   };
 
   flake = {
-    homeModules.waybar = {
+    homeModules.waybarService = {
       lib,
       pkgs,
       ...
     }: {
-      options = {
-        modules = {
-          waybar = {
-            features = lib.mkOption {
-              default = [];
-              description = "Extra features to be enabled.";
-              type = with lib.types;
-                listOf (enum [
-                  "audio"
-                  "backlight"
-                  "system-info"
-                  "battery"
-                  "tray"
-                ]);
-            };
-          };
+      systemd.user.services.waybar = {
+        Unit = {
+          Description = "Waybar service";
+          PartOf = "graphical-session.target";
+          After = "graphical-session.target";
         };
-      };
 
-      config = {
-        programs.waybar = {
-          enable = true;
-          package = self.packages.${pkgs.stdenv.hostPlatform.system}.waybar;
+        Service = {
+          Type = "simple";
+          ExecStart = "${lib.getExe' self.packages.${pkgs.stdenv.hostPlatform.system}.waybar "waybar"}";
+          Restart = "on-failure";
+          RestartSec = "1s";
+          KillMode = "process";
+        };
+
+        Install = {
+          WantedBy = ["graphical-session.target"];
         };
       };
     };

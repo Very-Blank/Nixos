@@ -26,6 +26,7 @@
           ];
         };
 
+        # NOTE: This is required for zsh's autocompletions to work.
         environment.pathsToLink = ["/share/zsh"];
       };
 
@@ -36,9 +37,12 @@
       }: {
         imports = with self.homeModules; [
           greeter
+          networkingTrayService
+          bluetoothTrayService
+          anyrunService
+          waybarService
+          makoService
           gtk
-          networkingTray
-          bluetoothTray
           firefox
           obs
         ];
@@ -53,35 +57,16 @@
           greeter = {
             cmd = "${lib.getExe' (self.packages.niri.override {
               niri = let
-                launcher = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun "anyrun"}";
               in {
                 audio = true;
                 brightness = true;
                 terminal = "${lib.getExe' self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty "ghostty"}";
-                inherit launcher;
+                launcher = "${lib.getExe' self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun "anyrun"}";
 
                 screenshots = {
                   path = "~/Pictures/Screenshots/";
                   format = "screenshot_%Y-%m-%d_%Hh%Mm%Ss.png";
                 };
-
-                spawnAtStartUp = [
-                  [
-                    "${lib.getExe' (self.packages.${pkgs.stdenv.hostPlatform.system}.waybar.override {
-                      features = [
-                        "tray"
-                        "audio"
-                        "system-info"
-                        "backlight"
-                        "battery"
-                      ];
-                    }) "waybar"}"
-                  ]
-                  [
-                    launcher
-                    "daemon"
-                  ]
-                ];
               };
             }) "niri"}";
           };
