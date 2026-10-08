@@ -1,14 +1,11 @@
 {self, ...}: {
   flake = {
     nixosModules.blank = self.lib.mkUserModule "blank" {
-      nixosModule = user: {...}: {
-        imports =
-          [
-            self.nixosModules.steam
-            self.nixosModules.niri
-          ]
-          ++ (map (module: self.combinedModules."${module}" user)
-            ["zsh"]);
+      nixosModule = user: {pkgs, ...}: {
+        imports = [
+          self.nixosModules.steam
+          self.nixosModules.niri
+        ];
 
         core = {
           unfree = {
@@ -19,6 +16,8 @@
         };
 
         users.users."${user}" = {
+          shell = self.packages.${pkgs.stdenv.hostPlatform.system}.zsh;
+
           extraGroups = [
             "wheel"
             "video"
@@ -26,6 +25,8 @@
             "audio"
           ];
         };
+
+        environment.pathsToLink = ["/share/zsh"];
       };
 
       homeModule = user: {
@@ -39,7 +40,6 @@
           networkingTray
           bluetoothTray
           firefox
-          nvim
           obs
         ];
 
@@ -104,6 +104,8 @@
                 defaultBranch = "main";
               };
 
+              core.editor = "nvim";
+
               user = {
                 name = "very-blank";
                 email = "aapeli.saarelainen.76@gmail.com";
@@ -113,7 +115,10 @@
         };
 
         home = {
-          packages = [pkgs.obsidian];
+          packages = [
+            pkgs.obsidian
+            self.packages.${pkgs.stdenv.hostPlatform.system}.nvim
+          ];
           stateVersion = "26.11";
         };
       };

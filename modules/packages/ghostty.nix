@@ -1,6 +1,5 @@
 {
   self,
-  pkgs,
   inputs,
   ...
 }: {
@@ -96,14 +95,14 @@
   };
 
   flake = {
-    nixosModules.ghostty = {...}: {
+    nixosModules.ghostty = {pkgs, ...}: {
       programs.ghostty = {
         enable = true;
         packages = self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty;
       };
     };
 
-    homeModules.ghostty = {...}: {
+    homeModules.ghostty = {pkgs, ...}: {
       programs.ghostty = {
         enable = true;
         packages = self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty;
