@@ -71,15 +71,15 @@
               self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
                 audio = true;
                 brightness = true;
-                terminal = "${lib.getExe' self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty "ghostty"}";
-                launcher = "${lib.getExe' self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun "anyrun"}";
+                terminal = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty "ghostty"}";
+                launcher = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun "anyrun"}";
 
                 screenshots = {
                   path = "~/Pictures/Screenshots/";
                   format = "screenshot_%Y-%m-%d_%Hh%Mm%Ss.png";
                 };
               }
-            ) "niri"}";
+            ) "niri-session"}";
           };
         };
 
