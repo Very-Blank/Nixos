@@ -55,9 +55,8 @@
 
         modules = {
           greeter = {
-            cmd = "${lib.getExe' (self.packages.niri.override {
-              niri = let
-              in {
+            cmd = "${lib.getExe' (
+              self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
                 audio = true;
                 brightness = true;
                 terminal = "${lib.getExe' self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty "ghostty"}";
@@ -67,8 +66,8 @@
                   path = "~/Pictures/Screenshots/";
                   format = "screenshot_%Y-%m-%d_%Hh%Mm%Ss.png";
                 };
-              };
-            }) "niri"}";
+              }
+            ) "niri"}";
           };
         };
 
