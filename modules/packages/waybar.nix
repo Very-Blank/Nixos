@@ -57,6 +57,8 @@
             "--set FONTCONFIG_FILE ${fontConfig}"
           )
         );
+
+      meta.mainProgram = "waybar";
     })) {};
   };
 

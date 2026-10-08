@@ -40,20 +40,10 @@
           {
             nixosModule,
             homeModule,
-          }: {config, ...}: {
+          }: {...}: {
             imports = [(nixosModule user)];
 
             config = {
-              sops.secrets."users/${user}/password-hash" = {
-                sopsFile = ../../secrets/users/. + "/${user}.yaml";
-                neededForUsers = true;
-              };
-
-              users.users."${user}" = {
-                hashedPasswordFile = config.sops.secrets."users/${user}/password-hash".path;
-                isNormalUser = true;
-              };
-
               home-manager.users."${user}" = {
                 imports = [
                   inputs.sops-nix.homeManagerModules.sops

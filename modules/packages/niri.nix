@@ -39,6 +39,8 @@
       postBuild = ''
         wrapProgram $out/bin/niri --add-flags "--config ${kdlConfig}"
       '';
+
+      meta.mainProgram = "niri";
     })) {};
   };
 

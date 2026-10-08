@@ -91,22 +91,8 @@
             "--set FONTCONFIG_FILE ${fontConfig}"
           )
         );
+
+      meta.mainProgram = "ghostty";
     })) {};
-  };
-
-  flake = {
-    nixosModules.ghostty = {pkgs, ...}: {
-      programs.ghostty = {
-        enable = true;
-        packages = self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty;
-      };
-    };
-
-    homeModules.ghostty = {pkgs, ...}: {
-      programs.ghostty = {
-        enable = true;
-        packages = self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty;
-      };
-    };
   };
 }

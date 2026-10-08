@@ -132,10 +132,14 @@
       name = "zsh";
       paths = [pkgs.zsh];
       buildInputs = [pkgs.makeWrapper];
+      passthru.shellPath = "/bin/zsh";
+
       postBuild = lib.strings.concatStringsSep " " [
         "wrapProgram $out/bin/zsh"
         "--set ZDOTDIR ${zdotdir}"
       ];
+
+      meta.mainProgram = "zsh";
     })) {};
   };
 }

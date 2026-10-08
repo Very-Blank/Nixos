@@ -1,7 +1,11 @@
 {self, ...}: {
   flake = {
     nixosModules.blank = self.lib.mkUserModule "blank" {
-      nixosModule = user: {pkgs, ...}: {
+      nixosModule = user: {
+        config,
+        pkgs,
+        ...
+      }: {
         imports = [
           self.nixosModules.steam
           self.nixosModules.niri
@@ -15,8 +19,16 @@
           };
         };
 
+        sops.secrets."users/${user}/password-hash" = {
+          sopsFile = ../../secrets/users/. + "/${user}.yaml";
+          neededForUsers = true;
+        };
+
         users.users."${user}" = {
           shell = self.packages.${pkgs.stdenv.hostPlatform.system}.zsh;
+
+          hashedPasswordFile = config.sops.secrets."users/${user}/password-hash".path;
+          isNormalUser = true;
 
           extraGroups = [
             "wheel"

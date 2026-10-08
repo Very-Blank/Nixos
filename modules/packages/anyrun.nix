@@ -168,6 +168,8 @@
           "--add-flags \"${lib.strings.concatStringsSep " " flags}\""
           "--set FONTCONFIG_FILE ${fontConfig}"
         ];
+
+      meta.mainProgram = "anyrun";
     })) {};
   };
 
