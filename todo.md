@@ -1,4 +1,12 @@
-# TODO
+# NOTE
+
+Launch vm with these options:
+
+```text
+$PATH -device virtio-vga -display gtk,gl=on
+```
+
+## TODO
 
 - [ ] Dendritic pattern.
 - [ ] Impermanence.
@@ -6,7 +14,7 @@
 - [ ] Slim down dependencies.
 - [ ] Better secrets handeling.
 
-## Server
+### Server
 
 - [ ] Deploy-rs.
 - [ ] Authelia.
