@@ -14,11 +14,11 @@
         family = "0xProto Nerd Font";
       },
       features ? [
-        # "audio"
-        # "backlight"
+        "audio"
+        "backlight"
         "system-info"
-        # "battery"
-        # "tray"
+        "battery"
+        "tray"
       ],
       leftModules ? ["niri/workspaces"],
     }: let

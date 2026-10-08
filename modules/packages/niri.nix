@@ -54,7 +54,7 @@
       paths = [pkgs.niri cursor.package];
       buildInputs = [pkgs.makeWrapper];
       postBuild = ''
-        wrapProgram $out/bin/niri --add-flags "--config ${kdlConfig}"
+        wrapProgram $out/bin/niri --add-flags "--config ${kdlConfig}" --set XCURSOR_PATH ${cursor.package}/share/icons
 
         rm "$out/share/systemd/user/niri.service"
 
