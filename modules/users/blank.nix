@@ -71,8 +71,8 @@
               self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
                 audio = true;
                 brightness = true;
-                terminal = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty "ghostty"}";
-                launcher = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun "anyrun"}";
+                terminal = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty}";
+                launcher = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun}";
 
                 screenshots = {
                   path = "~/Pictures/Screenshots/";
