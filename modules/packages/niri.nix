@@ -49,12 +49,22 @@
         Type=notify
         ExecStart=@niri@ --session
       '';
+
+      defaultCursorTheme = pkgs.writeTextDir "share/icons/default/index.theme" ''
+        [Icon Theme]
+        Name=Default
+        Comment=Default cursor theme
+        Inherits=${cursor.theme}
+      '';
     in (pkgs.symlinkJoin {
       name = "niri";
-      paths = [pkgs.niri cursor.package];
+      paths = [pkgs.niri];
       buildInputs = [pkgs.makeWrapper];
       postBuild = ''
-        wrapProgram $out/bin/niri --add-flags "--config ${kdlConfig}" --set XCURSOR_PATH ${cursor.package}/share/icons
+        wrapProgram $out/bin/niri --add-flags "--config ${kdlConfig}" \
+            --set XCURSOR_PATH ${defaultCursorTheme}/share/icons:${cursor.package}/share/icons \
+            --set XCURSOR_THEME ${cursor.theme} \
+            --set XCURSOR_SIZE ${toString cursor.size}
 
         rm "$out/share/systemd/user/niri.service"
 
@@ -63,6 +73,34 @@
 
       meta.mainProgram = "niri";
     })) {};
+
+    packages.xwayland-satellite = lib.makeOverridable ({
+      cursor ? {
+        package = pkgs.bibata-cursors;
+        theme = "Bibata-Modern-Classic";
+        size = 12;
+      },
+    }: let
+      defaultCursorTheme = pkgs.writeTextDir "share/icons/default/index.theme" ''
+        [Icon Theme]
+        Name=Default
+        Comment=Default cursor theme
+        Inherits=${cursor.theme}
+      '';
+    in
+      # FIXME: test if the environment variables can be move to the niri config.
+      pkgs.symlinkJoin {
+        name = "xwayland-satellite";
+        paths = [pkgs.xwayland-satellite];
+        nativeBuildInputs = [pkgs.makeWrapper];
+        postBuild = ''
+          wrapProgram $out/bin/xwayland-satellite \
+            --set XCURSOR_PATH ${defaultCursorTheme}/share/icons:${cursor.package}/share/icons \
+            --set XCURSOR_THEME ${cursor.theme} \
+            --set XCURSOR_SIZE ${toString cursor.size}
+        '';
+        meta.mainProgram = "xwayland-satellite";
+      }) {};
   };
 
   flake = {
@@ -113,20 +151,11 @@
 
         prefer-no-csd = true;
 
-        spawn-at-startup =
-          [
-            ["${lib.getExe pkgs.xwayland-satellite}"]
-          ]
-          ++ spawnAtStartUp;
+        spawn-at-startup = spawnAtStartUp;
 
-        environment =
-          {
-            DISPLAY = ":0";
-          }
-          # FIXME: This might be unneeded.
-          // lib.optionalAttrs (cursor != null) {
-            XCURSOR_PATH = "${cursor.package}/share/icons";
-          };
+        xwayland-satellite = {
+          path = "${lib.getExe pkgs.xwayland-satellite}";
+        };
 
         cursor =
           {

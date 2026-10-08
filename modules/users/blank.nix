@@ -32,7 +32,8 @@
         users.users."${user}" = {
           shell = self.packages.${pkgs.stdenv.hostPlatform.system}.zsh;
 
-          hashedPasswordFile = config.sops.secrets."users/${user}/password-hash".path;
+          # NOTE: We use lib.mkDefault so that we can override it in the VM!
+          hashedPasswordFile = lib.mkDefault config.sops.secrets."users/${user}/password-hash".path;
           isNormalUser = true;
 
           extraGroups = [
