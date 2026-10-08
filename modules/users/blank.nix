@@ -4,20 +4,25 @@
       nixosModule = user: {
         config,
         pkgs,
+        lib,
         ...
-      }: {
+      }: let
+        niri = self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
+          audio = true;
+          brightness = true;
+          terminal = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty}";
+          launcher = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun}";
+
+          screenshots = {
+            path = "~/Pictures/Screenshots/";
+            format = "screenshot_%Y-%m-%d_%Hh%Mm%Ss.png";
+          };
+        };
+      in {
         imports = [
           self.nixosModules.steam
           self.nixosModules.niri
         ];
-
-        core = {
-          unfree = {
-            packages = [
-              "obsidian"
-            ];
-          };
-        };
 
         sops.secrets."users/${user}/password-hash" = {
           sopsFile = ../../secrets/users/. + "/${user}.yaml";
@@ -38,15 +43,19 @@
           ];
         };
 
+        modules = {
+          greeter = {
+            "${user}" = "${lib.getExe' niri "niri-session"}";
+          };
+        };
+
+        systemd.packages = [niri];
+
         # NOTE: This is required for zsh's autocompletions to work.
         environment.pathsToLink = ["/share/zsh"];
       };
 
-      homeModule = user: {
-        lib,
-        pkgs,
-        ...
-      }: {
+      homeModule = user: {pkgs, ...}: {
         imports = with self.homeModules; [
           greeter
           networkingTrayService
@@ -62,24 +71,6 @@
         services = {
           nextcloud-client = {
             enable = true;
-          };
-        };
-
-        modules = {
-          greeter = {
-            cmd = "${lib.getExe' (
-              self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
-                audio = true;
-                brightness = true;
-                terminal = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty}";
-                launcher = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun}";
-
-                screenshots = {
-                  path = "~/Pictures/Screenshots/";
-                  format = "screenshot_%Y-%m-%d_%Hh%Mm%Ss.png";
-                };
-              }
-            ) "niri-session"}";
           };
         };
 
@@ -112,7 +103,6 @@
 
         home = {
           packages = [
-            pkgs.obsidian
             self.packages.${pkgs.stdenv.hostPlatform.system}.nvim
           ];
           stateVersion = "26.11";

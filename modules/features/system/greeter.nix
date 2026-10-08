@@ -9,19 +9,14 @@
       options = {
         modules = {
           greeter = {
-            commands = lib.mkOption {
-              type = lib.types.listOf (lib.types.submodule {
-                options = {
-                  user = lib.mkOption {
-                    type = lib.types.nonEmptyStr;
-                  };
-
-                  cmd = lib.mkOption {
-                    type = lib.types.nonEmptyStr;
-                    description = "The command that will be run for this user.";
-                  };
+            users = lib.mkOption {
+              type = lib.types.attrsOf (lib.types.submodule {
+                options.cmd = lib.mkOption {
+                  type = lib.types.nonEmptyStr;
+                  description = "The command that will be run for this user.";
                 };
               });
+              default = {};
             };
           };
         };
@@ -75,7 +70,10 @@
               };
 
               default_session = let
-                commands = map (command: "${command.user}) exec ${command.cmd} ;;") allCommands;
+                commands =
+                  lib.mapAttrsToList
+                  (user: userCfg: "${lib.escapeShellArg user}) exec ${userCfg.cmd} ;;")
+                  cfg.users;
 
                 chooser = pkgs.writeShellScript "session-chooser" ''
                   case "$(id -un)" in
