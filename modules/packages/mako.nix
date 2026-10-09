@@ -80,7 +80,7 @@
 
         Service = {
           Type = "simple";
-          ExecStart = "${lib.getExe' self.packages.${pkgs.stdenv.hostPlatform.system}.mako "mako"}";
+          ExecStart = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.mako}";
           Restart = "on-failure";
           RestartSec = "1s";
           KillMode = "process";

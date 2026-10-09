@@ -4,7 +4,7 @@
       modules = [
         self.nixosModules.zaratul
         self.nixosModules.zaratulHardware
-        ({lib, ...}: {
+        {
           virtualisation.vmVariant = {
             virtualisation = {
               memorySize = 4096;
@@ -18,11 +18,8 @@
 
           hardware.graphics.enable = true;
 
-          users.users.blank = {
-            hashedPasswordFile = lib.mkForce null;
-            password = "test";
-          };
-        })
+          core.host.type = "vm";
+        }
       ];
     };
 

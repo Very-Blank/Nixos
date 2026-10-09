@@ -24,7 +24,7 @@
           self.nixosModules.niri
         ];
 
-        sops.secrets."users/${user}/password-hash" = {
+        sops.secrets."users/${user}/password-hash" = lib.mkIf (config.core.host.type == "live") {
           sopsFile = ../../secrets/users/. + "/${user}.yaml";
           neededForUsers = true;
         };
@@ -32,8 +32,9 @@
         users.users."${user}" = {
           shell = self.packages.${pkgs.stdenv.hostPlatform.system}.zsh;
 
-          # NOTE: We use lib.mkDefault so that we can override it in the VM!
-          hashedPasswordFile = lib.mkDefault config.sops.secrets."users/${user}/password-hash".path;
+          hashedPasswordFile = lib.mkIf (config.core.host.type == "live") config.sops.secrets."users/${user}/password-hash".path;
+          password = lib.mkIf (config.core.host.type == "vm") "test";
+
           isNormalUser = true;
 
           extraGroups = [
@@ -63,6 +64,7 @@
           anyrunService
           waybarService
           makoService
+          swaybgService
           gtk
           firefox
           obs
@@ -105,6 +107,7 @@
           packages = [
             self.packages.${pkgs.stdenv.hostPlatform.system}.nvim
           ];
+
           stateVersion = "26.11";
         };
       };

@@ -13,6 +13,10 @@
         package = pkgs.nerd-fonts._0xproto;
         family = "0xProto Nerd Font";
       },
+      icons ? {
+        package = pkgs.papirus-icon-theme;
+        theme = "Papirus";
+      },
       features ? [
         "audio"
         "backlight"
@@ -36,6 +40,13 @@
       });
 
       fontConfig = self.lib.mkFontsConf pkgs font.package;
+
+      gtk3 = pkgs.writeText "gtk-3.0/settings.ini" ''
+        [Settings]
+        gtk-application-prefer-dark-theme=true
+        gtk-icon-theme-name=${icons.theme}
+        gtk-interface-color-scheme=dark
+      '';
     in (pkgs.symlinkJoin {
       name = "waybar";
       paths = [pkgs.waybar];
@@ -52,10 +63,13 @@
             "--add-flags \"${lib.strings.concatStringsSep " " flags}\""
           ]
           ++ (
-            lib.optional
-            (font != null)
+            lib.optional (font != null)
             "--set FONTCONFIG_FILE ${fontConfig}"
           )
+          ++ lib.optionals (icons != null) [
+            "--prefix XDG_DATA_DIRS : ${icons.package}/share"
+            "--prefix XDG_CONFIG_DIRS : ${gtk3}"
+          ]
         );
 
       meta.mainProgram = "waybar";

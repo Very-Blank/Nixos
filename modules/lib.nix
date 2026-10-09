@@ -13,11 +13,16 @@
               self.nixosModules.host
               self.nixosModules.home
               self.nixosModules.unfree
-              {
-                sops = {
+              ({
+                config,
+                lib,
+                ...
+              }: {
+                # NOTE: For VM's secrects aren't enabled.
+                sops = lib.mkIf (config.core.host.type == "live") {
                   age.keyFile = "/var/lib/sops/age/keys.txt";
                 };
-              }
+              })
             ]
             ++ modules;
         };

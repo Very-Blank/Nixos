@@ -188,7 +188,7 @@
 
         Service = {
           Type = "simple";
-          ExecStart = "${lib.getExe' self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun "anyrun"} deamon";
+          ExecStart = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun} daemon";
           Restart = "on-failure";
           RestartSec = "1s";
           KillMode = "process";
