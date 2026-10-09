@@ -18,7 +18,7 @@
       cursor ? {
         package = pkgs.bibata-cursors;
         theme = "Bibata-Modern-Classic";
-        size = 12;
+        size = 13;
       },
     }: let
       kdlConfig = inputs.niri.lib.validatedConfigFor pkgs.niri (inputs.niri.lib.mkNiriKDL (self.settings.niri {
@@ -50,7 +50,7 @@
         ExecStart=@niri@ --session
       '';
 
-      defaultCursorTheme = pkgs.writeTextDir "share/icons/default/index.theme" ''
+      cursorTheme = pkgs.writeTextDir "share/icons/default/index.theme" ''
         [Icon Theme]
         Name=Default
         Comment=Default cursor theme
@@ -62,7 +62,7 @@
       buildInputs = [pkgs.makeWrapper];
       postBuild = ''
         wrapProgram $out/bin/niri --add-flags "--config ${kdlConfig}" \
-            --set XCURSOR_PATH ${defaultCursorTheme}/share/icons:${cursor.package}/share/icons \
+            --set XCURSOR_PATH ${cursorTheme}/share/icons:${cursor.package}/share/icons \
             --set XCURSOR_THEME ${cursor.theme} \
             --set XCURSOR_SIZE ${toString cursor.size}
 
@@ -73,34 +73,6 @@
 
       meta.mainProgram = "niri";
     })) {};
-
-    packages.xwayland-satellite = lib.makeOverridable ({
-      cursor ? {
-        package = pkgs.bibata-cursors;
-        theme = "Bibata-Modern-Classic";
-        size = 12;
-      },
-    }: let
-      defaultCursorTheme = pkgs.writeTextDir "share/icons/default/index.theme" ''
-        [Icon Theme]
-        Name=Default
-        Comment=Default cursor theme
-        Inherits=${cursor.theme}
-      '';
-    in
-      # FIXME: test if the environment variables can be move to the niri config.
-      pkgs.symlinkJoin {
-        name = "xwayland-satellite";
-        paths = [pkgs.xwayland-satellite];
-        nativeBuildInputs = [pkgs.makeWrapper];
-        postBuild = ''
-          wrapProgram $out/bin/xwayland-satellite \
-            --set XCURSOR_PATH ${defaultCursorTheme}/share/icons:${cursor.package}/share/icons \
-            --set XCURSOR_THEME ${cursor.theme} \
-            --set XCURSOR_SIZE ${toString cursor.size}
-        '';
-        meta.mainProgram = "xwayland-satellite";
-      }) {};
   };
 
   flake = {
@@ -166,6 +138,11 @@
             xcursor-size = cursor.size;
           };
 
+        window-rule = {
+          geometry-corner-radius = 4;
+          clip-to-geometry = true;
+        };
+
         layout = let
           palette = inputs.colors.lib.withHash self.globals.theme.palette;
         in {
@@ -183,6 +160,8 @@
           };
 
           focus-ring = {
+            width = 3;
+
             active-gradient._props = {
               to = "${palette.base0E}";
               from = "${palette.base0D}";
@@ -194,7 +173,7 @@
 
           tab-indicator = {
             width = 4;
-            gap = 4;
+            gap = 2;
             position = "top";
             place-within-column = true;
 
