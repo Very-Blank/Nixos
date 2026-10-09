@@ -4,7 +4,7 @@
     pkgs,
     ...
   }: {
-    packages.ghostty = lib.makeOverridable ({background ? ../../resources/wallpapers/nixos-logo-ascii.png}: let
+    packages.swaybg = lib.makeOverridable ({background ? ../../resources/wallpapers/nixos-logo-ascii.png}: let
     in (pkgs.symlinkJoin {
       name = "swaybg";
       paths = [pkgs.swaybg];
