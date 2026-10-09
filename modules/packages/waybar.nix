@@ -41,12 +41,31 @@
 
       fontConfig = self.lib.mkFontsConf pkgs font.package;
 
-      gtk3 = pkgs.writeText "gtk-3.0/settings.ini" ''
-        [Settings]
-        gtk-application-prefer-dark-theme=true
-        gtk-icon-theme-name=${icons.theme}
-        gtk-interface-color-scheme=dark
-      '';
+      gsettings = let
+        schemas = pkgs.gsettings-desktop-schemas;
+        deps = [
+          "org.gnome.desktop.enums.xml"
+          "org.gnome.desktop.interface.gschema.xml"
+        ];
+      in
+        pkgs.runCommand "waybar-gsettings"
+        {
+          gschema = ''
+            [org.gnome.desktop.interface]
+            icon-theme='${icons.theme}'
+          '';
+
+          passAsFile = ["gschema"];
+          nativeBuildInputs = [
+            pkgs.glib
+          ];
+        }
+        ''
+          mkdir -p $out/
+          cp ${schemas}/share/gsettings-schemas/${schemas.name}/glib-2.0/schemas/{${lib.strings.concatStringsSep "," deps}} $out/
+          cp $gschemaPath $out/waybar.gschema.override
+          glib-compile-schemas --strict $out
+        '';
     in (pkgs.symlinkJoin {
       name = "waybar";
       paths = [pkgs.waybar];
@@ -68,7 +87,8 @@
           )
           ++ lib.optionals (icons != null) [
             "--prefix XDG_DATA_DIRS : ${icons.package}/share"
-            "--prefix XDG_CONFIG_DIRS : ${gtk3}"
+            "--set GSETTINGS_SCHEMA_DIR ${gsettings}"
+            "--set GSETTINGS_BACKEND memory"
           ]
         );
 
