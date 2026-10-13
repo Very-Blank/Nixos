@@ -7,6 +7,9 @@
   config = {
     hostname = "hermes";
 
+    services.upower.enable = true;
+    services.power-profiles-daemon.enable = true;
+
     modules = {
       terminal = {
         tmux.enable = true;
