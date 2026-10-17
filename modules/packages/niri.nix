@@ -64,7 +64,7 @@
       buildInputs = [pkgs.makeWrapper];
       postBuild = ''
         wrapProgram $out/bin/niri --add-flags "--config ${kdlConfig}" \
-            --set NIXOS_OZONE_WL 1
+            --set NIXOS_OZONE_WL 1 \
             --set XCURSOR_PATH ${cursorTheme}/share/icons:${cursor.package}/share/icons \
             --set XCURSOR_THEME ${cursor.theme} \
             --set XCURSOR_SIZE ${toString cursor.size}
