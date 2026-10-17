@@ -92,10 +92,25 @@
         ];
       };
 
+      services = {
+        gnome = {
+          gnome-keyring = {
+            enable = true;
+          };
+        };
+
+        dbus = {
+          packages = [
+            pkgs.nautilus
+          ];
+        };
+      };
+
       xdg.portal = {
         xdgOpenUsePortal = true;
+
         extraPortals = [
-          pkgs.xdg-desktop-portal-gtk
+          pkgs.xdg-desktop-portal-gnome
         ];
       };
     };

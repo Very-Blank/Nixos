@@ -75,10 +75,6 @@
           nextcloud-client = {
             enable = true;
           };
-
-          gnome-keyring = {
-            enable = true;
-          };
         };
 
         xdg = {
@@ -118,7 +114,6 @@
 
         home = {
           packages = [
-            pkgs.gcr
             self.packages.${pkgs.stdenv.hostPlatform.system}.nvim
             (self.packages.${pkgs.stdenv.hostPlatform.system}.git.override {
               user = {
