@@ -48,6 +48,38 @@
       core = {
         host = {
           name = "zaratul";
+
+          outputs = {
+            "PNP(AOC) 2590G5 0x00002709" = {
+              mode = {
+                width = 1920;
+                height = 1080;
+                refresh = 74.973;
+              };
+
+              position = {
+                x = 2327;
+                y = 0;
+              };
+            };
+
+            "PNP(AOC) Q27G3XMN 1APRBJA000045" = {
+              main = true;
+
+              mode = {
+                width = 2560;
+                height = 1440;
+                refresh = 180.002;
+              };
+
+              scale = 1.1;
+
+              position = {
+                x = 0;
+                y = 0;
+              };
+            };
+          };
         };
       };
 

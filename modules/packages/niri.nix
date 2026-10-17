@@ -10,6 +10,7 @@
   }: {
     packages.niri = lib.makeOverridable ({
       spawnAtStartUp ? [],
+      outputs ? null,
       terminal ? null,
       launcher ? null,
       screenshots ? null,
@@ -24,6 +25,7 @@
       kdlConfig = inputs.niri.lib.validatedConfigFor pkgs.niri (inputs.niri.lib.mkNiriKDL (self.settings.niri {
         inherit lib;
         inherit pkgs;
+        inherit outputs;
         inherit spawnAtStartUp;
         inherit terminal;
         inherit launcher;
@@ -102,6 +104,7 @@
     settings.niri = {
       lib,
       pkgs,
+      outputs ? null,
       spawnAtStartUp ? [],
       terminal ? null,
       launcher ? null,
@@ -286,6 +289,30 @@
       }
       // (lib.optionalAttrs (screenshots != null) {
         screenshot-path = "${screenshots.path}${screenshots.format}";
-      });
+      })
+      // (
+        lib.optionalAttrs (outputs != null && outputs != {})
+        {
+          output =
+            lib.mapAttrsToList (
+              name: settings: ({
+                  _args = [name];
+
+                  mode = "${lib.toString settings.mode.width}x${lib.toString settings.mode.height}@${lib.toString settings.mode.refresh}";
+
+                  position._props = {
+                    x = settings.position.x;
+                    y = settings.position.y;
+                  };
+
+                  scale = settings.scale;
+                }
+                // lib.optionalAttrs settings.main {
+                  focus-at-startup = [];
+                })
+            )
+            outputs;
+        }
+      );
   };
 }

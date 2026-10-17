@@ -8,6 +8,7 @@
         ...
       }: let
         niri = self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
+          outputs = config.core.host.outputs;
           audio = true;
           brightness = true;
           terminal = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty}";
