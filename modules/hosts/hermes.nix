@@ -40,6 +40,25 @@
         blank
       ];
 
+      users = {
+        mutableUsers = false;
+      };
+
+      programs = {
+        nano.enable = false;
+        vim.enable = true;
+      };
+
+      environment.systemPackages = [
+        pkgs.wget
+        pkgs.unzip
+      ];
+
+      services = {
+        upower.enable = true;
+        power-profiles-daemon.enable = true;
+      };
+
       core = {
         host = {
           name = "hermes";
@@ -58,24 +77,6 @@
         };
       };
 
-      users = {
-        mutableUsers = false;
-      };
-
-      programs = {
-        nano.enable = false;
-        vim.enable = true;
-      };
-
-      environment.systemPackages = [
-        pkgs.wget
-        pkgs.unzip
-      ];
-
-      system = {
-        stateVersion = "26.11";
-      };
-
       nix = {
         settings.experimental-features = [
           "nix-command"
@@ -87,6 +88,10 @@
           dates = "weekly";
           options = "--delete-older-than 2d";
         };
+      };
+
+      system = {
+        stateVersion = "26.11";
       };
     };
 
