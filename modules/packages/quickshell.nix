@@ -4,7 +4,7 @@
   ...
 }: {
   perSystem = {pkgs, ...}: {
-    packages.quickshell = inputs.quickshell.packages.${pkgs.stdenv.hostPlatform.system};
+    packages.quickshell = inputs.quickshell.packages.${pkgs.stdenv.hostPlatform.system}.default;
   };
 
   flake = {

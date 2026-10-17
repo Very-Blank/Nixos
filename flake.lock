@@ -273,11 +273,11 @@
         "quickshell": "quickshell_2"
       },
       "locked": {
-        "lastModified": 1792235707,
-        "narHash": "sha256-mk82tMjf038N0N5bfe4Xln3aX2SxQ3IB9qfxv8AtvRI=",
+        "lastModified": 1792236116,
+        "narHash": "sha256-KoNod/7XEgixqEx/0vfB7q+EB53SlOEr+e0dyyItkCs=",
         "owner": "Very-Blank",
         "repo": "QuickShellBar",
-        "rev": "c39b91151aecf45f008fef4d7251ad8b8976bcaf",
+        "rev": "63b43e04a04f9102917d0f746feb7dec14ea03cc",
         "type": "github"
       },
       "original": {
