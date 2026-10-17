@@ -61,8 +61,8 @@
         imports = with self.homeModules; [
           networkingTrayService
           bluetoothTrayService
+          quickshellService
           anyrunService
-          waybarService
           makoService
           swaybgService
           gtk
