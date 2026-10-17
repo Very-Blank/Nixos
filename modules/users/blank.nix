@@ -78,6 +78,7 @@
 
           gnome-keyring = {
             enable = true;
+            components = ["secrets"];
           };
         };
 
