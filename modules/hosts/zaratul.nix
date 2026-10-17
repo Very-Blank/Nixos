@@ -116,9 +116,8 @@
     };
 
     nixosModules.zaratulHardware = {
-      config,
       lib,
-      pkgs,
+      config,
       modulesPath,
       ...
     }: {

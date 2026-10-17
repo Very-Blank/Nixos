@@ -64,10 +64,12 @@
                           x = lib.mkOption {
                             type = lib.types.int;
                             description = "Display position in pixels";
+                            default = 0;
                           };
                           y = lib.mkOption {
                             type = lib.types.int;
                             description = "Display position in pixels";
+                            default = 0;
                           };
                         };
                       };
