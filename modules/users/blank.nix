@@ -85,6 +85,32 @@
           };
         };
 
+        programs.ssh = {
+          enable = true;
+
+          enableDefaultConfig = false;
+
+          settings = {
+            "github.com" = {
+              HostName = "github.com";
+              User = "very-blank";
+              IdentityFile = "~/.ssh/github";
+            };
+
+            "taildevourer.com" = {
+              HostName = "taildevourer.com";
+              User = "blank";
+              IdentityFile = "~/.ssh/taildevourer";
+            };
+
+            "gitlab.jyu.fi" = {
+              HostName = "gitlab.jyu.fi";
+              User = "blank";
+              IdentityFile = "~/.ssh/gitlab";
+            };
+          };
+        };
+
         home = {
           packages = [
             self.packages.${pkgs.stdenv.hostPlatform.system}.nvim
@@ -95,30 +121,6 @@
               };
             })
           ];
-
-          programs.ssh = {
-            enable = true;
-
-            settings = {
-              "github.com" = {
-                HostName = "github.com";
-                User = "very-blank";
-                IdentityFile = "~/.ssh/github";
-              };
-
-              "taildevourer.com" = {
-                HostName = "taildevourer.com";
-                User = "blank";
-                IdentityFile = "~/.ssh/taildevourer";
-              };
-
-              "gitlab.jyu.fi" = {
-                HostName = "gitlab.jyu.fi";
-                User = "blank";
-                IdentityFile = "~/.ssh/gitlab";
-              };
-            };
-          };
 
           stateVersion = "26.11";
         };
