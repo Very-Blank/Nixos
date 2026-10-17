@@ -75,6 +75,10 @@
           nextcloud-client = {
             enable = true;
           };
+
+          gnome-keyring = {
+            enable = true;
+          };
         };
 
         xdg = {
@@ -85,28 +89,30 @@
           };
         };
 
-        programs.ssh = {
-          enable = true;
+        programs = {
+          ssh = {
+            enable = true;
 
-          enableDefaultConfig = false;
+            enableDefaultConfig = false;
 
-          settings = {
-            "github.com" = {
-              HostName = "github.com";
-              User = "very-blank";
-              IdentityFile = "~/.ssh/github";
-            };
+            settings = {
+              "github.com" = {
+                HostName = "github.com";
+                User = "very-blank";
+                IdentityFile = "~/.ssh/github";
+              };
 
-            "taildevourer.com" = {
-              HostName = "taildevourer.com";
-              User = "blank";
-              IdentityFile = "~/.ssh/taildevourer";
-            };
+              "taildevourer.com" = {
+                HostName = "taildevourer.com";
+                User = "blank";
+                IdentityFile = "~/.ssh/taildevourer";
+              };
 
-            "gitlab.jyu.fi" = {
-              HostName = "gitlab.jyu.fi";
-              User = "blank";
-              IdentityFile = "~/.ssh/gitlab";
+              "gitlab.jyu.fi" = {
+                HostName = "gitlab.jyu.fi";
+                User = "blank";
+                IdentityFile = "~/.ssh/gitlab";
+              };
             };
           };
         };
