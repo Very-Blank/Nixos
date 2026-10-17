@@ -32,13 +32,13 @@
         (lib.optionalString (extraConfig != null) extraConfig)
       ];
 
-      configFile = pkgs.writeTextDir "git/config" config;
+      configFile = pkgs.writeText "config" config;
     in (pkgs.symlinkJoin {
       name = "git";
       paths = [pkgs.git];
       buildInputs = [pkgs.makeWrapper];
       postBuild = ''
-        wrapProgram $out/bin/git --add-flags "-C ${configFile}"
+        wrapProgram $out/bin/git --set GIT_CONFIG_GLOBAL ${configFile}
       '';
 
       meta = {
