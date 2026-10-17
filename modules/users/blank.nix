@@ -103,7 +103,6 @@
         programs = {
           ssh = {
             enable = true;
-            start-agent = true;
             enableDefaultConfig = false;
 
             settings = {
