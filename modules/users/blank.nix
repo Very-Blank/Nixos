@@ -52,6 +52,16 @@
           };
         };
 
+        security = {
+          pam = {
+            services = {
+              greetd = {
+                enableGnomeKeyring = true;
+              };
+            };
+          };
+        };
+
         systemd.packages = [niri];
 
         # NOTE: This is required for zsh's autocompletions to work.
@@ -78,7 +88,7 @@
 
           gnome-keyring = {
             enable = true;
-            components = ["secrets"];
+            components = ["secrets" "ssh"];
           };
         };
 
@@ -93,7 +103,7 @@
         programs = {
           ssh = {
             enable = true;
-
+            startAgent = true;
             enableDefaultConfig = false;
 
             settings = {
