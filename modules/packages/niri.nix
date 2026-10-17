@@ -95,7 +95,6 @@
       xdg.portal = {
         xdgOpenUsePortal = true;
         extraPortals = [
-          pkgs.xdg-desktop-portal-gnome
           pkgs.xdg-desktop-portal-gtk
         ];
       };

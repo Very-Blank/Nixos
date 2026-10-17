@@ -52,16 +52,6 @@
           };
         };
 
-        security = {
-          pam = {
-            services = {
-              greetd = {
-                enableGnomeKeyring = true;
-              };
-            };
-          };
-        };
-
         systemd.packages = [niri];
 
         # NOTE: This is required for zsh's autocompletions to work.
@@ -88,7 +78,6 @@
 
           gnome-keyring = {
             enable = true;
-            components = ["secrets" "ssh"];
           };
         };
 
@@ -129,6 +118,7 @@
 
         home = {
           packages = [
+            pkgs.gcr
             self.packages.${pkgs.stdenv.hostPlatform.system}.nvim
             (self.packages.${pkgs.stdenv.hostPlatform.system}.git.override {
               user = {
