@@ -155,6 +155,14 @@
             xcursor-size = cursor.size;
           };
 
+        input = {
+          touchpad = {
+            tap = [];
+            natural-scroll = [];
+            dwt = [];
+          };
+        };
+
         window-rule = {
           geometry-corner-radius = 4;
           clip-to-geometry = true;
