@@ -48,7 +48,15 @@
 
         modules = {
           greeter = {
-            users."${user}" = "${lib.getExe' niri "niri-session"}";
+            users."${user}" = let
+              niri-session = pkgs.writeShellScript "niri-session" ''
+                if systemctl --user -q is-active niri.service; then
+                  systemctl --user stop niri.service
+                fi
+
+                exec ${lib.getExe' niri "niri-session"}
+              '';
+            in "${niri-session}";
           };
         };
 
