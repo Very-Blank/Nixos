@@ -93,33 +93,6 @@
           };
         };
 
-        programs = {
-          ssh = {
-            enable = true;
-            enableDefaultConfig = false;
-
-            settings = {
-              "github.com" = {
-                HostName = "github.com";
-                User = "very-blank";
-                IdentityFile = "~/.ssh/github";
-              };
-
-              "taildevourer.com" = {
-                HostName = "taildevourer.com";
-                User = "blank";
-                IdentityFile = "~/.ssh/taildevourer";
-              };
-
-              "gitlab.jyu.fi" = {
-                HostName = "gitlab.jyu.fi";
-                User = "blank";
-                IdentityFile = "~/.ssh/gitlab";
-              };
-            };
-          };
-        };
-
         home = {
           packages = [
             self.packages.${pkgs.stdenv.hostPlatform.system}.nvim
@@ -128,6 +101,30 @@
                 email = "aapeli.saarelainen.76@gmail.com";
                 name = "very-blank";
               };
+            })
+            (self.packages.${pkgs.stdenv.hostPlatform.system}.ssh.override {
+              settings = [
+                {
+                  match = "github.com";
+                  name = "github.com";
+                  user = "very-blank";
+                  identityFile = "~/.ssh/github";
+                }
+
+                {
+                  match = "taildevourer.com";
+                  name = "taildevourer.com";
+                  identityFile = "~/.ssh/taildevourer";
+                  user = "blank";
+                }
+
+                {
+                  match = "gitlab.jyu.fi";
+                  name = "gitlab.jyu.fi";
+                  identityFile = "~/.ssh/gitlab";
+                  user = "blank";
+                }
+              ];
             })
           ];
 

@@ -10,8 +10,8 @@
   }: {
     packages.ghostty = lib.makeOverridable ({
       cellAdjust ? {
-        height = "-10%";
-        width = "-10%";
+        height = "-25%";
+        width = "-20%";
       },
       title ? "Ghostty",
       font ? {
