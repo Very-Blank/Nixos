@@ -21,7 +21,9 @@
         };
 
         Service = {
-          ExecStart = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.quickshell}";
+          ExecStart = "${lib.getExe (self.packages.${pkgs.stdenv.hostPlatform.system}.quickshell.override {
+            palette = inputs.colors.lib.withHash self.globals.theme.palette;
+          })}";
           Restart = "on-failure";
           RestartSec = "1s";
           KillMode = "process";
