@@ -129,7 +129,7 @@
                 }
 
                 {
-                  file = ".ssh/gitlab.pub";
+                  file = ".ssh/gitlab";
                   mode = "600";
                 }
                 {
