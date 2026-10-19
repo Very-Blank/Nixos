@@ -106,12 +106,36 @@
                 "Downloads"
                 "Pictures"
                 ".mozilla"
+                ".ssh/know_hosts"
               ];
 
               files = [
-                ".ssh/github"
-                ".ssh/taildevourer"
-                ".ssh/gitlab"
+                {
+                  file = ".ssh/github";
+                  mode = "600";
+                }
+                {
+                  file = ".ssh/github.pub";
+                  mode = "644";
+                }
+
+                {
+                  file = ".ssh/taildevourer";
+                  mode = "600";
+                }
+                {
+                  file = ".ssh/taildevourer.pub";
+                  mode = "644";
+                }
+
+                {
+                  file = ".ssh/gitlab.pub";
+                  mode = "600";
+                }
+                {
+                  file = ".ssh/gitlab.pub";
+                  mode = "644";
+                }
               ];
             };
           };
