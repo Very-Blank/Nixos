@@ -15,6 +15,11 @@
               self.nixosModules.host
               self.nixosModules.home
               self.nixosModules.unfree
+              ({...}: {
+                security.sudo.extraConfig = ''
+                  Defaults lecture="never"
+                '';
+              })
             ]
             ++ modules;
         };
