@@ -1,6 +1,6 @@
 {inputs, ...}: {
   flake = {
-    nixosModules.disk = {
+    nixosModules.disko = {
       lib,
       config,
       ...
