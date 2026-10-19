@@ -107,9 +107,12 @@
                 "Pictures"
                 ".mozilla"
                 ".ssh/know_hosts"
+                ".local/share/keyrings"
+                ".local/share/Nextcloud"
               ];
 
               files = [
+                ".zsh_history"
                 {
                   file = ".ssh/github";
                   mode = "600";
