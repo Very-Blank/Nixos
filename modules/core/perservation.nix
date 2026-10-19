@@ -22,7 +22,10 @@
               "/var/lib/systemd/coredump"
               "/var/lib/systemd/random-seed"
               "/etc/NetworkManager/system-connections"
-              "/tmp"
+              {
+                directory = "/tmp";
+                mode = "1777";
+              }
               {
                 directory = "/var/lib/nixos";
                 inInitrd = true;
