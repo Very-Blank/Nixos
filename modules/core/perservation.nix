@@ -17,8 +17,10 @@
             directories = [
               "/var/log"
               "/var/lib/bluetooth"
-              "/var/lib/nixos"
+              "/var/lib/NetworkManager"
+              "/var/lib/systemd/timers"
               "/var/lib/systemd/coredump"
+              "/var/lib/systemd/random-seed"
               "/etc/NetworkManager/system-connections"
               "/tmp"
               {
@@ -31,6 +33,7 @@
               {
                 file = "/var/lib/sops/age/keys.txt";
                 inInitrd = true;
+                mode = "0600";
               }
               {
                 file = "/etc/machine-id";
