@@ -75,6 +75,10 @@
             };
           };
         };
+
+        disko = {
+          diskId = "nvme-Samsung_SSD_980_500GB_S78GNL0Y338093Z";
+        };
       };
 
       nix = {

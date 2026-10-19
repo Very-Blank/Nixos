@@ -10,8 +10,8 @@
       options = {
         core = {
           disko = {
-            uuid = lib.mkOption {
-              description = "The uuid of the main disk used for the nixos install.";
+            diskId = lib.mkOption {
+              description = "The id of the main disk used for the nixos install.";
               type = lib.types.nonEmptyStr;
             };
           };
@@ -38,7 +38,7 @@
           };
 
           disk.main = {
-            device = "/dev/disk/by-uuid/${cfg.uuid}";
+            device = "/dev/disk/by-id/${cfg.diskId}";
             type = "disk";
 
             content = {
