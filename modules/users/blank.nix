@@ -44,56 +44,7 @@
             "input"
             "audio"
           ];
-        };
 
-        modules = {
-          greeter = {
-            users."${user}" = let
-              niri-session = pkgs.writeShellScript "niri-session" ''
-                if systemctl --user -q is-active niri.service; then
-                  systemctl --user stop niri.service
-                fi
-
-                exec ${lib.getExe' niri "niri-session"}
-              '';
-            in "${niri-session}";
-          };
-        };
-
-        systemd.packages = [niri];
-
-        # NOTE: This is required for zsh's autocompletions to work.
-        environment.pathsToLink = ["/share/zsh"];
-      };
-
-      homeModule = user: {pkgs, ...}: {
-        imports = with self.homeModules; [
-          networkingTrayService
-          bluetoothTrayService
-          quickshellService
-          anyrunService
-          swaybgService
-          makoService
-          gtk
-          firefox
-          obs
-        ];
-
-        services = {
-          nextcloud-client = {
-            enable = true;
-          };
-        };
-
-        xdg = {
-          enable = true;
-
-          userDirs = {
-            createDirectories = true;
-          };
-        };
-
-        home = {
           packages = [
             self.packages.${pkgs.stdenv.hostPlatform.system}.nvim
             (self.packages.${pkgs.stdenv.hostPlatform.system}.git.override {
@@ -127,7 +78,78 @@
               ];
             })
           ];
+        };
 
+        modules = {
+          greeter = {
+            users."${user}" = let
+              niri-session = pkgs.writeShellScript "niri-session" ''
+                if systemctl --user -q is-active niri.service; then
+                  systemctl --user stop niri.service
+                fi
+
+                exec ${lib.getExe' niri "niri-session"}
+              '';
+            in "${niri-session}";
+          };
+        };
+
+        systemd.packages = [niri];
+
+        preservation = {
+          preserveAt."/persistent" = {
+            users.${user} = {
+              directories = [
+                "Nix"
+                "Projects"
+                "Nextcloud"
+                "Downloads"
+                "Pictures"
+                ".mozilla"
+              ];
+
+              files = [
+                ".ssh/github"
+                ".ssh/taildevourer"
+                ".ssh/gitlab"
+              ];
+            };
+          };
+        };
+
+        # NOTE: This is required for zsh's autocompletions to work.
+        # FIXME: Move this else where?
+        environment.pathsToLink = ["/share/zsh"];
+      };
+
+      homeModule = user: {...}: {
+        imports = with self.homeModules; [
+          networkingTrayService
+          bluetoothTrayService
+          quickshellService
+          anyrunService
+          swaybgService
+          makoService
+          gtk
+          firefox
+          obs
+        ];
+
+        services = {
+          nextcloud-client = {
+            enable = true;
+          };
+        };
+
+        xdg = {
+          enable = true;
+
+          userDirs = {
+            createDirectories = true;
+          };
+        };
+
+        home = {
           stateVersion = "26.11";
         };
       };
