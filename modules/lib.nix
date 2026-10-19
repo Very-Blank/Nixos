@@ -10,6 +10,7 @@
           modules =
             [
               self.nixosModules.sops
+              self.nixosModules.disko
               self.nixosModules.perservation
               self.nixosModules.host
               self.nixosModules.home
