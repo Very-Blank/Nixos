@@ -318,8 +318,8 @@
         --gnome-window-background: ${theme.base00};
         --gnome-window-color: ${theme.base05};
         --gnome-view-background: ${theme.base00};
-        --gnome-sidebar-background: ${theme.base01};
-        --gnome-secondary-sidebar-background: ${theme.base01};
+        --gnome-sidebar-background: ${theme.base01} !important;
+        --gnome-secondary-sidebar-background: ${theme.base01} !important;
 
         /* UI Elements */
         --gnome-entry-background: color-mix(in srgb, ${theme.base01} 40%, ${theme.base02} 100%);
