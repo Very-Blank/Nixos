@@ -19,7 +19,9 @@
           "--add-flags \"${lib.strings.concatStringsSep " " flags}\""
         ];
 
-      meta.mainProgram = "swaybg";
+      meta = {
+        mainProgram = "swaybg";
+      };
     })) {};
   };
 

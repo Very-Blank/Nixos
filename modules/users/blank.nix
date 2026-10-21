@@ -1,18 +1,21 @@
 {self, ...}: {
   flake = {
-    nixosModules.blank = self.lib.mkUserModule "blank" {
-      nixosModule = user: {
-        config,
-        pkgs,
+    nixosModules.blank = let
+      user = "blank";
+    in
+      {
         lib,
+        self',
+        pkgs,
+        config,
         ...
       }: let
-        niri = self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
+        niri = self'.packages.niri.override {
           outputs = config.core.host.outputs;
           audio = true;
           brightness = true;
-          terminal = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty}";
-          launcher = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun}";
+          terminal = "${lib.getExe self'.packages.ghostty}";
+          launcher = "${lib.getExe self'.packages.anyrun}";
 
           screenshots = {
             path = "~/Pictures/Screenshots/";
@@ -31,7 +34,7 @@
         };
 
         users.users."${user}" = {
-          shell = self.packages.${pkgs.stdenv.hostPlatform.system}.zsh;
+          shell = self'.packages.zsh;
 
           hashedPasswordFile = lib.mkIf (config.core.host.type == "live") config.sops.secrets."users/${user}/password-hash".path;
           password = lib.mkIf (config.core.host.type == "vm") "test";
@@ -46,14 +49,15 @@
           ];
 
           packages = [
-            self.packages.${pkgs.stdenv.hostPlatform.system}.nvim
-            (self.packages.${pkgs.stdenv.hostPlatform.system}.git.override {
+            self'.packages.firefox
+            self'.packages.nvim
+            (self'.packages.git.override {
               user = {
                 email = "aapeli.saarelainen.76@gmail.com";
                 name = "very-blank";
               };
             })
-            (self.packages.${pkgs.stdenv.hostPlatform.system}.ssh.override {
+            (self'.packages.ssh.override {
               settings = [
                 {
                   match = "github.com";
@@ -105,7 +109,6 @@
                 "Nextcloud"
                 "Downloads"
                 "Pictures"
-                ".mozilla"
                 ".ssh/know_hosts"
                 ".local/share/keyrings"
                 ".local/share/Nextcloud"
@@ -149,37 +152,35 @@
         environment.pathsToLink = ["/share/zsh"];
       };
 
-      homeModule = user: {...}: {
-        imports = with self.homeModules; [
-          networkingTrayService
-          bluetoothTrayService
-          quickshellService
-          anyrunService
-          swaybgService
-          makoService
-          gtk
-          firefox
-          obs
-        ];
-
-        services = {
-          nextcloud-client = {
-            enable = true;
-          };
-        };
-
-        xdg = {
-          enable = true;
-
-          userDirs = {
-            createDirectories = true;
-          };
-        };
-
-        home = {
-          stateVersion = "26.11";
-        };
-      };
-    };
+    # homeModule = user: {...}: {
+    #   imports = with self.homeModules; [
+    #     networkingTrayService
+    #     bluetoothTrayService
+    #     quickshellService
+    #     anyrunService
+    #     swaybgService
+    #     makoService
+    #     gtk
+    #     obs
+    #   ];
+    #
+    #   services = {
+    #     nextcloud-client = {
+    #       enable = true;
+    #     };
+    #   };
+    #
+    #   xdg = {
+    #     enable = true;
+    #
+    #     userDirs = {
+    #       createDirectories = true;
+    #     };
+    #   };
+    #
+    #   home = {
+    #     stateVersion = "26.11";
+    #   };
+    # };
   };
 }

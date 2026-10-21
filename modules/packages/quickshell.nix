@@ -3,14 +3,14 @@
   inputs,
   ...
 }: {
-  perSystem = {pkgs, ...}: {
-    packages.quickshell = inputs.quickshell.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  perSystem = {inputs', ...}: {
+    packages.quickshell = inputs'.quickshell.packages.default;
   };
 
   flake = {
     homeModules.quickshellService = {
       lib,
-      pkgs,
+      self',
       ...
     }: {
       systemd.user.services.waybar = {
@@ -21,7 +21,7 @@
         };
 
         Service = {
-          ExecStart = "${lib.getExe (self.packages.${pkgs.stdenv.hostPlatform.system}.quickshell.override {
+          ExecStart = "${lib.getExe (self'.packages.quickshell.override {
             palette = inputs.colors.lib.withHash self.globals.theme.palette;
           })}";
           Restart = "on-failure";

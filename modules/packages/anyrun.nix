@@ -153,7 +153,11 @@
         }
       ];
 
-      fontConfig = self.lib.mkFontsConf pkgs font.package;
+      fontsConf = pkgs.makeFontsConf {
+        fontDirectories = [
+          font.package
+        ];
+      };
     in (pkgs.symlinkJoin {
       name = "anyrun";
       paths = [pkgs.anyrun];
@@ -166,7 +170,7 @@
         lib.strings.concatStringsSep " " [
           "wrapProgram $out/bin/anyrun"
           "--add-flags \"${lib.strings.concatStringsSep " " flags}\""
-          "--set FONTCONFIG_FILE ${fontConfig}"
+          "--set FONTCONFIG_FILE ${fontsConf}"
         ];
 
       meta.mainProgram = "anyrun";
@@ -174,7 +178,7 @@
   };
 
   flake = {
-    homeModules.anyrunService = {
+    nixosModules.anyrunService = {
       lib,
       pkgs,
       ...

@@ -1,18 +1,10 @@
-{
-  inputs,
-  lib,
-  ...
-}: {
-  imports = [
-    inputs.home-manager.flakeModules.home-manager
-  ];
-
+{lib, ...}: {
   options = {
     flake = {
-      combinedModules = lib.mkOption {
+      userModules = lib.mkOption {
         type = lib.types.lazyAttrsOf (lib.types.functionTo lib.types.deferredModule);
         default = {};
-        description = "Modules that combined home and nixos modules into one.";
+        description = "Nixos modules that take in user name as input.";
       };
 
       css = lib.mkOption {

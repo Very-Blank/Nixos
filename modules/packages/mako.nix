@@ -45,7 +45,11 @@
         text-color=${palette.base05}
       '';
 
-      fontConfig = self.lib.mkFontsConf pkgs font.package;
+      fontsConf = pkgs.makeFontsConf {
+        fontDirectories = [
+          font.package
+        ];
+      };
     in (pkgs.symlinkJoin {
       name = "mako";
       paths = [pkgs.mako];
@@ -58,7 +62,7 @@
         lib.strings.concatStringsSep " " [
           "wrapProgram $out/bin/mako"
           "--add-flags \"${lib.strings.concatStringsSep " " flags}\""
-          "--set FONTCONFIG_FILE ${fontConfig}"
+          "--set FONTCONFIG_FILE ${fontsConf}"
         ];
 
       meta.mainProgram = "mako";

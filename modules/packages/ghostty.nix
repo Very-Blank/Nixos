@@ -43,7 +43,11 @@
         ''
         + lib.optionalString (extraConfig != null) extraConfig;
 
-      fontConfig = self.lib.mkFontsConf pkgs font.package;
+      fontsConf = pkgs.makeFontsConf {
+        fontDirectories = [
+          font.package
+        ];
+      };
 
       theme = let
         palette = inputs.colors.lib.withHash self.globals.theme.palette;
@@ -88,7 +92,7 @@
           ++ (
             lib.optional
             (font != null)
-            "--set FONTCONFIG_FILE ${fontConfig}"
+            "--set FONTCONFIG_FILE ${fontsConf}"
           )
         );
 

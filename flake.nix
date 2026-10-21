@@ -1,50 +1,33 @@
 {
   description = "My NixOS stuffs";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs = let
+    follows = url: {
+      url = url;
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  in {
+    nixpkgs.url = "https://channels.nixos.org/nixos-unstable/nixexprs.tar.zst";
 
     # NOTE: These should help make things more organized.
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:denful/import-tree";
 
-    sops-nix = {
-      url = "github:Mic92/sops-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    sops-nix = follows "github:Mic92/sops-nix";
 
-    preservation = {
-      url = "github:nix-community/preservation";
-    };
+    preservation.url = "github:nix-community/preservation";
 
-    disko = {
-      url = "github:nix-community/disko";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    disko = follows "github:nix-community/disko";
 
-    home-manager = {
-      url = "github:nix-community/home-manager/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    hjem = follows "https://github.com/feel-co/hjem";
 
-    colors = {
-      url = "github:Very-Blank/colors";
-    };
+    colors.url = "github:Very-Blank/colors";
 
-    sefirah = {
-      url = "github:Very-Blank/Sefirah";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    sefirah = follows "github:Very-Blank/Sefirah";
 
-    quickshell = {
-      url = "github:Very-Blank/QuickShellBar";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    quickshell = follows "github:Very-Blank/QuickShellBar";
 
-    firefox-addons = {
-      url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    firefox-addons = follows "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
 
     firefox-gnome-theme = {
       url = "github:rafaelmardojai/firefox-gnome-theme";
@@ -53,10 +36,7 @@
 
     niri.url = "git+https://codeberg.org/BANanaD3V/niri-nix";
 
-    nixnvim = {
-      url = "github:Very-Blank/NixNvim";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixnvim = follows "github:Very-Blank/NixNvim";
   };
 
   outputs = inputs:

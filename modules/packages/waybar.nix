@@ -39,7 +39,11 @@
         fontWeight = "normal";
       });
 
-      fontConfig = self.lib.mkFontsConf pkgs font.package;
+      fontsConf = pkgs.makeFontsConf {
+        fontDirectories = [
+          font.package
+        ];
+      };
 
       gsettings = let
         schemas = pkgs.gsettings-desktop-schemas;
@@ -83,7 +87,7 @@
           ]
           ++ (
             lib.optional (font != null)
-            "--set FONTCONFIG_FILE ${fontConfig}"
+            "--set FONTCONFIG_FILE ${fontsConf}"
           )
           ++ lib.optionals (icons != null) [
             "--prefix XDG_DATA_DIRS : ${icons.package}/share"
