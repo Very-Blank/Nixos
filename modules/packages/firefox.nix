@@ -95,30 +95,38 @@
         Fingerprinting = true;
       };
 
-      # Keys come from each addon's own addonId, so no hardcoded IDs.
       ExtensionSettings =
         {"*".installation_mode = "blocked";}
         // builtins.listToAttrs (map (addon: {
             name = addon.addonId;
             value = forceInstall addon;
           }) (with addons; [
+            istilldontcareaboutcookies
             floccus
             ublock-origin
             bitwarden
-            # nicothin-space
-            noscript
             leechblock-ng
-            darkreader
           ]));
 
-      "3rdparty".Extensions."uBlock0@raymondhill.net".adminSettings.userSettings = {
-        uiTheme = "dark";
-        uiAccentCustom = true;
-        uiAccentCustom0 = "#${self.globals.theme.palette.base00}";
-        cloudStorageEnabled = false;
+      WebsiteFilter = {
+        Block = ["*://darkreader.org/help/*"];
       };
 
-      # Replaces profiles.default.search (search.json.mozlz4 doesn't exist in a fresh profile)
+      "3rdparty".Extensions = {
+        "${addons.ublock-origin.addonId}".adminSettings.userSettings = {
+          uiTheme = "dark";
+          uiAccentCustom = true;
+          uiAccentCustom0 = "#${self.globals.theme.palette.base0E}";
+          cloudStorageEnabled = false;
+        };
+
+        "${addons.bitwarden.addonId}" = {
+          environment = {
+            base = "https://vault.taildevourer.com";
+          };
+        };
+      };
+
       SearchEngines = {
         Default = "NonAIGoogle";
         Add = [
@@ -146,7 +154,7 @@
         "browser.urlbar.showSearchSuggestionsFirst" = lock false;
         "browser.urlbar.update2.engineAliasRefresh" = lock true;
 
-        # Quiet down the new tab page
+        "browser.newtabpage.activity-stream.default.sites" = lock "";
         "browser.newtabpage.activity-stream.feeds.section.topstories" = lock false;
         "browser.newtabpage.activity-stream.feeds.snippets" = lock false;
         "browser.newtabpage.activity-stream.section.highlights.includePocket" = lock false;
@@ -172,17 +180,16 @@
 
         "middlemouse.paste" = lock false;
         "browser.toolbars.bookmarks.visibility" = lock "never";
+
+        "extensions.InstallTrigger.enabled" = lock false;
       };
     };
 
-    # Firefox with policies.json baked in (this is what replaces programs.firefox.policies)
-    firefoxWithPolicies = pkgs.wrapFirefox pkgs.firefox-unwrapped {
+    firefoxWrapped = pkgs.wrapFirefox pkgs.firefox-unwrapped {
       extraPolicies = policies;
     };
 
-    # Files copied into the fresh temp profile on every launch.
-    # Put user.js, chrome/userChrome.css, etc. here.
-    profileSkeleton = pkgs.linkFarm "firefox-profile-skeleton" [
+    profile = pkgs.linkFarm "firefox-profile-skeleton" [
       {
         name = "user.js";
         path = pkgs.writeText "user.js" ''
@@ -227,24 +234,35 @@
       ];
     };
   in {
-    packages.firefox = pkgs.symlinkJoin {
-      name = "firefox-ephemeral";
-      paths = [firefoxWithPolicies];
-      nativeBuildInputs = [pkgs.makeWrapper];
+    packages = {
+      firefox = pkgs.symlinkJoin {
+        name = "firefox";
+        paths = [firefoxWrapped];
+        postBuild = ''
+          mv $out/bin/firefox $out/bin/.firefox
 
-      # The --run snippets are inlined into the wrapper script, so they run at
-      # launch time and can rewrite "$@" before the final exec.
-      postBuild = ''
-        wrapProgram $out/bin/firefox \
-          --set MOZ_NO_REMOTE 1 \
-          --set FONTCONFIG_FILE ${fontsConf} \
-          --run 'dir="$(mktemp -d -t firefox-profile.XXXXXX)"' \
-          --run 'cp -rL --no-preserve=mode ${profileSkeleton}/. "$dir"' \
-          --run 'set -- --profile "$dir" "$@"'
-      '';
+          cat > $out/bin/firefox << EOF
+          #!${pkgs.runtimeShell}
+          export FONTCONFIG_FILE=${fontsConf}
 
-      meta = {
-        mainProgram = "firefox";
+          dir=\$(mktemp -d -t firefox.XXXXXX)
+          trap 'rm -rf \$dir' EXIT
+
+          cp -rL --no-preserve=mode ${profile}/. "\$dir"
+
+          if [[ "\$#" -ne 0 ]]; then
+            $out/bin/.firefox --profile "\$dir" "\$@"
+          else
+            $out/bin/.firefox --profile "\$dir"
+          fi
+          EOF
+
+          chmod +x $out/bin/firefox
+        '';
+
+        meta = {
+          mainProgram = "firefox";
+        };
       };
     };
   };
