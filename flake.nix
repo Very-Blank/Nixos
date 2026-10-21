@@ -46,6 +46,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    firefox-gnome-theme = {
+      url = "github:rafaelmardojai/firefox-gnome-theme";
+      flake = false;
+    };
+
     niri.url = "git+https://codeberg.org/BANanaD3V/niri-nix";
 
     nixnvim = {
