@@ -101,29 +101,52 @@
   };
 
   flake = {
-    homeModules.waybarService = {
+    userModules.waybarService = user: {
       lib,
       pkgs,
       ...
     }: {
-      systemd.user.services.waybar = {
-        Unit = {
-          Description = "Waybar service";
-          PartOf = "graphical-session.target";
-          After = "graphical-session.target";
-        };
+      hjem.users.${user}.files = let
+        WantedBy = ["graphical-session.target"];
+        name = "waybar.service";
 
-        Service = {
-          ExecStart = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.waybar}";
-          Restart = "on-failure";
-          RestartSec = "1s";
-          KillMode = "process";
-        };
+        unit = self.lib.mkUnitFile pkgs name (
+          {
+            lib,
+            pkgs,
+            ...
+          }: {
+            Unit = {
+              Description = "Waybar service";
+              PartOf = ["graphical-session.target"];
+              After = ["graphical-session.target"];
+            };
 
-        Install = {
-          WantedBy = ["graphical-session.target"];
-        };
-      };
+            Service = {
+              Type = "exec";
+              ExecStart = ["${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.waybar}"];
+              Restart = "on-failure";
+              RestartSec = "1s";
+              KillMode = "process";
+            };
+
+            Install = {
+              inherit WantedBy;
+            };
+          }
+        );
+      in
+        lib.mkMerge (
+          [
+            {
+              ".config/systemd/user/${name}".source = unit;
+              ".config/systemd/user/graphical-session.target.wants/${name}".source = unit;
+            }
+          ]
+          ++ (map
+            (wantedby: {".config/systemd/user/${wantedby}.wants/${name}".source = unit;})
+            WantedBy)
+        );
     };
 
     settings.waybar = {

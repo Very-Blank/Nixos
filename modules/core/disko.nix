@@ -20,77 +20,79 @@
 
       config = let
         cfg = config.core.disko;
-      in {
-        fileSystems = {
-          "/nix".neededForBoot = true;
-          "/persistent".neededForBoot = true;
-        };
-
-        disko.devices = {
-          nodev = {
-            "/" = {
-              fsType = "tmpfs";
-              mountOptions = [
-                "size=25%"
-                "mode=755"
-              ];
-            };
+      in
+        lib.mkIf (config.core.host.type == "live") {
+          fileSystems = {
+            "/nix".neededForBoot = true;
+            "/persistent".neededForBoot = true;
           };
 
-          disk.main = {
-            device = "/dev/disk/by-id/${cfg.diskId}";
-            type = "disk";
-
-            content = {
-              type = "gpt";
+          disko.devices = {
+            nodev = {
+              "/" = {
+                fsType = "tmpfs";
+                mountOptions = [
+                  "size=25%"
+                  "mode=755"
+                ];
+              };
             };
 
-            content = {
-              partitions = {
-                boot = {
-                  name = "boot";
-                  size = "1M";
-                  type = "EF02";
-                };
+            disk.main = {
+              device = "/dev/disk/by-id/${cfg.diskId}";
+              type = "disk";
 
-                esp = {
-                  name = "ESP";
-                  size = "1G";
-                  type = "EF00";
+              content = {
+                type = "gpt";
+              };
 
-                  content = {
-                    type = "filesystem";
-                    format = "vfat";
-                    mountpoint = "/boot";
+              content = {
+                partitions = {
+                  boot = {
+                    name = "boot";
+                    size = "1M";
+                    type = "EF02";
                   };
-                };
 
-                swap = {
-                  size = "8G";
+                  esp = {
+                    name = "ESP";
+                    size = "1G";
+                    type = "EF00";
 
-                  content = {
-                    type = "swap";
-                    resumeDevice = true;
+                    content = {
+                      type = "filesystem";
+                      format = "vfat";
+                      mountpoint = "/boot";
+                    };
                   };
-                };
 
-                root = {
-                  name = "root";
-                  size = "100%";
+                  swap = {
+                    size = "8G";
 
-                  content = {
-                    type = "btrfs";
-                    extraArgs = ["-f"];
+                    content = {
+                      type = "swap";
+                      resumeDevice = true;
+                    };
+                  };
 
-                    subvolumes = {
-                      "/persistent" = {
-                        mountOptions = ["subvol=persistent" "noatime"];
-                        mountpoint = "/persistent";
-                      };
+                  root = {
+                    name = "root";
+                    size = "100%";
 
-                      "/nix" = {
-                        mountOptions = ["subvol=nix" "noatime"];
-                        mountpoint = "/nix";
+                    content = {
+                      type = "btrfs";
+                      extraArgs = ["-f"];
+
+                      subvolumes = {
+                        "/persistent" = {
+                          mountOptions = ["subvol=persistent" "noatime"];
+                          mountpoint = "/persistent";
+                        };
+
+                        "/nix" = {
+                          mountOptions = ["subvol=nix" "noatime"];
+                          mountpoint = "/nix";
+                        };
                       };
                     };
                   };
@@ -99,7 +101,6 @@
             };
           };
         };
-      };
     };
   };
 }

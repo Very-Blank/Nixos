@@ -5,17 +5,16 @@
     in
       {
         lib,
-        self',
         pkgs,
         config,
         ...
       }: let
-        niri = self'.packages.niri.override {
+        niri = self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
           outputs = config.core.host.outputs;
           audio = true;
           brightness = true;
-          terminal = "${lib.getExe self'.packages.ghostty}";
-          launcher = "${lib.getExe self'.packages.anyrun}";
+          terminal = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty}";
+          launcher = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun}";
 
           screenshots = {
             path = "~/Pictures/Screenshots/";
@@ -23,9 +22,19 @@
           };
         };
       in {
-        imports = [
-          self.nixosModules.steam
-          self.nixosModules.niri
+        imports = lib.concatLists [
+          [
+            self.nixosModules.steam
+            self.nixosModules.niri
+          ]
+          (map (m: m user) (with self.userModules; [
+            networkingTrayService
+            bluetoothTrayService
+            quickshellService
+            anyrunService
+            swaybgService
+            makoService
+          ]))
         ];
 
         sops.secrets."users/${user}/password-hash" = lib.mkIf (config.core.host.type == "live") {
@@ -34,7 +43,7 @@
         };
 
         users.users."${user}" = {
-          shell = self'.packages.zsh;
+          shell = self.packages.${pkgs.stdenv.hostPlatform.system}.zsh;
 
           hashedPasswordFile = lib.mkIf (config.core.host.type == "live") config.sops.secrets."users/${user}/password-hash".path;
           password = lib.mkIf (config.core.host.type == "vm") "test";
@@ -49,15 +58,15 @@
           ];
 
           packages = [
-            self'.packages.firefox
-            self'.packages.nvim
-            (self'.packages.git.override {
+            self.packages.${pkgs.stdenv.hostPlatform.system}.firefox
+            self.packages.${pkgs.stdenv.hostPlatform.system}.nvim
+            (self.packages.${pkgs.stdenv.hostPlatform.system}.git.override {
               user = {
                 email = "aapeli.saarelainen.76@gmail.com";
                 name = "very-blank";
               };
             })
-            (self'.packages.ssh.override {
+            (self.packages.${pkgs.stdenv.hostPlatform.system}.ssh.override {
               settings = [
                 {
                   match = "github.com";
@@ -153,17 +162,6 @@
       };
 
     # homeModule = user: {...}: {
-    #   imports = with self.homeModules; [
-    #     networkingTrayService
-    #     bluetoothTrayService
-    #     quickshellService
-    #     anyrunService
-    #     swaybgService
-    #     makoService
-    #     gtk
-    #     obs
-    #   ];
-    #
     #   services = {
     #     nextcloud-client = {
     #       enable = true;

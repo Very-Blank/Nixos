@@ -178,29 +178,33 @@
   };
 
   flake = {
-    nixosModules.anyrunService = {
-      lib,
-      pkgs,
-      ...
-    }: {
-      systemd.user.services.anyrun = {
-        Unit = {
-          Description = "Anyrun service";
-          PartOf = "graphical-session.target";
-          After = "graphical-session.target";
-        };
+    userModules.anyrunService = user: {pkgs, ...}: {
+      hjem.users.${user}.files = {
+        ".config/systemd/user/anyrun.service".source = self.lib.mkUnitFile pkgs "anyrun.service" (
+          {
+            lib,
+            pkgs,
+            ...
+          }: {
+            Unit = {
+              Description = "Anyrun service";
+              PartOf = ["graphical-session.target"];
+              After = ["graphical-session.target"];
+            };
 
-        Service = {
-          Type = "simple";
-          ExecStart = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun} daemon";
-          Restart = "on-failure";
-          RestartSec = "1s";
-          KillMode = "process";
-        };
+            Service = {
+              Type = "exec";
+              ExecStart = ["${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun} daemon"];
+              Restart = "on-failure";
+              RestartSec = "1s";
+              KillMode = "process";
+            };
 
-        Install = {
-          WantedBy = ["graphical-session.target"];
-        };
+            Install = {
+              WantedBy = ["graphical-session.target"];
+            };
+          }
+        );
       };
     };
 

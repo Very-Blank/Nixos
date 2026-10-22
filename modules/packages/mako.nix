@@ -16,7 +16,7 @@
       },
       font ? {
         package = pkgs.nerd-fonts._0xproto;
-        size = 12;
+        size = 10;
         family = "0xProto Nerd Font";
       },
     }: let
@@ -70,30 +70,52 @@
   };
 
   flake = {
-    homeModules.makoService = {
+    userModules.makoService = user: {
       lib,
       pkgs,
       ...
     }: {
-      systemd.user.services.mako = {
-        Unit = {
-          Description = "Mako service";
-          PartOf = "graphical-session.target";
-          After = "graphical-session.target";
-        };
+      hjem.users.${user}.files = let
+        WantedBy = ["graphical-session.target"];
+        name = "mako.service";
 
-        Service = {
-          Type = "simple";
-          ExecStart = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.mako}";
-          Restart = "on-failure";
-          RestartSec = "1s";
-          KillMode = "process";
-        };
+        unit = self.lib.mkUnitFile pkgs name (
+          {
+            lib,
+            pkgs,
+            ...
+          }: {
+            Unit = {
+              Description = "Mako service";
+              PartOf = ["graphical-session.target"];
+              After = ["graphical-session.target"];
+            };
 
-        Install = {
-          WantedBy = ["graphical-session.target"];
-        };
-      };
+            Service = {
+              Type = "exec";
+              ExecStart = ["${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.mako}"];
+              Restart = "on-failure";
+              RestartSec = "1s";
+              KillMode = "process";
+            };
+
+            Install = {
+              inherit WantedBy;
+            };
+          }
+        );
+      in
+        lib.mkMerge (
+          [
+            {
+              ".config/systemd/user/${name}".source = unit;
+              ".config/systemd/user/graphical-session.target.wants/${name}".source = unit;
+            }
+          ]
+          ++ (map
+            (wantedby: {".config/systemd/user/${wantedby}.wants/${name}".source = unit;})
+            WantedBy)
+        );
     };
   };
 }
