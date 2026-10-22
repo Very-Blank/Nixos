@@ -1,17 +1,11 @@
 # NOTE
 
-Launch vm with these options:
-
-```text
-$PATH -device virtio-vga -display gtk,gl=on
-```
-
 ## TODO
 
 - [X] Dendritic pattern.
-- [ ] Impermanence.
-- [ ] Remove Home manager.
-- [ ] Disko.
+- [X] Impermanence.
+- [X] Remove Home manager.
+- [X] Disko.
 - [ ] Better secrets handeling.
 
 ### Server

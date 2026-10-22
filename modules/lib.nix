@@ -76,7 +76,6 @@
             [
               (sectionToValue attrs "Unit")
               (sectionToValue attrs "Service")
-              (sectionToValue attrs "Install")
             ]
           )));
     };
@@ -217,23 +216,6 @@
               [Documentation](https://www.freedesktop.org/software/systemd/man/latest/systemd.kill.html#KillMode=)
             '';
           };
-        };
-
-        Install = {
-          WantedBy = mkListOfStrOption ''
-            A symbolic link is created in the .wants/ directory of each of the listed units when this unit is installed by systemctl enable.
-            [Documentation](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html#WantedBy=)
-          '';
-
-          RequiredBy = mkListOfStrOption ''
-            A symbolic link is created in the .requires/ directory of each of the listed units when this unit is installed by systemctl enable.
-            [Documentation](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html#WantedBy=)
-          '';
-
-          UpheldBy = mkListOfStrOption ''
-            A symbolic link is created in the .upholds/ directory of each of the listed units when this unit is installed by systemctl enable.
-            [Documentation](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html#WantedBy=)
-          '';
         };
       };
     };

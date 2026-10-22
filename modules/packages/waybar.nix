@@ -107,7 +107,7 @@
       ...
     }: {
       hjem.users.${user}.files = let
-        WantedBy = ["graphical-session.target"];
+        wants = ["graphical-session.target"];
         name = "waybar.service";
 
         unit = self.lib.mkUnitFile pkgs name (
@@ -129,10 +129,6 @@
               RestartSec = "1s";
               KillMode = "process";
             };
-
-            Install = {
-              inherit WantedBy;
-            };
           }
         );
       in
@@ -140,12 +136,11 @@
           [
             {
               ".config/systemd/user/${name}".source = unit;
-              ".config/systemd/user/graphical-session.target.wants/${name}".source = unit;
             }
           ]
           ++ (map
-            (wantedby: {".config/systemd/user/${wantedby}.wants/${name}".source = unit;})
-            WantedBy)
+            (wants: {".config/systemd/user/${wants}.wants/${name}".source = unit;})
+            wants)
         );
     };
 

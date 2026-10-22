@@ -178,9 +178,16 @@
   };
 
   flake = {
-    userModules.anyrunService = user: {pkgs, ...}: {
-      hjem.users.${user}.files = {
-        ".config/systemd/user/anyrun.service".source = self.lib.mkUnitFile pkgs "anyrun.service" (
+    userModules.anyrunService = user: {
+      lib,
+      pkgs,
+      ...
+    }: {
+      hjem.users.${user}.files = let
+        wants = ["graphical-session.target"];
+        name = "anyrun.service";
+
+        unit = self.lib.mkUnitFile pkgs name (
           {
             lib,
             pkgs,
@@ -199,13 +206,19 @@
               RestartSec = "1s";
               KillMode = "process";
             };
-
-            Install = {
-              WantedBy = ["graphical-session.target"];
-            };
           }
         );
-      };
+      in
+        lib.mkMerge (
+          [
+            {
+              ".config/systemd/user/${name}".source = unit;
+            }
+          ]
+          ++ (map
+            (wants: {".config/systemd/user/${wants}.wants/${name}".source = unit;})
+            wants)
+        );
     };
 
     css.anyrun = {
