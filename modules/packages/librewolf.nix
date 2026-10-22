@@ -20,23 +20,7 @@
       Status = "locked";
     };
 
-    engine = name: alias: url: {
-      Name = name;
-      Alias = alias;
-      URLTemplate = url;
-      Method = "GET";
-    };
-
     policies = {
-      FirefoxHome = {
-        Search = true;
-        TopSites = false;
-        SponsoredTopSites = false;
-        Highlights = false;
-        Pocket = false;
-        Snippets = false;
-      };
-
       AppAutoUpdate = false;
       BackgroundAppUpdate = false;
       NoDefaultBookmarks = true;
@@ -58,7 +42,7 @@
       # Access Restrictions
       BlockAboutConfig = false;
       BlockAboutProfiles = true;
-      BlockAboutSupport = true;
+      # BlockAboutSupport = true;
 
       # UI and Behavior
       DisplayMenuBar = "never";
@@ -102,15 +86,11 @@
             value = forceInstall addon;
           }) (with addons; [
             istilldontcareaboutcookies
-            floccus
+            # floccus
             ublock-origin
             bitwarden
             leechblock-ng
           ]));
-
-      WebsiteFilter = {
-        Block = ["*://darkreader.org/help/*"];
-      };
 
       "3rdparty".Extensions = {
         "${addons.ublock-origin.addonId}".adminSettings.userSettings = {
@@ -127,69 +107,64 @@
         };
       };
 
-      SearchEngines = {
-        Default = "NonAIGoogle";
-        Add = [
-          (engine "NonAIGoogle" "@gg" "https://www.google.com/search?udm=14&q={searchTerms}")
-          (engine "Youtube" "@yt" "https://www.youtube.com/results?search_query={searchTerms}")
-          (engine "Nix Packages" "@np" "https://search.nixos.org/packages?channel=unstable&query={searchTerms}")
-          (engine "Nix Options" "@no" "https://search.nixos.org/options?channel=unstable&query={searchTerms}")
-          (engine "NixOS Wiki" "@nw" "https://wiki.nixos.org/w/index.php?search={searchTerms}")
-          (engine "Home Manager Options" "@nh" "https://home-manager-options.extranix.com/?release=master&query={searchTerms}")
-        ];
-      };
-
       Preferences = {
         "browser.contentblocking.category" = lock "strict";
 
-        "extensions.pocket.enabled" = lock false;
-        "extensions.screenshots.disabled" = lock true;
-
-        "browser.topsites.contile.enabled" = lock false;
-        "browser.formfill.enable" = lock false;
-
-        "browser.search.suggest.enabled" = lock false;
-        "browser.search.suggest.enabled.private" = lock false;
-        "browser.urlbar.suggest.searches" = lock false;
-        "browser.urlbar.showSearchSuggestionsFirst" = lock false;
-        "browser.urlbar.update2.engineAliasRefresh" = lock true;
-
-        "browser.newtabpage.activity-stream.default.sites" = lock "";
-        "browser.newtabpage.activity-stream.feeds.section.topstories" = lock false;
-        "browser.newtabpage.activity-stream.feeds.snippets" = lock false;
-        "browser.newtabpage.activity-stream.section.highlights.includePocket" = lock false;
-        "browser.newtabpage.activity-stream.section.highlights.includeBookmarks" = lock false;
-        "browser.newtabpage.activity-stream.section.highlights.includeDownloads" = lock false;
-        "browser.newtabpage.activity-stream.section.highlights.includeVisited" = lock false;
-        "browser.newtabpage.activity-stream.showSponsored" = lock false;
-        "browser.newtabpage.activity-stream.system.showSponsored" = lock false;
-        "browser.newtabpage.activity-stream.showSponsoredTopSites" = lock false;
-        "browser.newtabpage.activity-stream.showWeather" = lock false;
-        "browser.newtabpage.activity-stream.system.showWeather" = lock false;
-        "browser.newtabpage.activity-stream.system.showWeatherOptIn" = lock false;
-        "browser.newtabpage.activity-stream.widgets.system.enabled" = lock false;
-        "browser.newtabpage.activity-stream.widgets.lists.enabled" = lock false;
-        "browser.newtabpage.activity-stream.widgets.focusTimer.enabled" = lock false;
-
         "sidebar.revamp" = lock true;
         "sidebar.verticalTabs" = lock true;
-        "sidebar.verticalTabs.dragToPinPromo.dismissed" = lock true;
         "sidebar.main.tools" = lock "bookmarks,${addons.bitwarden.addonId}";
 
         "layers.acceleration.force-enabled" = lock true;
 
         "middlemouse.paste" = lock false;
         "browser.toolbars.bookmarks.visibility" = lock "never";
-
-        "extensions.InstallTrigger.enabled" = lock false;
       };
     };
 
-    firefoxWrapped = pkgs.wrapFirefox pkgs.firefox-unwrapped {
+    librewolfWrapped = pkgs.wrapFirefox pkgs.librewolf-unwrapped {
       extraPolicies = policies;
     };
 
-    profile = pkgs.linkFarm "firefox-profile-skeleton" [
+    engines = [
+      {
+        id = "google-nonai";
+        name = "NonAIGoogle";
+        alias = "@gg";
+        url = "https://www.google.com/search?udm=14&q={searchTerms}";
+      }
+      {
+        id = "youtube";
+        name = "Youtube";
+        alias = "@yt";
+        url = "https://www.youtube.com/results?search_query={searchTerms}";
+      }
+      {
+        id = "nix-packages";
+        name = "Nix Packages";
+        alias = "@np";
+        url = "https://search.nixos.org/packages?channel=unstable&query={searchTerms}";
+      }
+      {
+        id = "nix-options";
+        name = "Nix Options";
+        alias = "@no";
+        url = "https://search.nixos.org/options?channel=unstable&query={searchTerms}";
+      }
+      {
+        id = "nixos-wiki";
+        name = "NixOS Wiki";
+        alias = "@nw";
+        url = "https://wiki.nixos.org/w/index.php?search={searchTerms}";
+      }
+      {
+        id = "hm-options";
+        name = "Home Manager Options";
+        alias = "@nh";
+        url = "https://home-manager-options.extranix.com/?release=master&query={searchTerms}";
+      }
+    ];
+
+    profile = pkgs.linkFarm "librewolf-profile-skeleton" [
       {
         name = "user.js";
         path = pkgs.writeText "user.js" ''
@@ -213,14 +188,14 @@
         name = "chrome/userChrome.css";
         path = pkgs.writeText "userChrome.css" ''
           @import "${inputs.firefox-gnome-theme}/userChrome.css";
-          ${self.css.firefox (inputs.colors.lib.withHash self.globals.theme.palette)}
+          ${self.css.librewolf (inputs.colors.lib.withHash self.globals.theme.palette)}
         '';
       }
       {
         name = "chrome/userContent.css";
         path = pkgs.writeText "userContent.css" ''
           @import "${inputs.firefox-gnome-theme}/userContent.css";
-          ${self.css.firefox (inputs.colors.lib.withHash self.globals.theme.palette)}
+          ${self.css.librewolf (inputs.colors.lib.withHash self.globals.theme.palette)}
         '';
       }
     ];
@@ -235,40 +210,40 @@
     };
   in {
     packages = {
-      firefox = pkgs.symlinkJoin {
-        name = "firefox";
-        paths = [firefoxWrapped];
+      librewolf = pkgs.symlinkJoin {
+        name = "librewolf";
+        paths = [librewolfWrapped];
         postBuild = ''
-          mv $out/bin/firefox $out/bin/.firefox
+          mv $out/bin/librewolf $out/bin/.librewolf
 
-          cat > $out/bin/firefox << EOF
+          cat > $out/bin/librewolf << EOF
           #!${pkgs.runtimeShell}
           export FONTCONFIG_FILE=${fontsConf}
 
-          dir=\$(mktemp -d -t firefox.XXXXXX)
+          dir=\$(mktemp -d -t librewolf.XXXXXX)
           trap 'rm -rf \$dir' EXIT
 
           cp -rL --no-preserve=mode ${profile}/. "\$dir"
 
           if [[ "\$#" -ne 0 ]]; then
-            $out/bin/.firefox --profile "\$dir" "\$@"
+            $out/bin/.librewolf --profile "\$dir" "\$@"
           else
-            $out/bin/.firefox --profile "\$dir"
+            $out/bin/.librewolf --profile "\$dir"
           fi
           EOF
 
-          chmod +x $out/bin/firefox
+          chmod +x $out/bin/librewolf
         '';
 
         meta = {
-          mainProgram = "firefox";
+          mainProgram = "librewolf";
         };
       };
     };
   };
 
   flake = {
-    css.firefox = theme: ''
+    css.librewolf = theme: ''
       :root {
         --gnome-palette-blue-1: ${theme.base0D};
         --gnome-palette-blue-2: ${theme.base0D};
@@ -381,12 +356,6 @@
           --gnome-tabbar-tab-hover-background: var(--gnome-tabbar-tab-hover-background);
           --gnome-tabbar-tab-active-background: color-mix(in oklab, ${theme.base01} 50%, ${theme.base02} 77.5%);
           --gnome-entry-background: color-mix(in oklab, ${theme.base01} 50%, ${theme.base02} 77.5%);
-        }
-
-        @-moz-document url(chrome://browser/content/browser.xul), url(about:newtab), url(about:home) {
-          .personalizeButtonWrapper {
-            display:none !important;
-          }
         }
       }
     '';
