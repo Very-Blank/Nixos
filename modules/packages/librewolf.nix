@@ -31,7 +31,13 @@
             Method = "GET";
           })
           engines;
-        Remove = ["Mojeek" "Brave" "Searx"];
+        Remove = [
+          "Mojeek"
+          "Brave"
+          "Searx"
+          "DuckDuckGo No-AI"
+          "Startpage"
+        ];
       };
 
       AppAutoUpdate = false;
