@@ -34,13 +34,45 @@
       SearchEngines = {
         Default = "NonAIGoogle";
         Add =
-          map (e: {
-            Name = e.name;
-            URLTemplate = e.url;
-            Alias = e.alias;
+          map (engine: {
+            Name = engine.name;
+            URLTemplate = engine.url;
+            Alias = engine.alias;
             Method = "GET";
           })
-          engines;
+          [
+            {
+              name = "NonAIGoogle";
+              alias = "@gg";
+              url = "https://www.google.com/search?udm=14&q={searchTerms}";
+            }
+            {
+              name = "Youtube";
+              alias = "@yt";
+              url = "https://www.youtube.com/results?search_query={searchTerms}";
+            }
+            {
+              name = "Nix Packages";
+              alias = "@np";
+              url = "https://search.nixos.org/packages?channel=unstable&query={searchTerms}";
+            }
+            {
+              name = "Nix Options";
+              alias = "@no";
+              url = "https://search.nixos.org/options?channel=unstable&query={searchTerms}";
+            }
+            {
+              name = "NixOS Wiki";
+              alias = "@nw";
+              url = "https://wiki.nixos.org/w/index.php?search={searchTerms}";
+            }
+            {
+              name = "Home Manager Options";
+              alias = "@nh";
+              url = "https://home-manager-options.extranix.com/?release=master&query={searchTerms}";
+            }
+          ];
+
         Remove = [
           "Mojeek"
           "Brave"
@@ -208,45 +240,6 @@
         lockPref("browser.translations.automaticallyPopup", false);
       '';
     };
-
-    engines = [
-      {
-        id = "google-nonai";
-        name = "NonAIGoogle";
-        alias = "@gg";
-        url = "https://www.google.com/search?udm=14&q={searchTerms}";
-      }
-      {
-        id = "youtube";
-        name = "Youtube";
-        alias = "@yt";
-        url = "https://www.youtube.com/results?search_query={searchTerms}";
-      }
-      {
-        id = "nix-packages";
-        name = "Nix Packages";
-        alias = "@np";
-        url = "https://search.nixos.org/packages?channel=unstable&query={searchTerms}";
-      }
-      {
-        id = "nix-options";
-        name = "Nix Options";
-        alias = "@no";
-        url = "https://search.nixos.org/options?channel=unstable&query={searchTerms}";
-      }
-      {
-        id = "nixos-wiki";
-        name = "NixOS Wiki";
-        alias = "@nw";
-        url = "https://wiki.nixos.org/w/index.php?search={searchTerms}";
-      }
-      {
-        id = "hm-options";
-        name = "Home Manager Options";
-        alias = "@nh";
-        url = "https://home-manager-options.extranix.com/?release=master&query={searchTerms}";
-      }
-    ];
 
     profile = pkgs.linkFarm "librewolf-profile-skeleton" [
       {

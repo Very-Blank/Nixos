@@ -58,7 +58,7 @@
           ];
 
           packages = [
-            self.packages.${pkgs.stdenv.hostPlatform.system}.firefox
+            self.packages.${pkgs.stdenv.hostPlatform.system}.librewolf
             self.packages.${pkgs.stdenv.hostPlatform.system}.nvim
             (self.packages.${pkgs.stdenv.hostPlatform.system}.git.override {
               user = {
@@ -121,6 +121,7 @@
                 ".ssh/know_hosts"
                 ".local/share/keyrings"
                 ".local/share/Nextcloud"
+                ".librewolf/cookies.sqlite"
               ];
 
               files = [
