@@ -21,6 +21,19 @@
     };
 
     policies = {
+      SearchEngines = {
+        Default = "NonAIGoogle";
+        Add =
+          map (e: {
+            Name = e.name;
+            URLTemplate = e.url;
+            Alias = e.alias;
+            Method = "GET";
+          })
+          engines;
+        Remove = ["Mojeek" "Brave" "Searx"];
+      };
+
       AppAutoUpdate = false;
       BackgroundAppUpdate = false;
       NoDefaultBookmarks = true;
@@ -62,7 +75,7 @@
       OfferToSaveLogins = false;
 
       # AI
-      GenerativeAI = {
+      AIControls = {
         Enabled = false;
         Chatbot = false;
         LinkPreviews = false;
@@ -112,17 +125,72 @@
 
         "sidebar.revamp" = lock true;
         "sidebar.verticalTabs" = lock true;
-        "sidebar.main.tools" = lock "bookmarks,${addons.bitwarden.addonId}";
+        "sidebar.main.tools" = lock "${addons.bitwarden.addonId}";
+
+        # clear up nav-bar
+        "browser.uiCustomization.state" = lock ''
+          {
+             "placements":{
+                "nav-bar":[
+                   "back-button",
+                   "forward-button",
+                   "stop-reload-button",
+                   "customizableui-special-spring1",
+                   "vertical-spacer",
+                   "urlbar-container",
+                   "customizableui-special-spring2",
+                   "downloads-button",
+                   "open-file-button",
+                   "fxa-toolbar-menu-button",
+                   "reset-pbm-toolbar-button",
+                   "unified-extensions-button",
+                   "ublock0_raymondhill_net-browser-action",
+                   "alltabs-button",
+                   "smartwindow-group-tabs-button",
+                   "ai-window-toggle"
+                ]
+             }
+          }
+        '';
 
         "layers.acceleration.force-enabled" = lock true;
-
-        "middlemouse.paste" = lock false;
         "browser.toolbars.bookmarks.visibility" = lock "never";
       };
     };
 
     librewolfWrapped = pkgs.wrapFirefox pkgs.librewolf-unwrapped {
+      inherit (pkgs.librewolf-unwrapped) extraPrefsFiles extraPoliciesFiles;
+      libName = "librewolf";
       extraPolicies = policies;
+      extraPrefs = ''
+        lockPref("browser.aboutConfig.showWarning", false);
+        lockPref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
+
+        // Set UI density to normal
+        lockPref("browser.uidensity", 0);
+
+        // Enable SVG context-propertes
+        lockPref("svg.context-properties.content.enabled", true);
+
+        // Disable private window dark theme
+        lockPref("browser.theme.dark-private-windows", false);
+
+        // Enable rounded bottom window corners
+        lockPref("widget.gtk.rounded-bottom-corners.enabled", true);
+
+        // Middle mouse paste
+        lockPref("middlemouse.paste", false);
+
+        // Disable backups as it causes warnings.
+        // Possibly because it tries to access root directory.
+        lockPref("browser.backup.enabled", false);
+        lockPref("browser.backup.scheduled.enabled", false);
+        lockPref("browser.backup.archive.enabled", false);
+        lockPref("browser.backup.restore.enabled", false);
+
+        // Disable translation popup.
+        lockPref("browser.translations.automaticallyPopup", false);
+      '';
     };
 
     engines = [
@@ -166,25 +234,6 @@
 
     profile = pkgs.linkFarm "librewolf-profile-skeleton" [
       {
-        name = "user.js";
-        path = pkgs.writeText "user.js" ''
-          user_pref("browser.aboutConfig.showWarning", false);
-          user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
-
-          // Set UI density to normal
-          user_pref("browser.uidensity", 0);
-
-          // Enable SVG context-propertes
-          user_pref("svg.context-properties.content.enabled", true);
-
-          // Disable private window dark theme
-          user_pref("browser.theme.dark-private-windows", false);
-
-          // Enable rounded bottom window corners
-          user_pref("widget.gtk.rounded-bottom-corners.enabled", true);
-        '';
-      }
-      {
         name = "chrome/userChrome.css";
         path = pkgs.writeText "userChrome.css" ''
           @import "${inputs.firefox-gnome-theme}/userChrome.css";
@@ -196,6 +245,34 @@
         path = pkgs.writeText "userContent.css" ''
           @import "${inputs.firefox-gnome-theme}/userContent.css";
           ${self.css.librewolf (inputs.colors.lib.withHash self.globals.theme.palette)}
+
+          @-moz-document url("about:newtab"), url("about:home") {
+            /* Wallpaper */
+            body {
+              background-image: url("file://${../../resources/wallpapers/bain_ning_bing_and_fang_yuan.png}") !important;
+              background-position: center center !important;
+              background-size: cover !important;
+              background-repeat: no-repeat !important;
+            }
+
+            /* Center Search Bar */
+            .search-wrapper {
+              position: fixed !important;
+              top: 50% !important;
+              left: 50% !important;
+              transform: translate(-50%, -50%) !important;
+            }
+
+            /* Disable Logo */
+            .logo-and-wordmark-wrapper {
+              display:none !important;
+            }
+
+            /* Disable Home Customize Button */
+            .open-customization-button {
+              display:none !important;
+            }
+          }
         '';
       }
     ];
@@ -300,7 +377,6 @@
 
         /* Colors */
         --gnome-destructive-bg: var(--gnome-palette-red-3);
-
         --gnome-success-bg: var(--gnome-palette-green-5);
         --gnome-warning-bg: var(--gnome-palette-yellow-3);
         --gnome-error-bg: var(--gnome-palette-red-4);
