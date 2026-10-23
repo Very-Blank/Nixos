@@ -4,6 +4,7 @@
   ...
 }: {
   perSystem = {
+    lib,
     pkgs,
     inputs',
     ...
@@ -21,6 +22,15 @@
     };
 
     policies = {
+      SanitizeOnShutdown = {
+        Exceptions = [
+          "https://accounts.google.com"
+          "https://www.google.com"
+          "https://youtube.com"
+          "https://github.com"
+        ];
+      };
+
       SearchEngines = {
         Default = "NonAIGoogle";
         Add =
@@ -293,35 +303,63 @@
     };
   in {
     packages = {
-      librewolf = pkgs.symlinkJoin {
-        name = "librewolf";
-        paths = [librewolfWrapped];
-        postBuild = ''
-          mv $out/bin/librewolf $out/bin/.librewolf
+      librewolf = let
+        save = pkgs.writeShellScript "save" ''
+          [[ -f "$1" ]] || exit 0
 
-          cat > $out/bin/librewolf << EOF
-          #!${pkgs.runtimeShell}
-          export FONTCONFIG_FILE=${fontsConf}
-
-          dir=\$(mktemp -d -t librewolf.XXXXXX)
-          trap 'rm -rf \$dir' EXIT
-
-          cp -rL --no-preserve=mode ${profile}/. "\$dir"
-
-          if [[ "\$#" -ne 0 ]]; then
-            $out/bin/.librewolf --profile "\$dir" "\$@"
-          else
-            $out/bin/.librewolf --profile "\$dir"
+          if [[ "$#" -ne 2 ]]; then
+            echo "Usage: save <profile-db> <stored-db>" >&2
+            exit 1
           fi
-          EOF
 
-          chmod +x $out/bin/librewolf
+          tmp=$(mktemp)
+          trap 'rm -rf \$tmp' EXIT
+
+          ${lib.getExe pkgs.sqlite} "$1" "VACUUM INTO '$tmp'"
+
+          mv "$tmp" "$2"
         '';
 
-        meta = {
-          mainProgram = "librewolf";
+        load = pkgs.writeShellScript "load" ''
+          if [[ "$#" -ne 2 ]]; then
+            echo "Usage: load <profile-db> <stored-db>" >&2
+            exit 1
+          fi
+
+          if [[ -f "$2" ]]; then
+            cp "$2" "$1"
+          fi
+        '';
+      in
+        pkgs.symlinkJoin {
+          name = "librewolf";
+          paths = [librewolfWrapped];
+          postBuild = ''
+            mv $out/bin/librewolf $out/bin/.librewolf
+
+            cat > $out/bin/librewolf << EOF
+            #!${pkgs.runtimeShell}
+            export FONTCONFIG_FILE=${fontsConf}
+
+            state="\$HOME/.librewolf"
+            mkdir -p "\$state"
+
+            dir=\$(mktemp -d -t librewolf.XXXXXX)
+            trap '${save} "\$dir/cookies.sqlite" "\$state/cookies.sqlite"; rm -rf "\$dir"' EXIT
+
+            cp -rL --no-preserve=mode ${profile}/. "\$dir"
+            ${load} "\$dir/cookies.sqlite" "\$state/cookies.sqlite"
+
+            $out/bin/.librewolf --profile "\$dir" "\$@"
+            EOF
+
+            chmod +x $out/bin/librewolf
+          '';
+
+          meta = {
+            mainProgram = "librewolf";
+          };
         };
-      };
     };
   };
 
