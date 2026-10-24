@@ -311,7 +311,7 @@
 
           ${lib.getExe pkgs.sqlite} "$1" "VACUUM INTO '$tmp'"
 
-          mv "$tmp" "$2"
+          cat "$tmp" > "$2"
         '';
 
         load = pkgs.writeShellScript "load" ''
