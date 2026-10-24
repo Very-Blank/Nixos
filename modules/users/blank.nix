@@ -120,6 +120,8 @@
                 "Pictures"
                 ".local/share/keyrings"
                 ".local/share/Nextcloud"
+                ".local/share/Steam"
+                ".steam"
               ];
 
               files = [
