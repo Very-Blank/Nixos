@@ -14,21 +14,7 @@
           audio = builtins.elem "audio" config.core.host.features;
           brightness = builtins.elem "audio" config.core.host.features;
 
-          terminal = "${
-            lib.getExe
-            (
-              if (config.core.host.name == "hermes")
-              then
-                # NOTE: On hermes this helps out to fill the whole terminal emulator.
-                (self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty.override {
-                  cellAdjust = {
-                    height = "-25%";
-                    width = "-20%";
-                  };
-                })
-              else self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty
-            )
-          }";
+          terminal = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty}";
 
           launcher = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun}";
 

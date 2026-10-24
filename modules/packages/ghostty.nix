@@ -9,14 +9,11 @@
     ...
   }: {
     packages.ghostty = lib.makeOverridable ({
-      cellAdjust ? {
-        height = "-20%";
-        width = "-20%";
-      },
       title ? "Ghostty",
       font ? {
         package = pkgs.nerd-fonts._0xproto;
         family = "0xProto Nerd Font";
+        size = 10;
       },
       extraConfig ? null,
     }: let
@@ -34,12 +31,9 @@
 
       config =
         ''
-          adjust-cell-height = ${cellAdjust.height}
-          adjust-cell-width = ${cellAdjust.width}
           title = ${title}
-        ''
-        + lib.optionalString (font != null) ''
           font-family = ${font.family}
+          font-size = ${lib.toString font.size}
         ''
         + lib.optionalString (extraConfig != null) extraConfig;
 
