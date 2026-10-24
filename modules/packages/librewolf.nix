@@ -28,6 +28,7 @@
           "https://www.google.com"
           "https://youtube.com"
           "https://github.com"
+          "https://discord.com"
         ];
       };
 
