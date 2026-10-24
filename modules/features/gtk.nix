@@ -40,10 +40,10 @@
           ".config/gtk-4.0/settings.ini".source =
             ini.generate "gtk4-settings.ini" {Settings = settings;};
 
-          files.".config/dconf/user".source = dconfDb;
-
           ".config/gtk-3.0/gtk.css".text = style;
           ".config/gtk-4.0/gtk.css".text = style;
+
+          ".config/dconf/user".source = dconfDb;
         };
       };
 
