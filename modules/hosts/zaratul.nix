@@ -32,18 +32,12 @@
 
     nixosModules.zaratul = {pkgs, ...}: {
       imports = with self.nixosModules; [
-        grubBoot
+        boot
         greeter
         networking
         audio
         blank
       ];
-
-      modules = {
-        grub = {
-          boot = "multi";
-        };
-      };
 
       core = {
         host = {
@@ -83,7 +77,14 @@
         };
 
         disko = {
-          diskId = "nvme-Samsung_SSD_980_PRO_1TB_S5GXNX0W429881M";
+          main = "nvme-Samsung_SSD_980_PRO_1TB_S5GXNX0W429881M";
+
+          extra = {
+            games = {
+              id = "nvme-Samsung_SSD_980_PRO_1TB_S5GXNX0W429881M";
+              mountpoint = "/games";
+            };
+          };
         };
       };
 

@@ -118,7 +118,6 @@
                 "Nextcloud"
                 "Downloads"
                 "Pictures"
-                ".ssh/know_hosts"
                 ".local/share/keyrings"
                 ".local/share/Nextcloud"
                 ".librewolf/cookies.sqlite"
@@ -126,6 +125,7 @@
 
               files = [
                 ".zsh_history"
+                ".ssh/known_hosts"
                 {
                   file = ".ssh/github";
                   mode = "600";

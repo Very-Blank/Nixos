@@ -32,7 +32,7 @@
 
     nixosModules.hermes = {pkgs, ...}: {
       imports = with self.nixosModules; [
-        systemdBoot
+        boot
         tuxedo
         greeter
         networking
@@ -77,7 +77,7 @@
         };
 
         disko = {
-          diskId = "nvme-Samsung_SSD_980_500GB_S78GNL0Y338093Z";
+          main = "nvme-Samsung_SSD_980_500GB_S78GNL0Y338093Z";
         };
       };
 
