@@ -22,16 +22,6 @@
     };
 
     policies = {
-      SanitizeOnShutdown = {
-        Exceptions = [
-          "https://accounts.google.com"
-          "https://www.google.com"
-          "https://youtube.com"
-          "https://github.com"
-          "https://discord.com"
-        ];
-      };
-
       SearchEngines = {
         Default = "NonAIGoogle";
         Add =
@@ -239,6 +229,8 @@
 
         // Disable translation popup.
         lockPref("browser.translations.automaticallyPopup", false);
+
+        lockPref("privacy.sanitize.sanitizeOnShutdown", false);
       '';
     };
 

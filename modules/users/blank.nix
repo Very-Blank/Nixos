@@ -39,6 +39,7 @@
 
             librewolfPersistent
             steamPersistent
+            audioPersistent
           ]))
         ];
 
@@ -62,16 +63,16 @@
             "audio"
           ];
 
-          packages = [
-            self.packages.${pkgs.stdenv.hostPlatform.system}.librewolf
-            self.packages.${pkgs.stdenv.hostPlatform.system}.nvim
-            (self.packages.${pkgs.stdenv.hostPlatform.system}.git.override {
+          packages = with self.packages.${pkgs.stdenv.hostPlatform.system}; [
+            librewolf
+            nvim
+            (git.override {
               user = {
                 email = "aapeli.saarelainen.76@gmail.com";
                 name = "very-blank";
               };
             })
-            (self.packages.${pkgs.stdenv.hostPlatform.system}.ssh.override {
+            (ssh.override {
               settings = [
                 {
                   match = "github.com";
@@ -91,7 +92,7 @@
                   match = "gitlab.jyu.fi";
                   name = "gitlab.jyu.fi";
                   identityFile = "~/.ssh/gitlab";
-                  user = "blank";
+                  user = "aapotska";
                 }
               ];
             })
