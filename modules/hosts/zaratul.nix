@@ -50,7 +50,7 @@
               };
 
               position = {
-                x = 2327;
+                x = 2560;
                 y = 0;
               };
             };
@@ -64,7 +64,7 @@
                 refresh = 180.002;
               };
 
-              scale = 1.5;
+              scale = 1;
 
               position = {
                 x = 0;
