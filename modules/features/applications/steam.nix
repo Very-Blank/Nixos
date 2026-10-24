@@ -8,9 +8,9 @@
           extraEnv = {
             PROTON_ENABLE_WAYLAND = "1";
           };
-
-          extraCompatPackages = [pkgs.proton-ge-bin];
         };
+
+        extraCompatPackages = [pkgs.proton-ge-bin];
       };
 
       core.unfree.packages = [
