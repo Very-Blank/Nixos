@@ -14,24 +14,21 @@
           audio = builtins.elem "audio" config.core.host.features;
           brightness = builtins.elem "audio" config.core.host.features;
 
-          terminal = "${lib.getExe (
-            lib.mkMerge [
-              # NOTE: On hermes this helps out to fill the whole terminal emulator.
-              (
-                lib.mkIf (config.host.name == "hermes")
+          terminal = "${
+            lib.getExe
+            (
+              if (config.host.name == "hermes")
+              then
+                # NOTE: On hermes this helps out to fill the whole terminal emulator.
                 (self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty.override {
                   cellAdjust = {
                     height = "-25%";
                     width = "-20%";
                   };
                 })
-              )
-              (
-                lib.mkIf (config.host.name == "zaratul")
-                self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty
-              )
-            ]
-          )}";
+              else self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty
+            )
+          }";
 
           launcher = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun}";
 
