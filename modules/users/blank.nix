@@ -122,38 +122,12 @@
                 ".local/share/Nextcloud"
                 ".local/share/Steam"
                 ".steam"
+                ".ssh"
               ];
 
               files = [
                 ".zsh_history"
-                ".ssh/known_hosts"
                 ".librewolf/cookies.sqlite"
-                {
-                  file = ".ssh/github";
-                  mode = "600";
-                }
-                {
-                  file = ".ssh/github.pub";
-                  mode = "644";
-                }
-
-                {
-                  file = ".ssh/taildevourer";
-                  mode = "600";
-                }
-                {
-                  file = ".ssh/taildevourer.pub";
-                  mode = "644";
-                }
-
-                {
-                  file = ".ssh/gitlab";
-                  mode = "600";
-                }
-                {
-                  file = ".ssh/gitlab.pub";
-                  mode = "644";
-                }
               ];
             };
           };
