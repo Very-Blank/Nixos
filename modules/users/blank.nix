@@ -120,12 +120,12 @@
                 "Pictures"
                 ".local/share/keyrings"
                 ".local/share/Nextcloud"
-                ".librewolf/cookies.sqlite"
               ];
 
               files = [
                 ".zsh_history"
                 ".ssh/known_hosts"
+                ".librewolf/cookies.sqlite"
                 {
                   file = ".ssh/github";
                   mode = "600";
