@@ -1,5 +1,7 @@
 {self, ...}: {
   flake = {
+    core.host.features = ["bluetooth"];
+
     nixosModules.bluetooth = {
       hardware = {
         bluetooth = {

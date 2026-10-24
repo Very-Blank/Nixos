@@ -32,8 +32,6 @@
 
     nixosModules.zaratul = {...}: {
       imports = with self.nixosModules; [
-        boot
-        greeter
         networking
         audio
         blank
@@ -66,7 +64,7 @@
                 refresh = 180.002;
               };
 
-              scale = 1.1;
+              scale = 1.5;
 
               position = {
                 x = 0;
@@ -74,10 +72,6 @@
               };
             };
           };
-
-          features = [
-            "audio"
-          ];
         };
 
         disko = {

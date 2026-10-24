@@ -23,11 +23,18 @@
               type = lib.types.listOf (lib.types.enum [
                 "battery"
                 "bluetooth"
-                "brightness"
                 "audio"
+                "brightness"
                 "wifi"
               ]);
-              description = "What features does the host have.";
+              description = ''
+                What features does the host have.
+
+                Enabled automatically when importing a module:
+                  - battery
+                  - bluetooth
+                  - audio
+              '';
               default = [];
             };
 

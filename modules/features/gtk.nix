@@ -9,8 +9,14 @@
         theme = self.globals.theme.palette;
       };
 
+      iconTheme = {
+        name = "Papirus-Dark";
+        package = pkgs.papirus-icon-theme;
+      };
+
       settings = {
         gtk-theme-name = "adw-gtk3";
+        gtk-icon-theme-name = iconTheme.name;
         gtk-application-prefer-dark-theme = true;
       };
 
@@ -18,6 +24,7 @@
         "org/gnome/desktop/interface" = {
           color-scheme = "prefer-dark";
           gtk-theme = "adw-gtk3";
+          icon-theme = iconTheme.name;
         };
       });
 
@@ -30,7 +37,11 @@
       ini = pkgs.formats.ini {};
     in {
       users.users."${user}" = {
-        packages = [pkgs.adw-gtk3];
+        packages = [
+          pkgs.adw-gtk3
+          iconTheme.package
+          pkgs.adwaita-icon-theme
+        ];
       };
 
       hjem.users.${user} = {

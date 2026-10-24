@@ -11,9 +11,28 @@
       }: let
         niri = self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
           outputs = config.core.host.outputs;
-          audio = true;
-          brightness = true;
-          terminal = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty}";
+          audio = builtins.elem "audio" config.core.host.features;
+          brightness = builtins.elem "audio" config.core.host.features;
+
+          terminal = "${lib.getExe (
+            lib.mkMerge [
+              # NOTE: On hermes this helps out to fill the whole terminal emulator.
+              (
+                lib.mkIf (config.host.name == "hermes")
+                (self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty.override {
+                  cellAdjust = {
+                    height = "-25%";
+                    width = "-20%";
+                  };
+                })
+              )
+              (
+                lib.mkIf (config.host.name == "zaratul")
+                self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty
+              )
+            ]
+          )}";
+
           launcher = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun}";
 
           screenshots = {
@@ -99,7 +118,7 @@
           ];
         };
 
-        modules = {
+        core = {
           greeter = {
             users."${user}" = let
               niri-session = pkgs.writeShellScript "niri-session" ''

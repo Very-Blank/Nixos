@@ -16,6 +16,8 @@
               self.nixosModules.defaults
               self.nixosModules.host
               self.nixosModules.unfree
+              self.nixosModules.greeter
+              self.nixosModules.boot
               inputs.hjem.nixosModules.default
               ({...}: {
                 security.sudo.extraConfig = ''

@@ -7,7 +7,7 @@
       ...
     }: {
       options = {
-        modules = {
+        core = {
           greeter = {
             users = lib.mkOption {
               type = lib.types.attrsOf lib.types.nonEmptyStr;

@@ -139,6 +139,7 @@
           }) (with addons; [
             istilldontcareaboutcookies
             # floccus
+            darkreader
             ublock-origin
             bitwarden
             leechblock-ng

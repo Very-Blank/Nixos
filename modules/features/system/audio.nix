@@ -1,12 +1,7 @@
 {
   flake = {
-    nixosModules.audio = {config, ...}: {
-      assertions = [
-        {
-          assertion = builtins.elem "audio" config.core.host.features;
-          message = "Host imports audio module even though it doesn't support audio.";
-        }
-      ];
+    nixosModules.audio = {
+      core.host.features = ["audio"];
 
       services = {
         pipewire = {

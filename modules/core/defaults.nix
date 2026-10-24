@@ -19,7 +19,7 @@
       };
 
       environment = {
-        systemPackages = lib.mkDefault [
+        systemPackages = lib.mkForce [
           pkgs.wget
           pkgs.unzip
           pkgs.tree

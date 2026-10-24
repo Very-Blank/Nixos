@@ -32,10 +32,9 @@
 
     nixosModules.hermes = {...}: {
       imports = with self.nixosModules; [
-        boot
-        tuxedo
-        greeter
         networking
+        bluetooth
+        tuxedo
         audio
         blank
       ];
@@ -63,9 +62,7 @@
 
           features = [
             "battery"
-            "bluetooth"
             "brightness"
-            "audio"
             "wifi"
           ];
         };
