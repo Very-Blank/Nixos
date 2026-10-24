@@ -13,6 +13,7 @@
               self.nixosModules.sops
               self.nixosModules.disko
               self.nixosModules.perservation
+              self.nixosModules.defaults
               self.nixosModules.host
               self.nixosModules.unfree
               inputs.hjem.nixosModules.default

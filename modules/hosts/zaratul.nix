@@ -30,7 +30,7 @@
       ];
     };
 
-    nixosModules.zaratul = {pkgs, ...}: {
+    nixosModules.zaratul = {...}: {
       imports = with self.nixosModules; [
         boot
         greeter
@@ -90,37 +90,6 @@
               mountpoint = "/extra";
             };
           };
-        };
-      };
-
-      users = {
-        mutableUsers = false;
-      };
-
-      programs = {
-        nano.enable = false;
-        vim.enable = true;
-      };
-
-      environment.systemPackages = [
-        pkgs.wget
-        pkgs.unzip
-      ];
-
-      system = {
-        stateVersion = "26.11";
-      };
-
-      nix = {
-        settings.experimental-features = [
-          "nix-command"
-          "flakes"
-        ];
-
-        gc = {
-          automatic = true;
-          dates = "weekly";
-          options = "--delete-older-than 2d";
         };
       };
     };

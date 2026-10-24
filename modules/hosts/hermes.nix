@@ -30,7 +30,7 @@
       ];
     };
 
-    nixosModules.hermes = {pkgs, ...}: {
+    nixosModules.hermes = {...}: {
       imports = with self.nixosModules; [
         boot
         tuxedo
@@ -38,20 +38,6 @@
         networking
         audio
         blank
-      ];
-
-      users = {
-        mutableUsers = false;
-      };
-
-      programs = {
-        nano.enable = false;
-        vim.enable = true;
-      };
-
-      environment.systemPackages = [
-        pkgs.wget
-        pkgs.unzip
       ];
 
       services = {
@@ -79,23 +65,6 @@
         disko = {
           main = "nvme-Samsung_SSD_980_500GB_S78GNL0Y338093Z";
         };
-      };
-
-      nix = {
-        settings.experimental-features = [
-          "nix-command"
-          "flakes"
-        ];
-
-        gc = {
-          automatic = true;
-          dates = "weekly";
-          options = "--delete-older-than 2d";
-        };
-      };
-
-      system = {
-        stateVersion = "26.11";
       };
     };
 
