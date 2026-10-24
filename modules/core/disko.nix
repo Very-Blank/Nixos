@@ -57,92 +57,89 @@
             };
 
             disk = lib.mkMerge [
-              (lib.concatLists
-                [
-                  {
-                    main = {
-                      device = "/dev/disk/by-id/${cfg.main}";
-                      type = "disk";
+              {
+                main = {
+                  device = "/dev/disk/by-id/${cfg.main}";
+                  type = "disk";
 
-                      content = {
-                        type = "gpt";
+                  content = {
+                    type = "gpt";
 
-                        partitions = {
-                          boot = {
-                            name = "boot";
-                            size = "1M";
-                            type = "EF02";
-                          };
+                    partitions = {
+                      boot = {
+                        name = "boot";
+                        size = "1M";
+                        type = "EF02";
+                      };
 
-                          esp = {
-                            name = "ESP";
-                            size = "1G";
-                            type = "EF00";
+                      esp = {
+                        name = "ESP";
+                        size = "1G";
+                        type = "EF00";
 
-                            content = {
-                              type = "filesystem";
-                              format = "vfat";
-                              mountpoint = "/boot";
+                        content = {
+                          type = "filesystem";
+                          format = "vfat";
+                          mountpoint = "/boot";
+                        };
+                      };
+
+                      swap = {
+                        size = "8G";
+
+                        content = {
+                          type = "swap";
+                          resumeDevice = true;
+                        };
+                      };
+
+                      root = {
+                        name = "root";
+                        size = "100%";
+
+                        content = {
+                          type = "btrfs";
+                          extraArgs = ["-f"];
+
+                          subvolumes = {
+                            "/persistent" = {
+                              mountpoint = "/persistent";
+                              mountOptions = ["subvol=persistent" "noatime"];
+                            };
+
+                            "/nix" = {
+                              mountpoint = "/nix";
+                              mountOptions = ["subvol=nix" "noatime"];
                             };
                           };
+                        };
+                      };
+                    };
+                  };
+                };
+              }
+              (lib.mapAttrs (
+                  _: opts: {
+                    device = "/dev/disk/by-id/${opts.id}";
+                    type = "disk";
 
-                          swap = {
-                            size = "8G";
-
-                            content = {
-                              type = "swap";
-                              resumeDevice = true;
-                            };
-                          };
-
-                          root = {
-                            name = "root";
-                            size = "100%";
-
-                            content = {
-                              type = "btrfs";
-                              extraArgs = ["-f"];
-
-                              subvolumes = {
-                                "/persistent" = {
-                                  mountpoint = "/persistent";
-                                  mountOptions = ["subvol=persistent" "noatime"];
-                                };
-
-                                "/nix" = {
-                                  mountpoint = "/nix";
-                                  mountOptions = ["subvol=nix" "noatime"];
-                                };
-                              };
-                            };
+                    content = {
+                      type = "gpt";
+                      partitions = {
+                        games = {
+                          size = "100%";
+                          content = {
+                            type = "filesystem";
+                            format = "ext4";
+                            mountpoint = opts.mountpoint;
+                            mountOptions = ["noatime" "nofail"];
                           };
                         };
                       };
                     };
                   }
-                ]
-                (lib.mapAttrs (name: opts: {
-                    ${name} = {
-                      device = "/dev/disk/by-id/${opts.id}";
-                      type = "disk";
-
-                      content = {
-                        type = "gpt";
-                        partitions = {
-                          games = {
-                            size = "100%";
-                            content = {
-                              type = "filesystem";
-                              format = "ext4";
-                              mountpoint = opts.mountpoint;
-                              mountOptions = ["noatime" "nofail"];
-                            };
-                          };
-                        };
-                      };
-                    };
-                  })
-                  cfg.extra))
+                )
+                cfg.extra)
             ];
           };
         };
