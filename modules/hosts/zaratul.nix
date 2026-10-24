@@ -64,7 +64,7 @@
                 refresh = 180.002;
               };
 
-              scale = 1;
+              scale = 1.0;
 
               position = {
                 x = 0;
