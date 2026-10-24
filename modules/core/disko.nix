@@ -29,6 +29,8 @@
                   };
                 };
               });
+
+              default = {};
             };
           };
         };
@@ -43,104 +45,106 @@
             "/persistent".neededForBoot = true;
           };
 
-          disko.devices = lib.mkMerge [
-            (lib.concatLists
-              [
-                {
-                  nodev = {
-                    "/" = {
-                      fsType = "tmpfs";
-                      mountOptions = [
-                        "size=50%"
-                        "mode=755"
-                      ];
-                    };
-                  };
+          disko.devices = {
+            nodev = {
+              "/" = {
+                fsType = "tmpfs";
+                mountOptions = [
+                  "size=50%"
+                  "mode=755"
+                ];
+              };
+            };
 
-                  disk.main = {
-                    device = "/dev/disk/by-id/${cfg.main}";
-                    type = "disk";
+            disk = lib.mkMerge [
+              (lib.concatLists
+                [
+                  {
+                    main = {
+                      device = "/dev/disk/by-id/${cfg.main}";
+                      type = "disk";
 
-                    content = {
-                      type = "gpt";
+                      content = {
+                        type = "gpt";
 
-                      partitions = {
-                        boot = {
-                          name = "boot";
-                          size = "1M";
-                          type = "EF02";
-                        };
-
-                        esp = {
-                          name = "ESP";
-                          size = "1G";
-                          type = "EF00";
-
-                          content = {
-                            type = "filesystem";
-                            format = "vfat";
-                            mountpoint = "/boot";
+                        partitions = {
+                          boot = {
+                            name = "boot";
+                            size = "1M";
+                            type = "EF02";
                           };
-                        };
 
-                        swap = {
-                          size = "8G";
+                          esp = {
+                            name = "ESP";
+                            size = "1G";
+                            type = "EF00";
 
-                          content = {
-                            type = "swap";
-                            resumeDevice = true;
+                            content = {
+                              type = "filesystem";
+                              format = "vfat";
+                              mountpoint = "/boot";
+                            };
                           };
-                        };
 
-                        root = {
-                          name = "root";
-                          size = "100%";
+                          swap = {
+                            size = "8G";
 
-                          content = {
-                            type = "btrfs";
-                            extraArgs = ["-f"];
+                            content = {
+                              type = "swap";
+                              resumeDevice = true;
+                            };
+                          };
 
-                            subvolumes = {
-                              "/persistent" = {
-                                mountpoint = "/persistent";
-                                mountOptions = ["subvol=persistent" "noatime"];
-                              };
+                          root = {
+                            name = "root";
+                            size = "100%";
 
-                              "/nix" = {
-                                mountpoint = "/nix";
-                                mountOptions = ["subvol=nix" "noatime"];
+                            content = {
+                              type = "btrfs";
+                              extraArgs = ["-f"];
+
+                              subvolumes = {
+                                "/persistent" = {
+                                  mountpoint = "/persistent";
+                                  mountOptions = ["subvol=persistent" "noatime"];
+                                };
+
+                                "/nix" = {
+                                  mountpoint = "/nix";
+                                  mountOptions = ["subvol=nix" "noatime"];
+                                };
                               };
                             };
                           };
                         };
                       };
                     };
-                  };
-                }
-              ]
-              (lib.mapAttrs (name: opts: {
-                  disk.${name} = {
-                    device = "/dev/disk/by-id/${opts.id}";
-                    type = "disk";
+                  }
+                ]
+                (lib.mapAttrs (name: opts: {
+                    ${name} = {
+                      device = "/dev/disk/by-id/${opts.id}";
+                      type = "disk";
 
-                    content = {
-                      type = "gpt";
-                      partitions = {
-                        games = {
-                          size = "100%";
-                          content = {
-                            type = "filesystem";
-                            format = "ext4";
-                            mountpoint = opts.mountpoint;
-                            mountOptions = ["noatime" "nofail"];
+                      content = {
+                        type = "gpt";
+                        partitions = {
+                          games = {
+                            size = "100%";
+                            content = {
+                              type = "filesystem";
+                              format = "ext4";
+                              mountpoint = opts.mountpoint;
+                              mountOptions = ["noatime" "nofail"];
+                            };
                           };
                         };
                       };
                     };
-                  };
-                })
-                cfg.extra))
-          ];
+                  })
+                  cfg.extra))
+            ];
+          };
         };
     };
   };
