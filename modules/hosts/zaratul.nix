@@ -81,8 +81,13 @@
 
           extra = {
             games = {
-              id = "nvme-Samsung_SSD_980_PRO_1TB_S5GXNX0W429881M";
+              id = "nvme-Samsung_SSD_980_PRO_1TB_S5GXNX0W429884H";
               mountpoint = "/games";
+            };
+
+            extra = {
+              id = "wwn-0x5000c500b1579198";
+              mountpoint = "/extra";
             };
           };
         };
