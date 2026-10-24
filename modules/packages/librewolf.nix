@@ -474,4 +474,18 @@
       }
     '';
   };
+
+  flake = {
+    userModules.librewolfPersistent = user: {
+      preservation = {
+        preserveAt."/persistent" = {
+          users.${user} = {
+            files = [
+              ".librewolf/cookies.sqlite"
+            ];
+          };
+        };
+      };
+    };
+  };
 }

@@ -1,23 +1,53 @@
 {self, ...}: {
   flake = {
-    homeModules.gtk = {pkgs, ...}: {
-      gtk = let
-        style = self.css.gtk {
-          theme = self.globals.theme.palette;
-        };
-      in {
-        enable = true;
-
-        colorScheme = "dark";
-
-        theme = {
-          package = pkgs.adw-gtk3;
-          name = "adw-gtk3";
-        };
-
-        gtk3.extraCss = style;
-        gtk4.extraCss = style;
+    userModules.gtk = user: {
+      lib,
+      pkgs,
+      ...
+    }: let
+      style = self.css.gtk {
+        theme = self.globals.theme.palette;
       };
+
+      settings = {
+        gtk-theme-name = "adw-gtk3";
+        gtk-application-prefer-dark-theme = true;
+      };
+
+      keyfile = pkgs.writeText "gtk.keyfile" (lib.generators.toDconfINI {
+        "org/gnome/desktop/interface" = {
+          color-scheme = "prefer-dark";
+          gtk-theme = "adw-gtk3";
+        };
+      });
+
+      dconfDb = pkgs.runCommand "dconf-user-db" {nativeBuildInputs = [pkgs.dconf];} ''
+        mkdir keyfiles
+        cp ${keyfile} keyfiles/00-gtk
+        dconf compile $out keyfiles
+      '';
+
+      ini = pkgs.formats.ini {};
+    in {
+      users.users."${user}" = {
+        packages = [pkgs.adw-gtk3];
+      };
+
+      hjem.users.${user} = {
+        files = {
+          ".config/gtk-3.0/settings.ini".source =
+            ini.generate "gtk3-settings.ini" {Settings = settings;};
+          ".config/gtk-4.0/settings.ini".source =
+            ini.generate "gtk4-settings.ini" {Settings = settings;};
+
+          files.".config/dconf/user".source = dconfDb;
+
+          ".config/gtk-3.0/gtk.css".text = style;
+          ".config/gtk-4.0/gtk.css".text = style;
+        };
+      };
+
+      programs.dconf.enable = true;
     };
 
     css.gtk = {theme}: let

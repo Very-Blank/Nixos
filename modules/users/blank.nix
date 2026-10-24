@@ -28,12 +28,17 @@
             self.nixosModules.niri
           ]
           (map (m: m user) (with self.userModules; [
+            gtk
+
             networkingTrayService
             bluetoothTrayService
             quickshellService
             anyrunService
             swaybgService
             makoService
+
+            librewolfPersistent
+            steamPersistent
           ]))
         ];
 
@@ -120,14 +125,11 @@
                 "Pictures"
                 ".local/share/keyrings"
                 ".local/share/Nextcloud"
-                ".local/share/Steam"
-                ".steam"
                 ".ssh"
               ];
 
               files = [
                 ".zsh_history"
-                ".librewolf/cookies.sqlite"
               ];
             };
           };
@@ -137,25 +139,5 @@
         # FIXME: Move this else where?
         environment.pathsToLink = ["/share/zsh"];
       };
-
-    # homeModule = user: {...}: {
-    #   services = {
-    #     nextcloud-client = {
-    #       enable = true;
-    #     };
-    #   };
-    #
-    #   xdg = {
-    #     enable = true;
-    #
-    #     userDirs = {
-    #       createDirectories = true;
-    #     };
-    #   };
-    #
-    #   home = {
-    #     stateVersion = "26.11";
-    #   };
-    # };
   };
 }
