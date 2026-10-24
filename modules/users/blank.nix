@@ -17,7 +17,7 @@
           terminal = "${
             lib.getExe
             (
-              if (config.host.name == "hermes")
+              if (config.core.host.name == "hermes")
               then
                 # NOTE: On hermes this helps out to fill the whole terminal emulator.
                 (self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty.override {
