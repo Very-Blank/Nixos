@@ -23,6 +23,8 @@
               type = lib.types.listOf (lib.types.enum [
                 "battery"
                 "bluetooth"
+                "brightness"
+                "audio"
                 "wifi"
               ]);
               description = "What features does the host have.";

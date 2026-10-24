@@ -60,6 +60,14 @@
               scale = 1.5;
             };
           };
+
+          features = [
+            "battery"
+            "bluetooth"
+            "brightness"
+            "audio"
+            "wifi"
+          ];
         };
 
         disko = {

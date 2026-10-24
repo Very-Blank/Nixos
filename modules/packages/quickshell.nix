@@ -11,6 +11,7 @@
     userModules.quickshellService = user: {
       lib,
       pkgs,
+      config,
       ...
     }: {
       hjem.users.${user}.files = let
@@ -34,6 +35,14 @@
               ExecStart = [
                 "${lib.getExe (self.packages.${pkgs.stdenv.hostPlatform.system}.quickshell.override {
                   palette = inputs.colors.lib.withHash self.globals.theme.palette;
+
+                  features = {
+                    # TODO: This should check what display manager the user uses.
+                    niriWorkspaces = true;
+                    audio = builtins.elem "audio" config.core.host.features;
+                    brightness = builtins.elem "brightness" config.core.host.features;
+                    battery = builtins.elem "battery" config.core.host.features;
+                  };
                 })}"
               ];
               Restart = "on-failure";
