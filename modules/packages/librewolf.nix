@@ -138,8 +138,6 @@
             value = forceInstall addon;
           }) (with addons; [
             istilldontcareaboutcookies
-            # floccus
-            darkreader
             ublock-origin
             bitwarden
             leechblock-ng
@@ -195,6 +193,9 @@
 
         "layers.acceleration.force-enabled" = lock true;
         "browser.toolbars.bookmarks.visibility" = lock "never";
+
+        "browser.newtabpage.activity-stream.hideLogo" = lock false;
+        "browser.newtabpage.activity-stream.showSearch" = lock false;
       };
     };
 
@@ -232,6 +233,12 @@
         lockPref("browser.translations.automaticallyPopup", false);
 
         lockPref("privacy.sanitize.sanitizeOnShutdown", false);
+
+
+        lockPref("privacy.resistFingerprinting", false);
+        lockPref("layout.css.prefers-color-scheme.content-override", 0);
+        lockPref("browser.theme.content-theme", 0);
+        lockPref("browser.theme.toolbar-theme", 0);
       '';
     };
 
@@ -256,19 +263,6 @@
               background-position: center center !important;
               background-size: cover !important;
               background-repeat: no-repeat !important;
-            }
-
-            /* Center Search Bar */
-            .search-wrapper {
-              position: fixed !important;
-              top: 50% !important;
-              left: 50% !important;
-              transform: translate(-50%, -50%) !important;
-            }
-
-            /* Disable Logo */
-            .logo-and-wordmark-wrapper {
-              display:none !important;
             }
 
             /* Disable Home Customize Button */
