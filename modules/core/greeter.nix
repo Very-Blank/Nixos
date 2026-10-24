@@ -19,7 +19,7 @@
       };
 
       config = let
-        cfg = config.modules.greeter;
+        cfg = config.core.greeter;
       in {
         services = {
           getty = {
