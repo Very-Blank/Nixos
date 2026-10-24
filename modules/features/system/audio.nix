@@ -27,8 +27,8 @@
       preservation = lib.mkIf (builtins.elem "audio" config.core.host.features) {
         preserveAt."/persistent" = {
           users.${user} = {
-            files = [
-              ".local/state/wireplumber/default-nodes"
+            directories = [
+              ".local/state/wireplumber/"
             ];
           };
         };
