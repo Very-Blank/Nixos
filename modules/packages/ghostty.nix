@@ -13,7 +13,7 @@
       font ? {
         package = pkgs.nerd-fonts._0xproto;
         family = "0xProto Nerd Font";
-        size = 10;
+        size = 11;
       },
       extraConfig ? null,
     }: let
