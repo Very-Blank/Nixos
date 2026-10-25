@@ -294,7 +294,7 @@
           fi
 
           tmp=$(mktemp)
-          trap 'rm -rf \$tmp' EXIT
+          trap 'rm -rf "$tmp"' EXIT
 
           ${lib.getExe pkgs.sqlite} "$1" "VACUUM INTO '$tmp'"
 
@@ -325,13 +325,22 @@
             state="\$HOME/.librewolf"
             mkdir -p "\$state"
 
-            dir=\$(mktemp -d -t librewolf.XXXXXX)
-            trap '${save} "\$dir/cookies.sqlite" "\$state/cookies.sqlite"; rm -rf "\$dir"' EXIT
+            base="\$XDG_RUNTIME_DIR"
+            [ -n "\$base" ] || base=/tmp
+            dir="\$base/librewolf-$hash"
 
-            cp -rL --no-preserve=mode ${profile}/. "\$dir"
-            ${load} "\$dir/cookies.sqlite" "\$state/cookies.sqlite"
+            if [ -d "\$dir" ]; then
+              exec $out/bin/.librewolf --profile "\$dir" "\$@"
+            else
+              mkdir -p -m 700 "\$dir"
+              trap '${save} "\$dir/cookies.sqlite" "\$state/cookies.sqlite"; rm -rf "\$dir"' EXIT
 
-            $out/bin/.librewolf --profile "\$dir" "\$@"
+              cp -rL --no-preserve=mode ${profile}/. "\$dir"
+              ${load} "\$dir/cookies.sqlite" "\$state/cookies.sqlite"
+
+              $out/bin/.librewolf --profile "\$dir" "\$@"
+            fi
+
             EOF
 
             chmod +x $out/bin/librewolf
