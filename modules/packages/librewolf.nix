@@ -325,9 +325,11 @@
             state="\$HOME/.librewolf"
             mkdir -p "\$state"
 
+            hash=$(basename "$out" | cut -d- -f1)
+
             base="\$XDG_RUNTIME_DIR"
             [ -n "\$base" ] || base=/tmp
-            dir="\$base/librewolf-$hash"
+            dir="\$base/librewolf-\$hash"
 
             if [ -d "\$dir" ]; then
               exec $out/bin/.librewolf --profile "\$dir" "\$@"
