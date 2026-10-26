@@ -6,6 +6,7 @@
   perSystem = {
     lib,
     pkgs,
+    inputs',
     ...
   }: {
     packages.niri = lib.makeOverridable ({
@@ -22,7 +23,9 @@
         size = 13;
       },
     }: let
-      kdlConfig = inputs.niri.lib.validatedConfigFor pkgs.niri (inputs.niri.lib.mkNiriKDL (self.settings.niri {
+      niri-package = inputs'.niri.packages.niri;
+
+      kdlConfig = inputs.niri-nix.lib.validatedConfigFor niri-package (inputs.niri-nix.lib.mkNiriKDL (self.settings.niri {
         inherit lib;
         inherit pkgs;
         inherit outputs;
@@ -60,7 +63,7 @@
       '';
     in (pkgs.symlinkJoin {
       name = "niri";
-      paths = [pkgs.niri];
+      paths = [niri-package];
       buildInputs = [pkgs.makeWrapper];
       postBuild = ''
         wrapProgram $out/bin/niri --add-flags "--config ${kdlConfig}" \

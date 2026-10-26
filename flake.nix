@@ -47,7 +47,12 @@
       flake = false;
     };
 
-    niri.url = "git+https://codeberg.org/BANanaD3V/niri-nix";
+    niri-nix.url = "git+https://codeberg.org/BANanaD3V/niri-nix";
+
+    niri = {
+      url = "github:niri-wm/niri";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     nixnvim = {
       url = "github:Very-Blank/NixNvim";
