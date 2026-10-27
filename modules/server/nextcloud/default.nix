@@ -60,7 +60,7 @@
         };
 
         config = {
-          adminuser = config.hostname;
+          # adminuser = config.hostname;
           # adminpassFile = config.sops.secrets."nextcloud/adminpass".path;
           dbtype = "pgsql";
         };
