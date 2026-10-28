@@ -12,13 +12,33 @@
             port = lib.mkOption {
               type = lib.types.ints.unsigned;
               default = 22;
-              description = "Port that the ssh service uses.";
+              description = ''
+                Port that the ssh service uses.
+              '';
             };
 
-            keys = lib.mkOption {
-              type = lib.types.listOf lib.types.singleLineStr;
-              description = "All of the authorized keys for ssh.";
-              default = [];
+            users = lib.mkOption {
+              type = lib.types.attrsOf (lib.types.submodule {
+                options = {
+                  authorizedKeys = lib.mkOption {
+                    type = lib.types.listOf lib.types.singleLineStr;
+                    description = ''
+                      The authorized keys that can ssh to this user.
+                    '';
+                    default = [];
+                  };
+                };
+              });
+
+              default = {};
+            };
+
+            banner = lib.mkOption {
+              type = lib.types.nullOr lib.types.nonEmptyStr;
+              description = ''
+                Banner to display on ssh.
+              '';
+              default = null;
             };
           };
         };
@@ -35,7 +55,6 @@
 
             settings = {
               PermitRootLogin = "no";
-
               PasswordAuthentication = false;
               KbdInteractiveAuthentication = false;
 
@@ -43,22 +62,14 @@
               Ciphers = lib.mkForce ["chacha20-poly1305@openssh.com"];
               KexAlgorithms = lib.mkForce ["mlkem768x25519-sha256"];
 
-              # FIXME: Make an option for this.
-              # AllowUsers = [config.modules.home.user.name];
+              AllowUsers =
+                lib.attrNames
+                cfg.users;
 
-              Banner = "${pkgs.writeText "Banner" ''
-
-                 ██████╗ ██╗   ██╗██████╗  ██████╗ ██████╗  ██████╗ ██████╗  ██████╗ ███████╗
-                ██╔═══██╗██║   ██║██╔══██╗██╔═══██╗██╔══██╗██╔═══██╗██╔══██╗██╔═══██╗██╔════╝
-                ██║   ██║██║   ██║██████╔╝██║   ██║██████╔╝██║   ██║██████╔╝██║   ██║███████╗
-                ██║   ██║██║   ██║██╔══██╗██║   ██║██╔══██╗██║   ██║██╔══██╗██║   ██║╚════██║
-                ╚██████╔╝╚██████╔╝██║  ██║╚██████╔╝██████╔╝╚██████╔╝██║  ██║╚██████╔╝███████║
-                 ╚═════╝  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝
-                                           A private ssh service.
-                                           Authorized users only,
-                                                 thank you.
-
-              ''}";
+              Banner =
+                lib.mkIf
+                (cfg.banner != null)
+                "${pkgs.writeText "Banner" cfg.banner}";
             };
           };
 
@@ -87,8 +98,10 @@
           };
         };
 
-        # FIXME: Make an option for this.
-        # users.users.${config.modules.home.user.name}.openssh.authorizedKeys.keys = cfg.keys;
+        users.users =
+          lib.mapAttrs
+          (name: value: {openssh.authorizedKeys.keys = value.authorizedKeys;})
+          cfg.users;
 
         networking.firewall.allowedTCPPorts = [cfg.port];
       };

@@ -34,15 +34,11 @@
       imports = with self.nixosModules; [
         networking
         bluetooth
+        battery
         tuxedo
         audio
         blank
       ];
-
-      services = {
-        upower.enable = true;
-        power-profiles-daemon.enable = true;
-      };
 
       core = {
         host = {
@@ -61,7 +57,6 @@
           };
 
           features = [
-            "battery"
             "brightness"
             "wifi"
           ];

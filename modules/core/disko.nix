@@ -11,7 +11,7 @@
         core = {
           disko = {
             main = lib.mkOption {
-              type = lib.types.nonEmptyStr;
+              type = lib.types.singleLineStr;
               description = "The id of the main disk used for the nixos install.";
             };
 
@@ -19,12 +19,12 @@
               type = lib.types.attrsOf (lib.types.submodule {
                 options = {
                   id = lib.mkOption {
-                    type = lib.types.nonEmptyStr;
+                    type = lib.types.singleLineStr;
                     description = "The id of the extra disk.";
                   };
 
                   mountpoint = lib.mkOption {
-                    type = lib.types.nonEmptyStr;
+                    type = lib.types.singleLineStr;
                     description = "The mountpoint of the extra disk.";
                   };
                 };
