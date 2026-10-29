@@ -41,9 +41,26 @@
               {
                 file = "/etc/machine-id";
                 inInitrd = true;
+                how = "symlink";
+                configureParent = true;
               }
             ];
           };
+        };
+
+        boot.initrd.systemd.tmpfiles.settings.preservation."/sysroot/state/etc/machine-id".f = {
+          argument = "uninitialized";
+        };
+
+        systemd.services.systemd-machine-id-commit = {
+          unitConfig.ConditionPathIsMountPoint = [
+            ""
+            "/persistent/etc/machine-id"
+          ];
+          serviceConfig.ExecStart = [
+            ""
+            "systemd-machine-id-setup --commit --root /persistent"
+          ];
         };
       };
     };
