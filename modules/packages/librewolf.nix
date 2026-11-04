@@ -286,24 +286,6 @@
     packages = {
       librewolf = let
         save = pkgs.writeShellScript "save" ''
-          [[ -f "$1" ]] || exit 0
-
-          if [[ "$#" -ne 2 ]]; then
-            echo "Usage: save <profile-db> <stored-db>" >&2
-            exit 1
-          fi
-
-          tmp=$(mktemp)
-          trap 'rm -rf "$tmp"' EXIT
-
-          ${lib.getExe pkgs.sqlite} "$1" "VACUUM INTO '$tmp'"
-
-          cat "$tmp" > "$2"
-        '';
-
-        # storage/default/https+++${site}/ls/data.sqlite
-
-        saveNew = pkgs.writeShellScript "save" ''
           if [[ "$#" -ne 2 ]]; then
             echo "Usage: save <profile-dir> <storage-dir>" >&2
             exit 1
@@ -311,7 +293,7 @@
 
           src="$1"
           dst="$2"
-            
+          
           [[ -f "$src"/cookies.sqlite ]] || exit 0
 
           tmp=$(mktemp -d)
@@ -345,7 +327,7 @@
           src="$2"
           dst="$1"
 
-          if [[ -f "$src" ]]; then
+          if [[ -d "$src" ]]; then
             cp -r "$src" "$dst"
           fi
         '';
