@@ -9,282 +9,267 @@
     inputs',
     ...
   }: let
-    addons = inputs'.firefox-addons.packages;
+  in {
+    packages.librewolf =
+      lib.makeOverridable (module: let
+        cfg = (self.lib.evalConfig pkgs self.configOptions.librewolf module).config;
 
-    forceInstall = addon: {
-      install_url = "file://${addon}/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/${addon.addonId}.xpi";
-      installation_mode = "force_installed";
-    };
+        addons = inputs'.firefox-addons.packages;
 
-    lock = value: {
-      Value = value;
-      Status = "locked";
-    };
+        policies = {
+          SearchEngines = {
+            Default = cfg.search.default;
+            Add =
+              lib.mapAttrsToList (name: value: {
+                Name = name;
+                URLTemplate = value.url;
+                Alias = value.alias;
+                Method = "GET";
+              })
+              cfg.search.engines;
 
-    policies = {
-      SearchEngines = {
-        Default = "NonAIGoogle";
-        Add =
-          map (engine: {
-            Name = engine.name;
-            URLTemplate = engine.url;
-            Alias = engine.alias;
-            Method = "GET";
-          })
-          [
-            {
-              name = "NonAIGoogle";
-              alias = "@gg";
-              url = "https://www.google.com/search?udm=14&q={searchTerms}";
-            }
-            {
-              name = "Youtube";
-              alias = "@yt";
-              url = "https://www.youtube.com/results?search_query={searchTerms}";
-            }
-            {
-              name = "Nix Packages";
-              alias = "@np";
-              url = "https://search.nixos.org/packages?channel=unstable&query={searchTerms}";
-            }
-            {
-              name = "Nix Options";
-              alias = "@no";
-              url = "https://search.nixos.org/options?channel=unstable&query={searchTerms}";
-            }
-            {
-              name = "NixOS Wiki";
-              alias = "@nw";
-              url = "https://wiki.nixos.org/w/index.php?search={searchTerms}";
-            }
-            {
-              name = "Home Manager Options";
-              alias = "@nh";
-              url = "https://home-manager-options.extranix.com/?release=master&query={searchTerms}";
-            }
-          ];
+            Remove = [
+              "Mojeek"
+              "Brave"
+              "Searx"
+              "DuckDuckGo No-AI"
+              "Startpage"
+            ];
+          };
 
-        Remove = [
-          "Mojeek"
-          "Brave"
-          "Searx"
-          "DuckDuckGo No-AI"
-          "Startpage"
-        ];
-      };
+          AppAutoUpdate = false;
+          BackgroundAppUpdate = false;
+          NoDefaultBookmarks = true;
 
-      AppAutoUpdate = false;
-      BackgroundAppUpdate = false;
-      NoDefaultBookmarks = true;
+          # Feature Disabling
+          DisableFirefoxStudies = true;
+          DisableFirefoxAccounts = true;
+          DisableFirefoxScreenshots = true;
+          DisableForgetButton = true;
+          DisableMasterPasswordCreation = true;
+          DisableProfileImport = true;
+          DisableProfileRefresh = true;
+          DisableSetDesktopBackground = true;
+          DisablePocket = true;
+          DisableTelemetry = true;
+          DisableFormHistory = true;
+          DisablePasswordReveal = true;
 
-      # Feature Disabling
-      DisableFirefoxStudies = true;
-      DisableFirefoxAccounts = true;
-      DisableFirefoxScreenshots = true;
-      DisableForgetButton = true;
-      DisableMasterPasswordCreation = true;
-      DisableProfileImport = true;
-      DisableProfileRefresh = true;
-      DisableSetDesktopBackground = true;
-      DisablePocket = true;
-      DisableTelemetry = true;
-      DisableFormHistory = true;
-      DisablePasswordReveal = true;
+          # Access Restrictions
+          BlockAboutConfig = false;
+          BlockAboutProfiles = true;
+          # BlockAboutSupport = true;
 
-      # Access Restrictions
-      BlockAboutConfig = false;
-      BlockAboutProfiles = true;
-      # BlockAboutSupport = true;
+          # UI and Behavior
+          DisplayMenuBar = "never";
+          DontCheckDefaultBrowser = true;
+          OverrideFirstRunPage = "";
+          OverridePostUpdatePage = "";
+          UserMessaging = {
+            SkipOnboarding = true;
+            WhatsNew = false;
+            ExtensionRecommendations = false;
+            FeatureRecommendations = false;
+            UrlbarInterventions = false;
+            MoreFromMozilla = false;
+            FirefoxLabs = false;
+          };
+          HardwareAcceleration = false;
+          OfferToSaveLogins = false;
 
-      # UI and Behavior
-      DisplayMenuBar = "never";
-      DontCheckDefaultBrowser = true;
-      OverrideFirstRunPage = "";
-      OverridePostUpdatePage = "";
-      UserMessaging = {
-        SkipOnboarding = true;
-        WhatsNew = false;
-        ExtensionRecommendations = false;
-        FeatureRecommendations = false;
-        UrlbarInterventions = false;
-        MoreFromMozilla = false;
-        FirefoxLabs = false;
-      };
-      HardwareAcceleration = false;
-      OfferToSaveLogins = false;
+          # AI
+          AIControls = {
+            Enabled = false;
+            Chatbot = false;
+            LinkPreviews = false;
+            TabGroups = false;
+            Locked = true;
+          };
 
-      # AI
-      AIControls = {
-        Enabled = false;
-        Chatbot = false;
-        LinkPreviews = false;
-        TabGroups = false;
-        Locked = true;
-      };
+          # Security
+          AutofillCreditCardEnabled = false;
+          EnableTrackingProtection = {
+            Value = true;
+            Locked = true;
+            Cryptomining = true;
+            Fingerprinting = true;
+          };
 
-      # Security
-      AutofillCreditCardEnabled = false;
-      EnableTrackingProtection = {
-        Value = true;
-        Locked = true;
-        Cryptomining = true;
-        Fingerprinting = true;
-      };
+          ExtensionSettings = let
+            forceInstall = addon: {
+              install_url = "file://${addon}/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/${addon.addonId}.xpi";
+              installation_mode = "force_installed";
+            };
+          in
+            {"*".installation_mode = "blocked";}
+            // lib.listToAttrs (map (extension: {
+                name = addons.${extension.name}.addonId;
+                value = forceInstall (addons.${extension.name});
+              })
+              cfg.extensions);
 
-      ExtensionSettings =
-        {"*".installation_mode = "blocked";}
-        // builtins.listToAttrs (map (addon: {
-            name = addon.addonId;
-            value = forceInstall addon;
-          }) (with addons; [
-            istilldontcareaboutcookies
-            ublock-origin
-            bitwarden
-            leechblock-ng
-          ]));
+          "3rdparty".Extensions = lib.listToAttrs (
+            map (
+              extension: {
+                name = addons.${extension.name}.addonId;
+                value = extension.settings;
+              }
+            )
+            (lib.filter (extension: extension.settings != null) cfg.extensions)
+          );
 
-      "3rdparty".Extensions = {
-        "${addons.ublock-origin.addonId}".adminSettings.userSettings = {
-          uiTheme = "dark";
-          uiAccentCustom = true;
-          uiAccentCustom0 = "#${self.globals.theme.palette.base0E}";
-          cloudStorageEnabled = false;
-        };
+          Preferences = let
+            lock = value: {
+              Value = value;
+              Status = "locked";
+            };
+          in {
+            "browser.contentblocking.category" = lock "strict";
 
-        "${addons.bitwarden.addonId}" = {
-          environment = {
-            base = "https://vault.taildevourer.com";
+            "sidebar.revamp" = lock true;
+            "sidebar.verticalTabs" = lock true;
+            "sidebar.main.tools" = lock (
+              lib.concatStringsSep "," (map (extension: "${addons.${extension.name}.addonId}") (lib.filter (extension: extension.tool) cfg.extensions))
+            );
+
+            # clear up nav-bar
+            "browser.uiCustomization.state" = lock ''
+              {
+                 "placements":{
+                    "nav-bar":[
+                       "back-button",
+                       "forward-button",
+                       "stop-reload-button",
+                       "customizableui-special-spring1",
+                       "vertical-spacer",
+                       "urlbar-container",
+                       "customizableui-special-spring2",
+                       "downloads-button",
+                       "open-file-button",
+                       "fxa-toolbar-menu-button",
+                       "reset-pbm-toolbar-button",
+                       "unified-extensions-button",
+                       "ublock0_raymondhill_net-browser-action",
+                       "alltabs-button",
+                       "smartwindow-group-tabs-button",
+                       "ai-window-toggle"
+                    ]
+                 }
+              }
+            '';
+
+            "layers.acceleration.force-enabled" = lock true;
+            "browser.toolbars.bookmarks.visibility" = lock "never";
+
+            "browser.newtabpage.activity-stream.hideLogo" = lock false;
+            "browser.newtabpage.activity-stream.showSearch" = lock false;
           };
         };
-      };
 
-      Preferences = {
-        "browser.contentblocking.category" = lock "strict";
+        librewolfWrapped = pkgs.wrapFirefox pkgs.librewolf-unwrapped {
+          inherit (pkgs.librewolf-unwrapped) extraPrefsFiles extraPoliciesFiles;
+          libName = "librewolf";
+          extraPolicies = policies;
+          extraPrefs = let
+            mkUuid = seed: let
+              hash = lib.hashString "sha256" seed;
+            in
+              lib.concatStringsSep "-" [
+                (builtins.substring 0 8 hash)
+                (builtins.substring 8 4 hash)
+                (builtins.substring 12 4 hash)
+                (builtins.substring 16 4 hash)
+                (builtins.substring 20 12 hash)
+              ];
 
-        "sidebar.revamp" = lock true;
-        "sidebar.verticalTabs" = lock true;
-        "sidebar.main.tools" = lock "${addons.bitwarden.addonId}";
+            uuids = builtins.toJSON (
+              lib.listToAttrs (map (extension: {
+                  name = addons.${extension.name}.addonId;
+                  value = mkUuid (extension.name + cfg.secret);
+                })
+                cfg.extensions)
+            );
+          in ''
+            lockPref("browser.aboutConfig.showWarning", false);
+            lockPref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 
-        # clear up nav-bar
-        "browser.uiCustomization.state" = lock ''
+            // Set UI density to normal
+            lockPref("browser.uidensity", 0);
+
+            // Enable SVG context-propertes
+            lockPref("svg.context-properties.content.enabled", true);
+
+            // Disable private window dark theme
+            lockPref("browser.theme.dark-private-windows", false);
+
+            // Enable rounded bottom window corners
+            lockPref("widget.gtk.rounded-bottom-corners.enabled", true);
+
+            // Middle mouse paste
+            lockPref("middlemouse.paste", false);
+
+            // Disable backups as it causes warnings.
+            // Possibly because it tries to access root directory.
+            lockPref("browser.backup.enabled", false);
+            lockPref("browser.backup.scheduled.enabled", false);
+            lockPref("browser.backup.archive.enabled", false);
+            lockPref("browser.backup.restore.enabled", false);
+
+            // Disable translation popup.
+            lockPref("browser.translations.automaticallyPopup", false);
+
+            lockPref("privacy.sanitize.sanitizeOnShutdown", false);
+
+            lockPref("privacy.resistFingerprinting", false);
+            lockPref("layout.css.prefers-color-scheme.content-override", 0);
+            lockPref("browser.theme.content-theme", 0);
+            lockPref("browser.theme.toolbar-theme", 0);
+
+            lockPref("extensions.webextensions.uuids", '${uuids}');
+          '';
+        };
+
+        profile = pkgs.linkFarm "librewolf-profile-skeleton" [
           {
-             "placements":{
-                "nav-bar":[
-                   "back-button",
-                   "forward-button",
-                   "stop-reload-button",
-                   "customizableui-special-spring1",
-                   "vertical-spacer",
-                   "urlbar-container",
-                   "customizableui-special-spring2",
-                   "downloads-button",
-                   "open-file-button",
-                   "fxa-toolbar-menu-button",
-                   "reset-pbm-toolbar-button",
-                   "unified-extensions-button",
-                   "ublock0_raymondhill_net-browser-action",
-                   "alltabs-button",
-                   "smartwindow-group-tabs-button",
-                   "ai-window-toggle"
-                ]
-             }
+            name = "chrome/userChrome.css";
+            path = pkgs.writeText "userChrome.css" ''
+              @import "${inputs.firefox-gnome-theme}/userChrome.css";
+              ${self.css.librewolf (inputs.colors.lib.withHash self.globals.theme.palette)}
+            '';
           }
-        '';
+          {
+            name = "chrome/userContent.css";
+            path = pkgs.writeText "userContent.css" ''
+              @import "${inputs.firefox-gnome-theme}/userContent.css";
+              ${self.css.librewolf (inputs.colors.lib.withHash self.globals.theme.palette)}
 
-        "layers.acceleration.force-enabled" = lock true;
-        "browser.toolbars.bookmarks.visibility" = lock "never";
+              @-moz-document url("about:newtab"), url("about:home") {
+                /* Wallpaper */
+                body {
+                  background-image: url("file://${../../resources/wallpapers/bain_ning_bing_and_fang_yuan.png}") !important;
+                  background-position: center center !important;
+                  background-size: cover !important;
+                  background-repeat: no-repeat !important;
+                }
 
-        "browser.newtabpage.activity-stream.hideLogo" = lock false;
-        "browser.newtabpage.activity-stream.showSearch" = lock false;
-      };
-    };
-
-    librewolfWrapped = pkgs.wrapFirefox pkgs.librewolf-unwrapped {
-      inherit (pkgs.librewolf-unwrapped) extraPrefsFiles extraPoliciesFiles;
-      libName = "librewolf";
-      extraPolicies = policies;
-      extraPrefs = ''
-        lockPref("browser.aboutConfig.showWarning", false);
-        lockPref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
-
-        // Set UI density to normal
-        lockPref("browser.uidensity", 0);
-
-        // Enable SVG context-propertes
-        lockPref("svg.context-properties.content.enabled", true);
-
-        // Disable private window dark theme
-        lockPref("browser.theme.dark-private-windows", false);
-
-        // Enable rounded bottom window corners
-        lockPref("widget.gtk.rounded-bottom-corners.enabled", true);
-
-        // Middle mouse paste
-        lockPref("middlemouse.paste", false);
-
-        // Disable backups as it causes warnings.
-        // Possibly because it tries to access root directory.
-        lockPref("browser.backup.enabled", false);
-        lockPref("browser.backup.scheduled.enabled", false);
-        lockPref("browser.backup.archive.enabled", false);
-        lockPref("browser.backup.restore.enabled", false);
-
-        // Disable translation popup.
-        lockPref("browser.translations.automaticallyPopup", false);
-
-        lockPref("privacy.sanitize.sanitizeOnShutdown", false);
-
-
-        lockPref("privacy.resistFingerprinting", false);
-        lockPref("layout.css.prefers-color-scheme.content-override", 0);
-        lockPref("browser.theme.content-theme", 0);
-        lockPref("browser.theme.toolbar-theme", 0);
-      '';
-    };
-
-    profile = pkgs.linkFarm "librewolf-profile-skeleton" [
-      {
-        name = "chrome/userChrome.css";
-        path = pkgs.writeText "userChrome.css" ''
-          @import "${inputs.firefox-gnome-theme}/userChrome.css";
-          ${self.css.librewolf (inputs.colors.lib.withHash self.globals.theme.palette)}
-        '';
-      }
-      {
-        name = "chrome/userContent.css";
-        path = pkgs.writeText "userContent.css" ''
-          @import "${inputs.firefox-gnome-theme}/userContent.css";
-          ${self.css.librewolf (inputs.colors.lib.withHash self.globals.theme.palette)}
-
-          @-moz-document url("about:newtab"), url("about:home") {
-            /* Wallpaper */
-            body {
-              background-image: url("file://${../../resources/wallpapers/bain_ning_bing_and_fang_yuan.png}") !important;
-              background-position: center center !important;
-              background-size: cover !important;
-              background-repeat: no-repeat !important;
-            }
-
-            /* Disable Home Customize Button */
-            .open-customization-button {
-              display:none !important;
-            }
+                /* Disable Home Customize Button */
+                .open-customization-button {
+                  display:none !important;
+                }
+              }
+            '';
           }
-        '';
-      }
-    ];
+        ];
 
-    fontsConf = pkgs.makeFontsConf {
-      fontDirectories = [
-        pkgs.noto-fonts
-        pkgs.noto-fonts-cjk-sans
-        pkgs.noto-fonts-cjk-serif
-        pkgs.noto-fonts-color-emoji
-      ];
-    };
-  in {
-    packages = {
-      librewolf = let
+        fontsConf = pkgs.makeFontsConf {
+          fontDirectories = [
+            pkgs.noto-fonts
+            pkgs.noto-fonts-cjk-sans
+            pkgs.noto-fonts-cjk-serif
+            pkgs.noto-fonts-color-emoji
+          ];
+        };
+
         save = pkgs.writeShellScript "save" ''
           if [[ "$#" -ne 2 ]]; then
             echo "Usage: save <profile-dir> <storage-dir>" >&2
@@ -293,7 +278,7 @@
 
           src="$1"
           dst="$2"
-          
+                  
           [[ -f "$src"/cookies.sqlite ]] || exit 0
 
           tmp=$(mktemp -d)
@@ -371,8 +356,12 @@
           meta = {
             mainProgram = "librewolf";
           };
-        };
-    };
+        })
+      {
+        # NOTE: We set a fake secrect only for when running with: nix run .#
+        # Using this in your config is a security issue!
+        secret = "fake-secrect-do-not-use";
+      };
   };
 
   flake = {
@@ -494,14 +483,135 @@
   };
 
   flake = {
-    userModules.librewolfPersistent = user: {
-      preservation = {
-        preserveAt."/persistent" = {
-          users.${user} = {
-            directories = [
-              ".librewolf"
-            ];
+    userModules.librewolf = user: {
+      config = {
+        preservation = {
+          preserveAt."/persistent" = {
+            users.${user} = {
+              directories = [
+                ".librewolf"
+              ];
+            };
           };
+        };
+      };
+    };
+
+    configOptions.librewolf = {lib, ...}: {
+      options = {
+        extensions = lib.mkOption {
+          type = lib.types.listOf (lib.types.submodule {
+            options = {
+              name = lib.mkOption {
+                type = lib.types.singleLineStr;
+                description = ''
+                  Name of the firefox addon.
+                '';
+              };
+
+              settings = lib.mkOption {
+                type = lib.types.nullOr lib.types.json;
+              };
+
+              tool = lib.mkEnableOption ''
+                If enabled the extensions will be added to the tool bar.
+              '';
+            };
+          });
+
+          default = [
+            {name = "leechblock-ng";}
+            {name = "istilldontcareaboutcookies";}
+            {
+              name = "ublock-origin";
+              settings = {
+                adminSettings.userSettings = {
+                  uiTheme = "dark";
+                  uiAccentCustom = true;
+                  uiAccentCustom0 = "#${self.globals.theme.palette.base0E}";
+                  cloudStorageEnabled = false;
+                };
+              };
+            }
+            {
+              name = "bitwarden";
+              tool = true;
+              settings = {
+                environment = {
+                  base = "https://vault.taildevourer.com";
+                };
+              };
+            }
+          ];
+        };
+
+        secret = lib.mkOption {
+          type = lib.types.nonEmptyStr;
+          description = ''
+            Secrect value that we use with the extension's name to create an unique secrect uuid.
+          '';
+        };
+
+        search = {
+          engines = lib.mkOption {
+            type = lib.types.attrsOf (lib.types.submodule {
+              options = {
+                url = lib.mkOption {
+                  type = lib.types.nonEmptyStr;
+                };
+
+                alias = lib.mkOption {
+                  type = lib.types.nonEmptyStr;
+                };
+              };
+            });
+
+            default = {
+              "NonAIGoogle" = {
+                alias = "@gg";
+                url = "https://www.google.com/search?udm=14&q={searchTerms}";
+              };
+
+              "Youtube" = {
+                alias = "@yt";
+                url = "https://www.youtube.com/results?search_query={searchTerms}";
+              };
+
+              "Nix Packages" = {
+                alias = "@np";
+                url = "https://search.nixos.org/packages?channel=unstable&query={searchTerms}";
+              };
+
+              "Nix Options" = {
+                alias = "@no";
+                url = "https://search.nixos.org/options?channel=unstable&query={searchTerms}";
+              };
+
+              "NixOS Wiki" = {
+                alias = "@nw";
+                url = "https://wiki.nixos.org/w/index.php?search={searchTerms}";
+              };
+
+              "Home Manager Options" = {
+                alias = "@nh";
+                url = "https://home-manager-options.extranix.com/?release=master&query={searchTerms}";
+              };
+            };
+          };
+
+          # FIXME: Add and assert to check this engine exists.
+          default = lib.mkOption {
+            type = lib.types.nonEmptyStr;
+            default = "NonAIGoogle";
+          };
+        };
+
+        background = lib.mkOption {
+          type = lib.types.path;
+          description = ''
+            Path to the background image.
+          '';
+          example = lib.literalExpression "./wallpaper.png";
         };
       };
     };
