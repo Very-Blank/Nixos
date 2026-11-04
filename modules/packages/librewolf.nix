@@ -301,14 +301,52 @@
           cat "$tmp" > "$2"
         '';
 
-        load = pkgs.writeShellScript "load" ''
+        # storage/default/https+++${site}/ls/data.sqlite
+
+        saveNew = pkgs.writeShellScript "save" ''
           if [[ "$#" -ne 2 ]]; then
-            echo "Usage: load <profile-db> <stored-db>" >&2
+            echo "Usage: save <profile-dir> <storage-dir>" >&2
             exit 1
           fi
 
-          if [[ -f "$2" ]]; then
-            cp "$2" "$1"
+          src="$1"
+          dst="$2"
+            
+          [[ -f "$src"/cookies.sqlite ]] || exit 0
+
+          tmp=$(mktemp -d)
+          trap 'rm -rf "$tmp"' EXIT
+
+          ${lib.getExe pkgs.sqlite} "$src"/cookies.sqlite "VACUUM INTO '$tmp/cookies.sqlite'"
+
+          if [[ -d "$src"/storage/default ]]; then
+            for dir in "$src"/storage/default/https+++*; do
+              db="$dir/ls/data.sqlite"
+              [[ -f "$db" ]] || continue
+
+              site="$(basename "$dir")"
+              loc="$tmp"/storage/default/"$site"/ls
+
+              mkdir -p "$loc"
+
+              ${lib.getExe pkgs.sqlite} "$db" "VACUUM INTO '$loc/data.sqlite'"
+            done
+          fi
+
+          ${lib.getExe pkgs.rsync} -a --delete "$tmp"/ "''${dst:?}"/
+        '';
+
+        load = pkgs.writeShellScript "load" ''
+          if [[ "$#" -ne 2 ]]; then
+            echo "Usage: load <profile-dir> <stored-dir>" >&2
+            exit 1
+          fi
+
+          src="$2"
+          dst="$1"
+
+          if [[ -f "$src" ]]; then
+            cp -r "$src" "$dst"
           fi
         '';
       in
@@ -335,10 +373,10 @@
               exec $out/bin/.librewolf --profile "\$dir" "\$@"
             else
               mkdir -p -m 700 "\$dir"
-              trap '${save} "\$dir/cookies.sqlite" "\$state/cookies.sqlite"; rm -rf "\$dir"' EXIT
+              trap '${save} "\$dir" "\$state"; rm -rf "\$dir"' EXIT
 
               cp -rL --no-preserve=mode ${profile}/. "\$dir"
-              ${load} "\$dir/cookies.sqlite" "\$state/cookies.sqlite"
+              ${load} "\$dir" "\$state"
 
               $out/bin/.librewolf --profile "\$dir" "\$@"
             fi
@@ -478,8 +516,8 @@
       preservation = {
         preserveAt."/persistent" = {
           users.${user} = {
-            files = [
-              ".librewolf/cookies.sqlite"
+            directories = [
+              ".librewolf"
             ];
           };
         };
