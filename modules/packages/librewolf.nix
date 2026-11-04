@@ -328,7 +328,7 @@
           dst="$1"
 
           if [[ -d "$src" ]]; then
-            cp -r "$src" "$dst"
+            cp -r "$src"/* "$dst"/
           fi
         '';
       in
