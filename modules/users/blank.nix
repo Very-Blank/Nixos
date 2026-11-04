@@ -13,9 +13,7 @@
           outputs = config.core.host.outputs;
           audio = builtins.elem "audio" config.core.host.features;
           brightness = builtins.elem "audio" config.core.host.features;
-
           terminal = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty}";
-
           launcher = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun}";
 
           screenshots = {
@@ -67,6 +65,7 @@
 
           packages = with self.packages.${pkgs.stdenv.hostPlatform.system}; [
             librewolf
+
             nvim
             (git.override {
               user = {

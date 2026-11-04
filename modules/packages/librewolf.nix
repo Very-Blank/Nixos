@@ -10,358 +10,353 @@
     ...
   }: let
   in {
-    packages.librewolf =
-      lib.makeOverridable (module: let
-        cfg = (self.lib.evalConfig pkgs self.configOptions.librewolf module).config;
+    packages.librewolf = lib.makeOverridable (module: let
+      cfg = (self.lib.evalConfig pkgs self.configOptions.librewolf module).config;
 
-        addons = inputs'.firefox-addons.packages;
+      addons = inputs'.firefox-addons.packages;
 
-        policies = {
-          SearchEngines = {
-            Default = cfg.search.default;
-            Add =
-              lib.mapAttrsToList (name: value: {
-                Name = name;
-                URLTemplate = value.url;
-                Alias = value.alias;
-                Method = "GET";
-              })
-              cfg.search.engines;
+      policies = {
+        SearchEngines = {
+          Default = cfg.search.default;
+          Add =
+            lib.mapAttrsToList (name: value: {
+              Name = name;
+              URLTemplate = value.url;
+              Alias = value.alias;
+              Method = "GET";
+            })
+            cfg.search.engines;
 
-            Remove = [
-              "Mojeek"
-              "Brave"
-              "Searx"
-              "DuckDuckGo No-AI"
-              "Startpage"
-            ];
-          };
-
-          AppAutoUpdate = false;
-          BackgroundAppUpdate = false;
-          NoDefaultBookmarks = true;
-
-          # Feature Disabling
-          DisableFirefoxStudies = true;
-          DisableFirefoxAccounts = true;
-          DisableFirefoxScreenshots = true;
-          DisableForgetButton = true;
-          DisableMasterPasswordCreation = true;
-          DisableProfileImport = true;
-          DisableProfileRefresh = true;
-          DisableSetDesktopBackground = true;
-          DisablePocket = true;
-          DisableTelemetry = true;
-          DisableFormHistory = true;
-          DisablePasswordReveal = true;
-
-          # Access Restrictions
-          BlockAboutConfig = false;
-          BlockAboutProfiles = true;
-          # BlockAboutSupport = true;
-
-          # UI and Behavior
-          DisplayMenuBar = "never";
-          DontCheckDefaultBrowser = true;
-          OverrideFirstRunPage = "";
-          OverridePostUpdatePage = "";
-          UserMessaging = {
-            SkipOnboarding = true;
-            WhatsNew = false;
-            ExtensionRecommendations = false;
-            FeatureRecommendations = false;
-            UrlbarInterventions = false;
-            MoreFromMozilla = false;
-            FirefoxLabs = false;
-          };
-          HardwareAcceleration = false;
-          OfferToSaveLogins = false;
-
-          # AI
-          AIControls = {
-            Enabled = false;
-            Chatbot = false;
-            LinkPreviews = false;
-            TabGroups = false;
-            Locked = true;
-          };
-
-          # Security
-          AutofillCreditCardEnabled = false;
-          EnableTrackingProtection = {
-            Value = true;
-            Locked = true;
-            Cryptomining = true;
-            Fingerprinting = true;
-          };
-
-          ExtensionSettings = let
-            forceInstall = addon: {
-              install_url = "file://${addon}/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/${addon.addonId}.xpi";
-              installation_mode = "force_installed";
-            };
-          in
-            {"*".installation_mode = "blocked";}
-            // lib.listToAttrs (map (extension: {
-                name = addons.${extension.name}.addonId;
-                value = forceInstall (addons.${extension.name});
-              })
-              cfg.extensions);
-
-          "3rdparty".Extensions = lib.listToAttrs (
-            map (
-              extension: {
-                name = addons.${extension.name}.addonId;
-                value = extension.settings;
-              }
-            )
-            (lib.filter (extension: extension.settings != null) cfg.extensions)
-          );
-
-          Preferences = let
-            lock = value: {
-              Value = value;
-              Status = "locked";
-            };
-          in {
-            "browser.contentblocking.category" = lock "strict";
-
-            "sidebar.revamp" = lock true;
-            "sidebar.verticalTabs" = lock true;
-            "sidebar.main.tools" = lock (
-              lib.concatStringsSep "," (map (extension: "${addons.${extension.name}.addonId}") (lib.filter (extension: extension.tool) cfg.extensions))
-            );
-
-            # clear up nav-bar
-            "browser.uiCustomization.state" = lock ''
-              {
-                 "placements":{
-                    "nav-bar":[
-                       "back-button",
-                       "forward-button",
-                       "stop-reload-button",
-                       "customizableui-special-spring1",
-                       "vertical-spacer",
-                       "urlbar-container",
-                       "customizableui-special-spring2",
-                       "downloads-button",
-                       "open-file-button",
-                       "fxa-toolbar-menu-button",
-                       "reset-pbm-toolbar-button",
-                       "unified-extensions-button",
-                       "ublock0_raymondhill_net-browser-action",
-                       "alltabs-button",
-                       "smartwindow-group-tabs-button",
-                       "ai-window-toggle"
-                    ]
-                 }
-              }
-            '';
-
-            "layers.acceleration.force-enabled" = lock true;
-            "browser.toolbars.bookmarks.visibility" = lock "never";
-
-            "browser.newtabpage.activity-stream.hideLogo" = lock false;
-            "browser.newtabpage.activity-stream.showSearch" = lock false;
-          };
-        };
-
-        librewolfWrapped = pkgs.wrapFirefox pkgs.librewolf-unwrapped {
-          inherit (pkgs.librewolf-unwrapped) extraPrefsFiles extraPoliciesFiles;
-          libName = "librewolf";
-          extraPolicies = policies;
-          extraPrefs = let
-            mkUuid = seed: let
-              hash = lib.hashString "sha256" seed;
-            in
-              lib.concatStringsSep "-" [
-                (builtins.substring 0 8 hash)
-                (builtins.substring 8 4 hash)
-                (builtins.substring 12 4 hash)
-                (builtins.substring 16 4 hash)
-                (builtins.substring 20 12 hash)
-              ];
-
-            uuids = builtins.toJSON (
-              lib.listToAttrs (map (extension: {
-                  name = addons.${extension.name}.addonId;
-                  value = mkUuid (extension.name + cfg.secret);
-                })
-                cfg.extensions)
-            );
-          in ''
-            lockPref("browser.aboutConfig.showWarning", false);
-            lockPref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
-
-            // Set UI density to normal
-            lockPref("browser.uidensity", 0);
-
-            // Enable SVG context-propertes
-            lockPref("svg.context-properties.content.enabled", true);
-
-            // Disable private window dark theme
-            lockPref("browser.theme.dark-private-windows", false);
-
-            // Enable rounded bottom window corners
-            lockPref("widget.gtk.rounded-bottom-corners.enabled", true);
-
-            // Middle mouse paste
-            lockPref("middlemouse.paste", false);
-
-            // Disable backups as it causes warnings.
-            // Possibly because it tries to access root directory.
-            lockPref("browser.backup.enabled", false);
-            lockPref("browser.backup.scheduled.enabled", false);
-            lockPref("browser.backup.archive.enabled", false);
-            lockPref("browser.backup.restore.enabled", false);
-
-            // Disable translation popup.
-            lockPref("browser.translations.automaticallyPopup", false);
-
-            lockPref("privacy.sanitize.sanitizeOnShutdown", false);
-
-            lockPref("privacy.resistFingerprinting", false);
-            lockPref("layout.css.prefers-color-scheme.content-override", 0);
-            lockPref("browser.theme.content-theme", 0);
-            lockPref("browser.theme.toolbar-theme", 0);
-
-            lockPref("extensions.webextensions.uuids", '${uuids}');
-          '';
-        };
-
-        profile = pkgs.linkFarm "librewolf-profile-skeleton" [
-          {
-            name = "chrome/userChrome.css";
-            path = pkgs.writeText "userChrome.css" ''
-              @import "${inputs.firefox-gnome-theme}/userChrome.css";
-              ${self.css.librewolf (inputs.colors.lib.withHash self.globals.theme.palette)}
-            '';
-          }
-          {
-            name = "chrome/userContent.css";
-            path = pkgs.writeText "userContent.css" ''
-              @import "${inputs.firefox-gnome-theme}/userContent.css";
-              ${self.css.librewolf (inputs.colors.lib.withHash self.globals.theme.palette)}
-
-              @-moz-document url("about:newtab"), url("about:home") {
-                /* Wallpaper */
-                body {
-                  background-image: url("file://${../../resources/wallpapers/bain_ning_bing_and_fang_yuan.png}") !important;
-                  background-position: center center !important;
-                  background-size: cover !important;
-                  background-repeat: no-repeat !important;
-                }
-
-                /* Disable Home Customize Button */
-                .open-customization-button {
-                  display:none !important;
-                }
-              }
-            '';
-          }
-        ];
-
-        fontsConf = pkgs.makeFontsConf {
-          fontDirectories = [
-            pkgs.noto-fonts
-            pkgs.noto-fonts-cjk-sans
-            pkgs.noto-fonts-cjk-serif
-            pkgs.noto-fonts-color-emoji
+          Remove = [
+            "Mojeek"
+            "Brave"
+            "Searx"
+            "DuckDuckGo No-AI"
+            "Startpage"
           ];
         };
 
-        save = pkgs.writeShellScript "save" ''
-          if [[ "$#" -ne 2 ]]; then
-            echo "Usage: save <profile-dir> <storage-dir>" >&2
-            exit 1
-          fi
+        AppAutoUpdate = false;
+        BackgroundAppUpdate = false;
+        NoDefaultBookmarks = true;
 
-          src="$1"
-          dst="$2"
-                  
-          [[ -f "$src"/cookies.sqlite ]] || exit 0
+        # Feature Disabling
+        DisableFirefoxStudies = true;
+        DisableFirefoxAccounts = true;
+        DisableFirefoxScreenshots = true;
+        DisableForgetButton = true;
+        DisableMasterPasswordCreation = true;
+        DisableProfileImport = true;
+        DisableProfileRefresh = true;
+        DisableSetDesktopBackground = true;
+        DisablePocket = true;
+        DisableTelemetry = true;
+        DisableFormHistory = true;
+        DisablePasswordReveal = true;
 
-          tmp=$(mktemp -d)
-          trap 'rm -rf "$tmp"' EXIT
+        # Access Restrictions
+        BlockAboutConfig = false;
+        BlockAboutProfiles = true;
+        # BlockAboutSupport = true;
 
-          ${lib.getExe pkgs.sqlite} "$src"/cookies.sqlite "VACUUM INTO '$tmp/cookies.sqlite'"
+        # UI and Behavior
+        DisplayMenuBar = "never";
+        DontCheckDefaultBrowser = true;
+        OverrideFirstRunPage = "";
+        OverridePostUpdatePage = "";
+        UserMessaging = {
+          SkipOnboarding = true;
+          WhatsNew = false;
+          ExtensionRecommendations = false;
+          FeatureRecommendations = false;
+          UrlbarInterventions = false;
+          MoreFromMozilla = false;
+          FirefoxLabs = false;
+        };
+        HardwareAcceleration = false;
+        OfferToSaveLogins = false;
 
-          if [[ -d "$src"/storage/default ]]; then
-            for dir in "$src"/storage/default/https+++*; do
-              db="$dir/ls/data.sqlite"
-              [[ -f "$db" ]] || continue
+        # AI
+        AIControls = {
+          Enabled = false;
+          Chatbot = false;
+          LinkPreviews = false;
+          TabGroups = false;
+          Locked = true;
+        };
 
-              site="$(basename "$dir")"
-              loc="$tmp"/storage/default/"$site"/ls
+        # Security
+        AutofillCreditCardEnabled = false;
+        EnableTrackingProtection = {
+          Value = true;
+          Locked = true;
+          Cryptomining = true;
+          Fingerprinting = true;
+        };
 
-              mkdir -p "$loc"
+        ExtensionSettings = let
+          forceInstall = addon: {
+            install_url = "file://${addon}/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/${addon.addonId}.xpi";
+            installation_mode = "force_installed";
+          };
+        in
+          {"*".installation_mode = "blocked";}
+          // lib.listToAttrs (map (extension: {
+              name = addons.${extension.name}.addonId;
+              value = forceInstall (addons.${extension.name});
+            })
+            cfg.extensions);
 
-              ${lib.getExe pkgs.sqlite} "$db" "VACUUM INTO '$loc/data.sqlite'"
-            done
-          fi
+        "3rdparty".Extensions = lib.listToAttrs (
+          map (
+            extension: {
+              name = addons.${extension.name}.addonId;
+              value = extension.settings;
+            }
+          )
+          (lib.filter (extension: extension.settings != null) cfg.extensions)
+        );
 
-          ${lib.getExe pkgs.rsync} -a --delete "$tmp"/ "''${dst:?}"/
-        '';
+        Preferences = let
+          lock = value: {
+            Value = value;
+            Status = "locked";
+          };
+        in {
+          "browser.contentblocking.category" = lock "strict";
 
-        load = pkgs.writeShellScript "load" ''
-          if [[ "$#" -ne 2 ]]; then
-            echo "Usage: load <profile-dir> <stored-dir>" >&2
-            exit 1
-          fi
+          "sidebar.revamp" = lock true;
+          "sidebar.verticalTabs" = lock true;
+          "sidebar.main.tools" = lock (
+            lib.concatStringsSep "," (map (extension: "${addons.${extension.name}.addonId}") (lib.filter (extension: extension.tool) cfg.extensions))
+          );
 
-          src="$2"
-          dst="$1"
-
-          if [[ -d "$src" ]]; then
-            cp -r "$src"/* "$dst"/
-          fi
-        '';
-      in
-        pkgs.symlinkJoin {
-          name = "librewolf";
-          paths = [librewolfWrapped];
-          postBuild = ''
-            mv $out/bin/librewolf $out/bin/.librewolf
-
-            cat > $out/bin/librewolf << EOF
-            #!${pkgs.runtimeShell}
-            export FONTCONFIG_FILE=${fontsConf}
-
-            state="\$HOME/.librewolf"
-            mkdir -p "\$state"
-
-            hash=$(basename "$out" | cut -d- -f1)
-
-            base="\$XDG_RUNTIME_DIR"
-            [ -n "\$base" ] || base=/tmp
-            dir="\$base/librewolf-\$hash"
-
-            if [ -d "\$dir" ]; then
-              exec $out/bin/.librewolf --profile "\$dir" "\$@"
-            else
-              mkdir -p -m 700 "\$dir"
-              trap '${save} "\$dir" "\$state"; rm -rf "\$dir"' EXIT
-
-              cp -rL --no-preserve=mode ${profile}/. "\$dir"
-              ${load} "\$dir" "\$state"
-
-              $out/bin/.librewolf --profile "\$dir" "\$@"
-            fi
-
-            EOF
-
-            chmod +x $out/bin/librewolf
+          # clear up nav-bar
+          "browser.uiCustomization.state" = lock ''
+            {
+               "placements":{
+                  "nav-bar":[
+                     "back-button",
+                     "forward-button",
+                     "stop-reload-button",
+                     "customizableui-special-spring1",
+                     "vertical-spacer",
+                     "urlbar-container",
+                     "customizableui-special-spring2",
+                     "downloads-button",
+                     "open-file-button",
+                     "fxa-toolbar-menu-button",
+                     "reset-pbm-toolbar-button",
+                     "unified-extensions-button",
+                     "ublock0_raymondhill_net-browser-action",
+                     "alltabs-button",
+                     "smartwindow-group-tabs-button",
+                     "ai-window-toggle"
+                  ]
+               }
+            }
           '';
 
-          meta = {
-            mainProgram = "librewolf";
-          };
-        })
-      {
-        # NOTE: We set a fake secrect only for when running with: nix run .#
-        # Using this in your config is a security issue!
-        secret = "fake-secrect-do-not-use";
+          "layers.acceleration.force-enabled" = lock true;
+          "browser.toolbars.bookmarks.visibility" = lock "never";
+
+          "browser.newtabpage.activity-stream.hideLogo" = lock false;
+          "browser.newtabpage.activity-stream.showSearch" = lock false;
+        };
       };
+
+      librewolfWrapped = pkgs.wrapFirefox pkgs.librewolf-unwrapped {
+        inherit (pkgs.librewolf-unwrapped) extraPrefsFiles extraPoliciesFiles;
+        libName = "librewolf";
+        extraPolicies = policies;
+        extraPrefs = let
+          mkUuid = seed: let
+            hash = lib.hashString "sha256" seed;
+          in
+            lib.concatStringsSep "-" [
+              (builtins.substring 0 8 hash)
+              (builtins.substring 8 4 hash)
+              (builtins.substring 12 4 hash)
+              (builtins.substring 16 4 hash)
+              (builtins.substring 20 12 hash)
+            ];
+
+          uuids = builtins.toJSON (
+            lib.listToAttrs (map (extension: {
+                name = addons.${extension.name}.addonId;
+                value = mkUuid (extension.name + cfg.secret);
+              })
+              cfg.extensions)
+          );
+        in ''
+          lockPref("browser.aboutConfig.showWarning", false);
+          lockPref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
+
+          // Set UI density to normal
+          lockPref("browser.uidensity", 0);
+
+          // Enable SVG context-propertes
+          lockPref("svg.context-properties.content.enabled", true);
+
+          // Disable private window dark theme
+          lockPref("browser.theme.dark-private-windows", false);
+
+          // Enable rounded bottom window corners
+          lockPref("widget.gtk.rounded-bottom-corners.enabled", true);
+
+          // Middle mouse paste
+          lockPref("middlemouse.paste", false);
+
+          // Disable backups as it causes warnings.
+          // Possibly because it tries to access root directory.
+          lockPref("browser.backup.enabled", false);
+          lockPref("browser.backup.scheduled.enabled", false);
+          lockPref("browser.backup.archive.enabled", false);
+          lockPref("browser.backup.restore.enabled", false);
+
+          // Disable translation popup.
+          lockPref("browser.translations.automaticallyPopup", false);
+
+          lockPref("privacy.sanitize.sanitizeOnShutdown", false);
+
+          lockPref("privacy.resistFingerprinting", false);
+          lockPref("layout.css.prefers-color-scheme.content-override", 0);
+          lockPref("browser.theme.content-theme", 0);
+          lockPref("browser.theme.toolbar-theme", 0);
+
+          lockPref("extensions.webextensions.uuids", '${uuids}');
+        '';
+      };
+
+      profile = pkgs.linkFarm "librewolf-profile-skeleton" [
+        {
+          name = "chrome/userChrome.css";
+          path = pkgs.writeText "userChrome.css" ''
+            @import "${inputs.firefox-gnome-theme}/userChrome.css";
+            ${self.css.librewolf (inputs.colors.lib.withHash self.globals.theme.palette)}
+          '';
+        }
+        {
+          name = "chrome/userContent.css";
+          path = pkgs.writeText "userContent.css" ''
+            @import "${inputs.firefox-gnome-theme}/userContent.css";
+            ${self.css.librewolf (inputs.colors.lib.withHash self.globals.theme.palette)}
+
+            @-moz-document url("about:newtab"), url("about:home") {
+              /* Wallpaper */
+              body {
+                background-image: url("file://${../../resources/wallpapers/bain_ning_bing_and_fang_yuan.png}") !important;
+                background-position: center center !important;
+                background-size: cover !important;
+                background-repeat: no-repeat !important;
+              }
+
+              /* Disable Home Customize Button */
+              .open-customization-button {
+                display:none !important;
+              }
+            }
+          '';
+        }
+      ];
+
+      fontsConf = pkgs.makeFontsConf {
+        fontDirectories = [
+          pkgs.noto-fonts
+          pkgs.noto-fonts-cjk-sans
+          pkgs.noto-fonts-cjk-serif
+          pkgs.noto-fonts-color-emoji
+        ];
+      };
+
+      save = pkgs.writeShellScript "save" ''
+        if [[ "$#" -ne 2 ]]; then
+          echo "Usage: save <profile-dir> <storage-dir>" >&2
+          exit 1
+        fi
+
+        src="$1"
+        dst="$2"
+            
+        [[ -f "$src"/cookies.sqlite ]] || exit 0
+
+        tmp=$(mktemp -d)
+        trap 'rm -rf "$tmp"' EXIT
+
+        ${lib.getExe pkgs.sqlite} "$src"/cookies.sqlite "VACUUM INTO '$tmp/cookies.sqlite'"
+
+        if [[ -d "$src"/storage/default ]]; then
+          for dir in "$src"/storage/default/https+++*; do
+            db="$dir/ls/data.sqlite"
+            [[ -f "$db" ]] || continue
+
+            site="$(basename "$dir")"
+            loc="$tmp"/storage/default/"$site"/ls
+
+            mkdir -p "$loc"
+
+            ${lib.getExe pkgs.sqlite} "$db" "VACUUM INTO '$loc/data.sqlite'"
+          done
+        fi
+
+        ${lib.getExe pkgs.rsync} -a --delete "$tmp"/ "''${dst:?}"/
+      '';
+
+      load = pkgs.writeShellScript "load" ''
+        if [[ "$#" -ne 2 ]]; then
+          echo "Usage: load <profile-dir> <stored-dir>" >&2
+          exit 1
+        fi
+
+        src="$2"
+        dst="$1"
+
+        if [[ -d "$src" ]]; then
+          cp -r "$src"/* "$dst"/
+        fi
+      '';
+    in
+      pkgs.symlinkJoin {
+        name = "librewolf";
+        paths = [librewolfWrapped];
+        postBuild = ''
+          mv $out/bin/librewolf $out/bin/.librewolf
+
+          cat > $out/bin/librewolf << EOF
+          #!${pkgs.runtimeShell}
+          export FONTCONFIG_FILE=${fontsConf}
+
+          state="\$HOME/.librewolf"
+          mkdir -p "\$state"
+
+          hash=$(basename "$out" | cut -d- -f1)
+
+          base="\$XDG_RUNTIME_DIR"
+          [ -n "\$base" ] || base=/tmp
+          dir="\$base/librewolf-\$hash"
+
+          if [ -d "\$dir" ]; then
+            exec $out/bin/.librewolf --profile "\$dir" "\$@"
+          else
+            mkdir -p -m 700 "\$dir"
+            trap '${save} "\$dir" "\$state"; rm -rf "\$dir"' EXIT
+
+            cp -rL --no-preserve=mode ${profile}/. "\$dir"
+            ${load} "\$dir" "\$state"
+
+            $out/bin/.librewolf --profile "\$dir" "\$@"
+          fi
+
+          EOF
+
+          chmod +x $out/bin/librewolf
+        '';
+
+        meta = {
+          mainProgram = "librewolf";
+        };
+      })
+    {};
   };
 
   flake = {
@@ -497,7 +492,11 @@
       };
     };
 
-    configOptions.librewolf = {lib, ...}: {
+    configOptions.librewolf = {
+      lib,
+      config,
+      ...
+    }: {
       options = {
         extensions = lib.mkOption {
           type = lib.types.listOf (lib.types.submodule {
@@ -543,13 +542,6 @@
               };
             }
           ];
-        };
-
-        secret = lib.mkOption {
-          type = lib.types.nonEmptyStr;
-          description = ''
-            Secrect value that we use with the extension's name to create an unique secrect uuid.
-          '';
         };
 
         search = {
@@ -599,20 +591,34 @@
             };
           };
 
-          # FIXME: Add and assert to check this engine exists.
           default = lib.mkOption {
             type = lib.types.nonEmptyStr;
             default = "NonAIGoogle";
+            description = ''
+              The default search engine.
+            '';
           };
         };
 
         background = lib.mkOption {
-          type = lib.types.path;
+          type = lib.types.nullOr lib.types.path;
+          default = null;
           description = ''
             Path to the background image.
           '';
           example = lib.literalExpression "./wallpaper.png";
         };
+      };
+
+      config = {
+        assertions = [
+          {
+            assertion = !(lib.elem config.search.default (lib.attrNames config.search.engines));
+            message = ''
+              The default search engine isn't declared in the engines option. 
+            '';
+          }
+        ];
       };
     };
   };
