@@ -121,7 +121,7 @@
                 }
               '';
               background = ''
-                const patterns = ${cfg.autoCloseTabs};
+                const patterns = ${lib.strings.toJSON cfg.autoCloseTabs};
 
                 browser.tabs.onUpdated.addListener(
                   (tabId) => browser.tabs.remove(tabId),
@@ -327,7 +327,7 @@
 
           src="$1"
           dst="$2"
-            
+                  
           [[ -f "$src"/cookies.sqlite ]] || exit 0
 
           tmp=$(mktemp -d)
@@ -348,7 +348,7 @@
               ${lib.getExe pkgs.sqlite} "$db" "VACUUM INTO '$loc/data.sqlite'"
             done
           fi
-            
+                  
           for uuid in ${lib.escapeShellArgs uuids}; do
             ${saveExtensions} "$src"/storage/default/moz-extension+++"$uuid" "$tmp"
 
@@ -375,7 +375,7 @@
         [[ -d "$dir" ]] || exit 0 
 
         ls_db="$dir"/ls/data.sqlite
-        
+            
         if [[ -f "$ls_db" ]]; then
           loc="$tmp"/storage/default/"$name"/ls
           mkdir -p "$loc"
