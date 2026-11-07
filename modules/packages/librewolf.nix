@@ -11,9 +11,13 @@
   }: let
   in {
     packages.librewolf = lib.makeOverridable (module: let
-      cfg = (self.lib.evalConfig pkgs self.configOptions.librewolf module).config;
+      cfg = self.lib.evalConfig pkgs self.configOptions.librewolf module;
 
       addons = inputs'.firefox-addons.packages;
+
+      makeUUID = value: let
+        hash = lib.hashString "sha256" ("H9wihqDhg4mH0Jq1YaMXK7Wqc/134+79J/8gkXOstXs" + value);
+      in "${lib.substring 0 8 hash}-${lib.substring 8 4 hash}-4${lib.substring 13 3 hash}-a${lib.substring 17 3 hash}-${lib.substring 20 12 hash}";
 
       policies = {
         SearchEngines = {
@@ -34,6 +38,10 @@
             "DuckDuckGo No-AI"
             "Startpage"
           ];
+        };
+
+        Cookies = {
+          Allow = cfg.keepCookiesFor;
         };
 
         AppAutoUpdate = false;
@@ -122,73 +130,56 @@
             Value = value;
             Status = "locked";
           };
-        in {
-          "browser.contentblocking.category" = lock "strict";
+        in
+          {
+            "browser.contentblocking.category" = lock "strict";
 
-          "sidebar.revamp" = lock true;
-          "sidebar.verticalTabs" = lock true;
-          "sidebar.main.tools" = lock (
-            lib.concatStringsSep "," (map (extension: "${addons.${extension.name}.addonId}") (lib.filter (extension: extension.tool) cfg.extensions))
-          );
+            "sidebar.revamp" = lock true;
+            "sidebar.verticalTabs" = lock true;
+            "sidebar.main.tools" = lock (
+              lib.concatStringsSep "," (map (extension: "${addons.${extension.name}.addonId}") (lib.filter (extension: extension.tool) cfg.extensions))
+            );
 
-          # clear up nav-bar
-          "browser.uiCustomization.state" = lock ''
-            {
-               "placements":{
-                  "nav-bar":[
-                     "back-button",
-                     "forward-button",
-                     "stop-reload-button",
-                     "customizableui-special-spring1",
-                     "vertical-spacer",
-                     "urlbar-container",
-                     "customizableui-special-spring2",
-                     "downloads-button",
-                     "open-file-button",
-                     "fxa-toolbar-menu-button",
-                     "reset-pbm-toolbar-button",
-                     "unified-extensions-button",
-                     "ublock0_raymondhill_net-browser-action",
-                     "alltabs-button",
-                     "smartwindow-group-tabs-button",
-                     "ai-window-toggle"
-                  ]
-               }
-            }
-          '';
+            # clear up nav-bar
+            "browser.uiCustomization.state" = lock ''
+              {
+                 "placements":{
+                    "nav-bar":[
+                       "back-button",
+                       "forward-button",
+                       "stop-reload-button",
+                       "customizableui-special-spring1",
+                       "vertical-spacer",
+                       "urlbar-container",
+                       "customizableui-special-spring2",
+                       "downloads-button",
+                       "open-file-button",
+                       "fxa-toolbar-menu-button",
+                       "reset-pbm-toolbar-button",
+                       "unified-extensions-button",
+                       "ublock0_raymondhill_net-browser-action",
+                       "alltabs-button",
+                       "smartwindow-group-tabs-button",
+                       "ai-window-toggle"
+                    ]
+                 }
+              }
+            '';
 
-          "layers.acceleration.force-enabled" = lock true;
-          "browser.toolbars.bookmarks.visibility" = lock "never";
-
-          "browser.newtabpage.activity-stream.hideLogo" = lock false;
-          "browser.newtabpage.activity-stream.showSearch" = lock false;
-        };
+            "layers.acceleration.force-enabled" = lock true;
+            "browser.toolbars.bookmarks.visibility" = lock "never";
+          }
+          // lib.optionalAttrs (cfg.background != null) {
+            "browser.newtabpage.activity-stream.hideLogo" = lock false;
+            "browser.newtabpage.activity-stream.showSearch" = lock false;
+          };
       };
 
       librewolfWrapped = pkgs.wrapFirefox pkgs.librewolf-unwrapped {
         inherit (pkgs.librewolf-unwrapped) extraPrefsFiles extraPoliciesFiles;
         libName = "librewolf";
         extraPolicies = policies;
-        extraPrefs = let
-          mkUuid = seed: let
-            hash = lib.hashString "sha256" seed;
-          in
-            lib.concatStringsSep "-" [
-              (builtins.substring 0 8 hash)
-              (builtins.substring 8 4 hash)
-              (builtins.substring 12 4 hash)
-              (builtins.substring 16 4 hash)
-              (builtins.substring 20 12 hash)
-            ];
-
-          uuids = builtins.toJSON (
-            lib.listToAttrs (map (extension: {
-                name = addons.${extension.name}.addonId;
-                value = mkUuid (extension.name + cfg.secret);
-              })
-              cfg.extensions)
-          );
-        in ''
+        extraPrefs = ''
           lockPref("browser.aboutConfig.showWarning", false);
           lockPref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 
@@ -217,14 +208,23 @@
           // Disable translation popup.
           lockPref("browser.translations.automaticallyPopup", false);
 
-          lockPref("privacy.sanitize.sanitizeOnShutdown", false);
-
           lockPref("privacy.resistFingerprinting", false);
           lockPref("layout.css.prefers-color-scheme.content-override", 0);
           lockPref("browser.theme.content-theme", 0);
           lockPref("browser.theme.toolbar-theme", 0);
 
-          lockPref("extensions.webextensions.uuids", '${uuids}');
+          defaultPref("extensions.webextensions.uuids", ${
+            lib.strings.toJSON (lib.strings.toJSON
+              (lib.listToAttrs (
+                map (
+                  extension: {
+                    name = addons.${extension.name}.addonId;
+                    value = makeUUID addons.${extension.name}.addonId;
+                  }
+                )
+                (lib.filter (extension: extension.keepData) cfg.extensions)
+              )))
+          });
         '';
       };
 
@@ -243,13 +243,16 @@
             ${self.css.librewolf (inputs.colors.lib.withHash self.globals.theme.palette)}
 
             @-moz-document url("about:newtab"), url("about:home") {
-              /* Wallpaper */
-              body {
-                background-image: url("file://${../../resources/wallpapers/bain_ning_bing_and_fang_yuan.png}") !important;
-                background-position: center center !important;
-                background-size: cover !important;
-                background-repeat: no-repeat !important;
-              }
+              ${
+              lib.optionalString (cfg.background != null) ''
+                body {
+                  background-image: url("file://${cfg.background}") !important;
+                  background-position: center center !important;
+                  background-size: cover !important;
+                  background-repeat: no-repeat !important;
+                }
+              ''
+            }
 
               /* Disable Home Customize Button */
               .open-customization-button {
@@ -269,40 +272,100 @@
         ];
       };
 
-      save = pkgs.writeShellScript "save" ''
+      save = let
+        uuids =
+          map (
+            extension: makeUUID addons.${extension.name}.addonId
+          )
+          (lib.filter (extension: extension.keepData) cfg.extensions);
+      in
+        pkgs.writeShellScript "save" ''
+          set -euo pipefail
+
+          if [[ "$#" -ne 2 ]]; then
+            echo "Usage: save <profile-dir> <storage-dir>" >&2
+            exit 1
+          fi
+
+          src="$1"
+          dst="$2"
+                
+          [[ -f "$src"/cookies.sqlite ]] || exit 0
+
+          tmp=$(mktemp -d)
+          trap 'rm -rf "$tmp"' EXIT
+
+          ${lib.getExe pkgs.sqlite} "$src"/cookies.sqlite "VACUUM INTO '$tmp/cookies.sqlite'"
+
+          if [[ -d "$src"/storage/default ]]; then
+            for dir in "$src"/storage/default/https+++*; do
+              db="$dir/ls/data.sqlite"
+              [[ -f "$db" ]] || continue
+
+              site="$(basename "$dir")"
+              loc="$tmp"/storage/default/"$site"/ls
+
+              mkdir -p "$loc"
+
+              ${lib.getExe pkgs.sqlite} "$db" "VACUUM INTO '$loc/data.sqlite'"
+            done
+          fi
+                
+          for uuid in ${lib.escapeShellArgs uuids}; do
+            ${saveExtensions} "$src"/storage/default/moz-extension+++"$uuid" "$tmp"
+
+            for dir in "$src"/storage/default/moz-extension+++"$uuid"^userContextId=*; do
+              ${saveExtensions} "$dir" "$tmp"
+            done
+          done
+
+          ${lib.getExe pkgs.rsync} -a --delete "$tmp"/ "''${dst:?}"/
+        '';
+
+      saveExtensions = pkgs.writeShellScript "saveExtensions" ''
+        set -euo pipefail
+
         if [[ "$#" -ne 2 ]]; then
-          echo "Usage: save <profile-dir> <storage-dir>" >&2
+          echo "Usage: save <extension-dir> <tmp-dir>" >&2
           exit 1
         fi
 
-        src="$1"
-        dst="$2"
+        dir="$1"
+        name="$(basename "$dir")"
+        tmp="$2"
+
+        [[ -d "$dir" ]] || exit 0 
+
+        ls_db="$dir"/ls/data.sqlite
             
-        [[ -f "$src"/cookies.sqlite ]] || exit 0
+        if [[ -f "$ls_db" ]]; then
+          loc="$tmp"/storage/default/"$name"/ls
+          mkdir -p "$loc"
 
-        tmp=$(mktemp -d)
-        trap 'rm -rf "$tmp"' EXIT
-
-        ${lib.getExe pkgs.sqlite} "$src"/cookies.sqlite "VACUUM INTO '$tmp/cookies.sqlite'"
-
-        if [[ -d "$src"/storage/default ]]; then
-          for dir in "$src"/storage/default/https+++*; do
-            db="$dir/ls/data.sqlite"
-            [[ -f "$db" ]] || continue
-
-            site="$(basename "$dir")"
-            loc="$tmp"/storage/default/"$site"/ls
-
-            mkdir -p "$loc"
-
-            ${lib.getExe pkgs.sqlite} "$db" "VACUUM INTO '$loc/data.sqlite'"
-          done
+          ${lib.getExe pkgs.sqlite} "$ls_db" "VACUUM INTO '$loc/data.sqlite'"
         fi
 
-        ${lib.getExe pkgs.rsync} -a --delete "$tmp"/ "''${dst:?}"/
+        [[ -d "$dir"/idb ]] || exit 0
+
+        loc="$tmp"/storage/default/"$name"/idb
+        mkdir -p "$loc"
+
+        for folder in "$dir"/idb/*.files; do
+          [[ -d "$folder" ]] || continue
+
+          cp -r "$folder" "$loc/"
+        done
+
+        for db in "$dir"/idb/*.sqlite; do
+          [[ -f "$db" ]] || continue
+
+          ${lib.getExe pkgs.sqlite} "$db" "VACUUM INTO '$loc/$(basename "$db")'"
+        done
       '';
 
       load = pkgs.writeShellScript "load" ''
+        set -euo pipefail
+
         if [[ "$#" -ne 2 ]]; then
           echo "Usage: load <profile-dir> <stored-dir>" >&2
           exit 1
@@ -360,6 +423,175 @@
   };
 
   flake = {
+    userModules.librewolfPersistent = user: {
+      config = {
+        preservation = {
+          preserveAt."/persistent" = {
+            users.${user} = {
+              directories = [
+                ".librewolf"
+              ];
+            };
+          };
+        };
+      };
+    };
+
+    configOptions.librewolf = {
+      lib,
+      config,
+      ...
+    }: {
+      options = {
+        extensions = lib.mkOption {
+          type = lib.types.listOf (lib.types.submodule {
+            options = {
+              name = lib.mkOption {
+                type = lib.types.singleLineStr;
+                description = ''
+                  Name of the firefox addon.
+                '';
+              };
+
+              settings = lib.mkOption {
+                type = lib.types.nullOr lib.types.json;
+              };
+
+              tool = lib.mkEnableOption ''
+                If enabled the extensions will be added to the tool bar.
+              '';
+
+              keepData = lib.mkEnableOption ''
+                If enabled the extensions data will be saved.
+              '';
+            };
+          });
+
+          default = [
+            {name = "leechblock-ng";}
+            {name = "istilldontcareaboutcookies";}
+            {
+              name = "ublock-origin";
+              settings = {
+                adminSettings.userSettings = {
+                  uiTheme = "dark";
+                  uiAccentCustom = true;
+                  uiAccentCustom0 = "#${self.globals.theme.palette.base0E}";
+                  cloudStorageEnabled = false;
+                };
+              };
+            }
+            {
+              name = "bitwarden";
+              tool = true;
+              keepData = true;
+              settings = {
+                environment = {
+                  base = "https://vault.taildevourer.com";
+                };
+              };
+            }
+          ];
+        };
+
+        search = {
+          engines = lib.mkOption {
+            type = lib.types.attrsOf (lib.types.submodule {
+              options = {
+                url = lib.mkOption {
+                  type = lib.types.nonEmptyStr;
+                };
+
+                alias = lib.mkOption {
+                  type = lib.types.nonEmptyStr;
+                };
+              };
+            });
+
+            default = {
+              "NonAIGoogle" = {
+                alias = "@gg";
+                url = "https://www.google.com/search?udm=14&q={searchTerms}";
+              };
+
+              "Youtube" = {
+                alias = "@yt";
+                url = "https://www.youtube.com/results?search_query={searchTerms}";
+              };
+
+              "Nix Packages" = {
+                alias = "@np";
+                url = "https://search.nixos.org/packages?channel=unstable&query={searchTerms}";
+              };
+
+              "Nix Options" = {
+                alias = "@no";
+                url = "https://search.nixos.org/options?channel=unstable&query={searchTerms}";
+              };
+
+              "NixOS Wiki" = {
+                alias = "@nw";
+                url = "https://wiki.nixos.org/w/index.php?search={searchTerms}";
+              };
+
+              "Home Manager Options" = {
+                alias = "@nh";
+                url = "https://home-manager-options.extranix.com/?release=master&query={searchTerms}";
+              };
+            };
+          };
+
+          default = lib.mkOption {
+            type = lib.types.nonEmptyStr;
+            default = "NonAIGoogle";
+            description = ''
+              The default search engine.
+            '';
+          };
+        };
+
+        keepCookiesFor = lib.mkOption {
+          type = lib.types.listOf lib.types.nonEmptyStr;
+          default = [
+            "www.youtube.com"
+            "accounts.youtube.com"
+            "music.youtube.com"
+            "www.google.com"
+            "mail.google.com"
+            "github.com"
+          ];
+          example = ["github.com" "https://mail.google.com"];
+          description = ''
+            Sites whose cookies and site data are kept when the browser closes.
+          '';
+          apply = map (site:
+            if lib.hasInfix "://" site
+            then site
+            else "https://" + site);
+        };
+
+        background = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          description = ''
+            Path to the background image.
+          '';
+          example = lib.literalExpression "./wallpaper.png";
+        };
+      };
+
+      config = {
+        assertions = [
+          {
+            assertion = lib.elem config.search.default (lib.attrNames config.search.engines);
+            message = ''
+              The default search engine isn't declared in the engines option. 
+            '';
+          }
+        ];
+      };
+    };
+
     css.librewolf = theme: ''
       :root {
         --gnome-palette-blue-1: ${theme.base0D};
@@ -475,151 +707,5 @@
         }
       }
     '';
-  };
-
-  flake = {
-    userModules.librewolf = user: {
-      config = {
-        preservation = {
-          preserveAt."/persistent" = {
-            users.${user} = {
-              directories = [
-                ".librewolf"
-              ];
-            };
-          };
-        };
-      };
-    };
-
-    configOptions.librewolf = {
-      lib,
-      config,
-      ...
-    }: {
-      options = {
-        extensions = lib.mkOption {
-          type = lib.types.listOf (lib.types.submodule {
-            options = {
-              name = lib.mkOption {
-                type = lib.types.singleLineStr;
-                description = ''
-                  Name of the firefox addon.
-                '';
-              };
-
-              settings = lib.mkOption {
-                type = lib.types.nullOr lib.types.json;
-              };
-
-              tool = lib.mkEnableOption ''
-                If enabled the extensions will be added to the tool bar.
-              '';
-            };
-          });
-
-          default = [
-            {name = "leechblock-ng";}
-            {name = "istilldontcareaboutcookies";}
-            {
-              name = "ublock-origin";
-              settings = {
-                adminSettings.userSettings = {
-                  uiTheme = "dark";
-                  uiAccentCustom = true;
-                  uiAccentCustom0 = "#${self.globals.theme.palette.base0E}";
-                  cloudStorageEnabled = false;
-                };
-              };
-            }
-            {
-              name = "bitwarden";
-              tool = true;
-              settings = {
-                environment = {
-                  base = "https://vault.taildevourer.com";
-                };
-              };
-            }
-          ];
-        };
-
-        search = {
-          engines = lib.mkOption {
-            type = lib.types.attrsOf (lib.types.submodule {
-              options = {
-                url = lib.mkOption {
-                  type = lib.types.nonEmptyStr;
-                };
-
-                alias = lib.mkOption {
-                  type = lib.types.nonEmptyStr;
-                };
-              };
-            });
-
-            default = {
-              "NonAIGoogle" = {
-                alias = "@gg";
-                url = "https://www.google.com/search?udm=14&q={searchTerms}";
-              };
-
-              "Youtube" = {
-                alias = "@yt";
-                url = "https://www.youtube.com/results?search_query={searchTerms}";
-              };
-
-              "Nix Packages" = {
-                alias = "@np";
-                url = "https://search.nixos.org/packages?channel=unstable&query={searchTerms}";
-              };
-
-              "Nix Options" = {
-                alias = "@no";
-                url = "https://search.nixos.org/options?channel=unstable&query={searchTerms}";
-              };
-
-              "NixOS Wiki" = {
-                alias = "@nw";
-                url = "https://wiki.nixos.org/w/index.php?search={searchTerms}";
-              };
-
-              "Home Manager Options" = {
-                alias = "@nh";
-                url = "https://home-manager-options.extranix.com/?release=master&query={searchTerms}";
-              };
-            };
-          };
-
-          default = lib.mkOption {
-            type = lib.types.nonEmptyStr;
-            default = "NonAIGoogle";
-            description = ''
-              The default search engine.
-            '';
-          };
-        };
-
-        background = lib.mkOption {
-          type = lib.types.nullOr lib.types.path;
-          default = null;
-          description = ''
-            Path to the background image.
-          '';
-          example = lib.literalExpression "./wallpaper.png";
-        };
-      };
-
-      config = {
-        assertions = [
-          {
-            assertion = !(lib.elem config.search.default (lib.attrNames config.search.engines));
-            message = ''
-              The default search engine isn't declared in the engines option. 
-            '';
-          }
-        ];
-      };
-    };
   };
 }

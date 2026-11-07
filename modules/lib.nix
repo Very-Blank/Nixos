@@ -28,19 +28,42 @@
             ++ modules;
         };
 
-      evalConfig = pkgs: options: module: (lib.evalModules {
-        modules = [
-          {
-            config = {
-              _module.args = {
-                pkgs = pkgs;
-              };
-            };
-          }
-          options
-          module
-        ];
-      });
+      evalConfig = pkgs: options: module: let
+        cfg =
+          (lib.evalModules {
+            modules = [
+              {
+                options = {
+                  assertions = lib.mkOption {
+                    type = lib.types.listOf lib.types.unspecified;
+                    internal = true;
+                    default = [];
+                    example = [
+                      {
+                        assertion = false;
+                        message = "reason";
+                      }
+                    ];
+                  };
+                  warnings = lib.mkOption {
+                    type = lib.types.listOf lib.types.str;
+                    internal = true;
+                    default = [];
+                  };
+                };
+
+                config = {
+                  _module.args = {
+                    pkgs = pkgs;
+                  };
+                };
+              }
+              options
+              module
+            ];
+          }).config;
+      in
+        lib.asserts.checkAssertWarn cfg.assertions cfg.warnings cfg;
 
       mkUnitFile = pkgs: name: module: let
         attrs = self.lib.evalConfig pkgs self.configOptions.units module;
