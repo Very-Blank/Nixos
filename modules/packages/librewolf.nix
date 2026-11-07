@@ -40,8 +40,8 @@
           ];
         };
 
-        Cookies = {
-          Allow = cfg.keepCookiesFor;
+        SanitizeOnShutdown = {
+          Exceptions = cfg.keepCookiesFor;
         };
 
         AppAutoUpdate = false;
@@ -107,13 +107,49 @@
             install_url = "file://${addon}/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/${addon.addonId}.xpi";
             installation_mode = "force_installed";
           };
+
+          autoClose =
+            pkgs.runCommand "auto-close.xpi" {
+              manifest = ''
+                {
+                  "manifest_version": 2,
+                  "name": "auto-close",
+                  "version": "1.0",
+                  "browser_specific_settings": { "gecko": { "id": "auto-close@local" } },
+                  "permissions": ["tabs"],
+                  "background": { "scripts": ["background.js"] }
+                }
+              '';
+              background = ''
+                const patterns = ${cfg.autoCloseTabs};
+
+                browser.tabs.onUpdated.addListener(
+                  (tabId) => browser.tabs.remove(tabId),
+                  { urls: patterns, properties: ["url"] }
+                );
+              '';
+
+              passAsFile = ["manifest" "background"];
+              nativeBuildInputs = [pkgs.zip];
+            } ''
+              mkdir src
+              cp $manifestPath src/manifest.json
+              cp $backgroundPath src/background.js
+              (cd src && zip -r "$out" .)
+            '';
         in
           {"*".installation_mode = "blocked";}
           // lib.listToAttrs (map (extension: {
               name = addons.${extension.name}.addonId;
               value = forceInstall (addons.${extension.name});
             })
-            cfg.extensions);
+            cfg.extensions)
+          // {
+            "auto-close@local" = {
+              installation_mode = "force_installed";
+              install_url = "file://${autoClose}";
+            };
+          };
 
         "3rdparty".Extensions = lib.listToAttrs (
           map (
@@ -213,6 +249,8 @@
           lockPref("browser.theme.content-theme", 0);
           lockPref("browser.theme.toolbar-theme", 0);
 
+          lockPref("xpinstall.signatures.required", false);
+
           defaultPref("extensions.webextensions.uuids", ${
             lib.strings.toJSON (lib.strings.toJSON
               (lib.listToAttrs (
@@ -289,7 +327,7 @@
 
           src="$1"
           dst="$2"
-                
+            
           [[ -f "$src"/cookies.sqlite ]] || exit 0
 
           tmp=$(mktemp -d)
@@ -310,7 +348,7 @@
               ${lib.getExe pkgs.sqlite} "$db" "VACUUM INTO '$loc/data.sqlite'"
             done
           fi
-                
+            
           for uuid in ${lib.escapeShellArgs uuids}; do
             ${saveExtensions} "$src"/storage/default/moz-extension+++"$uuid" "$tmp"
 
@@ -337,7 +375,7 @@
         [[ -d "$dir" ]] || exit 0 
 
         ls_db="$dir"/ls/data.sqlite
-            
+        
         if [[ -f "$ls_db" ]]; then
           loc="$tmp"/storage/default/"$name"/ls
           mkdir -p "$loc"
@@ -468,7 +506,11 @@
           });
 
           default = [
-            {name = "leechblock-ng";}
+            {name = "darkreader";}
+            {
+              name = "leechblock-ng";
+              keepData = true;
+            }
             {name = "istilldontcareaboutcookies";}
             {
               name = "ublock-origin";
@@ -548,6 +590,11 @@
               The default search engine.
             '';
           };
+        };
+
+        autoCloseTabs = lib.mkOption {
+          type = lib.types.listOf lib.types.nonEmptyStr;
+          default = ["*://*.darkreader.org/*"];
         };
 
         keepCookiesFor = lib.mkOption {
