@@ -81,7 +81,7 @@
             )
             (lib.filterAttrs
               (_: value: (value != null) && value != [])
-              attrs.config.${name});
+              attrs.${name});
         in
           if values != []
           then [
