@@ -1,23 +1,23 @@
-{
+{self, ...}: {
   perSystem = {
     lib,
     pkgs,
     ...
   }: {
-    packages.git = lib.makeOverridable ({
-      editor ? "nvim",
-      defaultBranch ? "main",
-      user ? null,
-      extraConfig ? null,
-    }: let
+    packages.git = lib.makeOverridable (module: let
+      cfg = self.lib.evalConfig pkgs self.configOptions.tmux module;
+
       config = lib.strings.concatStringsSep "\n" [
         ''
           [core]
-          	editor = "${editor}"
-
+            editor = "${cfg.core.editor}"
+        ''
+        ''
           [init]
-          	defaultBranch = "${defaultBranch}"
+          	defaultBranch = "${cfg.init.defaultBranch}"
+        ''
 
+        ''
           [pull]
           	rebase = false
         ''
@@ -25,11 +25,11 @@
           lib.optionalString (user != null)
           ''
             [user]
-            	email = "${user.email}"
             	name = "${user.name}"
+            	email = "${user.email}"
           ''
         )
-        (lib.optionalString (extraConfig != null) extraConfig)
+        cfg.extraConfig
       ];
 
       configFile = pkgs.writeText "config" config;
@@ -51,7 +51,10 @@
     configOptions.git = {lib, ...}: {
       options = {
         core = {
-          edit
+          editor = lib.mkOption {
+            type = lib.types.nullOr lib.types.nonEmptyStr;
+            default = null;
+          };
         };
 
         init = {
@@ -71,6 +74,12 @@
             type = lib.types.nullOr lib.types.nonEmptyStr;
             default = null;
           };
+        };
+
+        extraConfig = lib.mkOption {
+          type = lib.types.lines;
+          default = "";
+          description = "Additional configuration added to the config.";
         };
       };
     };

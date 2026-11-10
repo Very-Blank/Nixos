@@ -91,7 +91,7 @@
         extraConfig = lib.mkOption {
           type = lib.types.lines;
           default = "";
-          description = "Additional configuration to add to the config.";
+          description = "Additional configuration added to the config.";
         };
       };
     };
