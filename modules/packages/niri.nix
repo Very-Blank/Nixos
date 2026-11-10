@@ -9,33 +9,14 @@
     inputs',
     ...
   }: {
-    packages.niri = lib.makeOverridable ({
-      spawnAtStartUp ? [],
-      outputs ? null,
-      terminal ? null,
-      launcher ? null,
-      screenshots ? null,
-      audio ? false,
-      brightness ? false,
-      cursor ? {
-        package = pkgs.bibata-cursors;
-        theme = "Bibata-Modern-Classic";
-        size = 13;
-      },
-    }: let
+    packages.niri = lib.makeOverridable (module: let
       niri-package = inputs'.niri.packages.niri;
+      cfg = self.lib.evalConfig pkgs self.configOptions.niri module;
 
       kdlConfig = inputs.niri-nix.lib.validatedConfigFor niri-package (inputs.niri-nix.lib.mkNiriKDL (self.settings.niri {
         inherit lib;
         inherit pkgs;
-        inherit outputs;
-        inherit spawnAtStartUp;
-        inherit terminal;
-        inherit launcher;
-        inherit screenshots;
-        inherit audio;
-        inherit brightness;
-        inherit cursor;
+        inherit cfg;
       }));
 
       niriService = pkgs.writeText "niri.service" ''
@@ -59,7 +40,7 @@
         [Icon Theme]
         Name=Default
         Comment=Default cursor theme
-        Inherits=${cursor.theme}
+        Inherits=${cfg.cursor.theme}
       '';
     in (pkgs.symlinkJoin {
       name = "niri";
@@ -68,9 +49,9 @@
       postBuild = ''
         wrapProgram $out/bin/niri --add-flags "--config ${kdlConfig}" \
             --set NIXOS_OZONE_WL 1 \
-            --set XCURSOR_PATH ${cursorTheme}/share/icons:${cursor.package}/share/icons \
-            --set XCURSOR_THEME ${cursor.theme} \
-            --set XCURSOR_SIZE ${toString cursor.size}
+            --set XCURSOR_PATH ${cursorTheme}/share/icons:${cfg.cursor.package}/share/icons \
+            --set XCURSOR_THEME ${cfg.cursor.theme} \
+            --set XCURSOR_SIZE ${toString cfg.cursor.size}
 
         rm "$out/share/systemd/user/niri.service"
 
@@ -175,10 +156,12 @@
               };
             }
           );
+
+          default = {};
         };
 
         cursor = lib.mkOption {
-          type = lib.type.submodule {
+          type = lib.types.submodule {
             options = {
               package = lib.mkOption {
                 type = lib.types.package;
@@ -244,14 +227,7 @@
     settings.niri = {
       lib,
       pkgs,
-      outputs ? null,
-      spawnAtStartUp ? [],
-      terminal ? null,
-      launcher ? null,
-      screenshots ? null,
-      audio ? false,
-      brightness ? false,
-      cursor ? null,
+      cfg,
     }:
       {
         input = {
@@ -266,20 +242,17 @@
 
         prefer-no-csd = true;
 
-        spawn-at-startup = spawnAtStartUp;
+        spawn-at-startup = cfg.spawnAtStartUp;
 
         xwayland-satellite = {
           path = "${lib.getExe pkgs.xwayland-satellite}";
         };
 
-        cursor =
-          {
-            hide-when-typing = true;
-          }
-          // lib.optionalAttrs (cursor != null) {
-            xcursor-theme = cursor.theme;
-            xcursor-size = cursor.size;
-          };
+        cursor = {
+          hide-when-typing = true;
+          xcursor-theme = cfg.cursor.theme;
+          xcursor-size = cfg.cursor.size;
+        };
 
         input = {
           touchpad = {
@@ -405,17 +378,17 @@
             name = "Mod+${toString num}";
             value.focus-workspace = num;
           }) (lib.range 1 9)))
-          // (lib.optionalAttrs (terminal != null) {
-            "Mod+T" = {spawn = "${terminal}";};
+          // (lib.optionalAttrs (cfg.terminal != null) {
+            "Mod+T" = {spawn = "${cfg.terminal}";};
           })
-          // (lib.optionalAttrs (launcher != null) {
-            "Mod+D" = {spawn = "${launcher}";};
+          // (lib.optionalAttrs (cfg.launcher != null) {
+            "Mod+D" = {spawn = "${cfg.launcher}";};
           })
-          // (lib.optionalAttrs (screenshots != null) {
+          // (lib.optionalAttrs (cfg.screenshots != null) {
             "Mod+Shift+S" = {screenshot = [];};
             "Print" = {screenshot-screen = [];};
           })
-          // (lib.optionalAttrs audio {
+          // (lib.optionalAttrs cfg.audio {
             "XF86AudioRaiseVolume" = {
               spawn = ["${lib.getExe' pkgs.wireplumber "wpctl"}" "set-volume" "@DEFAULT_AUDIO_SINK@" " 0.1+"];
             };
@@ -426,7 +399,7 @@
               spawn = ["${lib.getExe' pkgs.wireplumber "wpctl"}" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];
             };
           })
-          // (lib.optionalAttrs brightness {
+          // (lib.optionalAttrs cfg.brightness {
             "XF86MonBrightnessUp" = {
               spawn = ["${lib.getExe pkgs.brightnessctl}" "set" "5%+"];
             };
@@ -435,11 +408,11 @@
             };
           });
       }
-      // (lib.optionalAttrs (screenshots != null) {
-        screenshot-path = "${screenshots.path}${screenshots.format}";
+      // (lib.optionalAttrs (cfg.screenshots != null) {
+        screenshot-path = "${cfg.screenshots.path}${cfg.screenshots.format}";
       })
       // (
-        lib.optionalAttrs (outputs != null && outputs != {})
+        lib.optionalAttrs (cfg.outputs != {})
         {
           output =
             lib.mapAttrsToList (
@@ -459,7 +432,7 @@
                   focus-at-startup = [];
                 })
             )
-            outputs;
+            cfg.outputs;
         }
       );
   };
