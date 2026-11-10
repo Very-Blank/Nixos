@@ -24,14 +24,13 @@
           ''
             setopt ${let
             in
-              lib.strings.concatStringsSep " " (lib.mapAttrsToList
+              lib.strings.concatStringsSep " " ((lib.mapAttrsToList
                 (opt: on:
                   if on
                   then opt
                   else "NO_${opt}")
                 {
                   "APPEND_HISTORY" = cfg.history.append;
-                  "HIST_FCNTL_LOCK" = cfg.history.fcntlLock;
                   "HIST_IGNORE_DUPS" = cfg.history.ignoreDups;
                   "HIST_IGNORE_SPACE" = cfg.history.ignoreSpace;
                   "SHARE_HISTORY" = cfg.history.share;
@@ -41,7 +40,8 @@
                   "HIST_FIND_NO_DUPS" = cfg.history.findNoDups;
                   "HIST_IGNORE_ALL_DUPS" = cfg.history.ignoreAllDups;
                   "HIST_SAVE_NO_DUPS" = cfg.history.saveNoDups;
-                })}
+                })
+              + ["HIST_FCNTL_LOCK"])}
           ''
           (lib.optionalString (cfg.editor != null)
             ''
@@ -178,7 +178,6 @@
           };
 
           append = mkEnableOption false "Append to the history file instead of overwriting it.";
-          fcntlLock = mkEnableOption true "Use fcntl() to lock the history file instead of the built-in locking.";
           ignoreDups = mkEnableOption true "Don't record a command identical to the previous one.";
           ignoreSpace = mkEnableOption true "Don't record commands that start with a space.";
           share = mkEnableOption true "Share history between all running sessions.";

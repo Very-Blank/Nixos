@@ -102,6 +102,7 @@
     configOptions.niri = {
       lib,
       pkgs,
+      config,
       ...
     }: {
       options = {
@@ -221,6 +222,17 @@
         spawnAtStartUp = lib.mkOption {
           type = lib.types.listOf (lib.types.listOf lib.types.nonEmptyStr);
         };
+      };
+
+      config = {
+        assertions = [
+          {
+            assertion = 0 <= config.cursor.size;
+            message = ''
+              Cursor size can't be a negative number.
+            '';
+          }
+        ];
       };
     };
 
