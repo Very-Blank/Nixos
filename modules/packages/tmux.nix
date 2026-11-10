@@ -40,10 +40,10 @@
         postBuild = ''
           wrapProgram $out/bin/tmux --append-flags "-f ${pkgs.writeText "config" tmuxConfig} -L ${cfg.name}"
         '';
-      });
+      }) {};
   };
   flake = {
-    configOptions.tmux = {lib}: {
+    configOptions.tmux = {lib, ...}: {
       options = {
         name = lib.mkOption {
           default = "default";

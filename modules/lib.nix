@@ -66,7 +66,7 @@
         lib.asserts.checkAssertWarn cfg.assertions cfg.warnings cfg;
 
       mkUnitFile = pkgs: name: module: let
-        attrs = self.lib.evalConfig pkgs self.configOptions.units module;
+        cfg = self.lib.evalConfig pkgs self.configOptions.units module;
 
         sectionToValue = attrs: name: let
           values =
@@ -100,8 +100,8 @@
           (
             lib.concatLists
             [
-              (sectionToValue attrs "Unit")
-              (sectionToValue attrs "Service")
+              (sectionToValue cfg "Unit")
+              (sectionToValue cfg "Service")
             ]
           )));
     };

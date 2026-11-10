@@ -1,103 +1,56 @@
-{
+{self, ...}: {
   perSystem = {
     lib,
     pkgs,
     ...
   }: {
-    packages.zsh = lib.makeOverridable ({
-      keyMap ? "viins",
-      autosuggestion ? {
-        strategies = ["history"];
-        highlight = "fg=magenta";
-      },
-      opts ? [
-        "HIST_FCNTL_LOCK"
-        "HIST_IGNORE_DUPS"
-        "HIST_IGNORE_SPACE"
-        "SHARE_HISTORY"
-        "NO_APPEND_HISTORY"
-        "NO_EXTENDED_HISTORY"
-        "NO_HIST_SAVE_BY_COPY"
-        "NO_HIST_EXPIRE_DUPS_FIRST"
-        "NO_HIST_FIND_NO_DUPS"
-        "NO_HIST_IGNORE_ALL_DUPS"
-        "NO_HIST_SAVE_NO_DUPS"
-      ],
-      editor ? {
-        editor = "nvim";
-        visual = "nvim";
-      },
-      history ? {
-        size = 1000; # History size.
-        save = 1000; # How many lines to save from the history
-      },
-      keys ? [
-        {
-          key = "^Y";
-          action = "autosuggest-accept";
-        }
-      ],
-      aliases ? [
-        {
-          alias = "gc";
-          action = "git checkout";
-        }
-        {
-          alias = "gca";
-          action = "git commit -a";
-        }
-        {
-          alias = "glm";
-          action = "git pull origin main";
-        }
-        {
-          alias = "gsm";
-          action = "git push origin main";
-        }
-        {
-          alias = "ls";
-          action = "ls --color=auto -h --group-directories-first";
-        }
-        {
-          alias = "ns";
-          action = "nix-shell --run zsh";
-        }
-      ],
-    }: let
+    packages.zsh = lib.makeOverridable (module: let
+      cfg = self.lib.evalConfig pkgs self.configOptions.zsh module;
+
       config = lib.strings.concatStringsSep "\n" (
         [
           (
-            if keyMap == "viins"
+            if cfg.keymap == "viins"
             then "bindkey -v"
-            else if keyMap == "vicmd"
+            else if cfg.keymap == "vicmd"
             then "bindkey -a"
             else "bindkey -e"
           )
           ''
             source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-            ${
-              lib.optionalString (autosuggestion.strategies != [])
-              ''
-                ZSH_AUTOSUGGEST_STRATEGY=(${lib.concatStringsSep " " autosuggestion.strategies})
-              ''
-            }
-            ${
-              lib.optionalString (autosuggestion.highlight != null)
-              ''
-                ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="${autosuggestion.highlight}"
-              ''
-            }
+            ZSH_AUTOSUGGEST_STRATEGY=(${lib.concatStringsSep " " cfg.autosuggestion.strategies})
+            ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="${cfg.autosuggestion.highlight}"
           ''
           ''
-            setopt ${lib.strings.concatStringsSep " " opts}
+            setopt ${let
+            in
+              lib.strings.concatStringsSep " " (lib.mapAttrsToList
+                (opt: on:
+                  if on
+                  then opt
+                  else "NO_${opt}")
+                {
+                  "APPEND_HISTORY" = cfg.history.append;
+                  "HIST_FCNTL_LOCK" = cfg.history.fcntlLock;
+                  "HIST_IGNORE_DUPS" = cfg.history.ignoreDups;
+                  "HIST_IGNORE_SPACE" = cfg.history.ignoreSpace;
+                  "SHARE_HISTORY" = cfg.history.share;
+                  "EXTENDED_HISTORY" = cfg.history.extended;
+                  "HIST_SAVE_BY_COPY" = cfg.history.saveByCopy;
+                  "HIST_EXPIRE_DUPS_FIRST" = cfg.history.expireDuplicatesFirst;
+                  "HIST_FIND_NO_DUPS" = cfg.history.findNoDups;
+                  "HIST_IGNORE_ALL_DUPS" = cfg.history.ignoreAllDups;
+                  "HIST_SAVE_NO_DUPS" = cfg.history.saveNoDups;
+                })}
           ''
+          (lib.optionalString (cfg.editor != null)
+            ''
+              export EDITOR="${cfg.editor}"
+              export VISUAL="${cfg.editor}"
+            '')
           ''
-            export EDITOR="${editor.editor}"
-            export VISUAL="${editor.visual}"
-          ''
-          ''
-            HISTSIZE="${lib.toString history.size}"
-            SAVEHIST="${lib.toString history.save}"
+            HISTSIZE="${lib.toString cfg.history.size}"
+            SAVEHIST="${lib.toString cfg.history.save}"
             HISTFILE="$HOME/.zsh_history"
           ''
           ''
@@ -106,8 +59,8 @@
             prompt pure
           ''
         ]
-        ++ (map (key: "bindkey '${key.key}' ${key.action}") keys)
-        ++ (map (alias: "alias -- ${alias.alias}='${alias.action}'") aliases)
+        ++ (lib.mapAttrsToList (key: action: "bindkey '${key}' ${action}") cfg.keys)
+        ++ (lib.mapAttrsToList (alias: action: "alias -- ${alias}='${action}'") cfg.aliases)
         ++ [
           ''
             source ${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
@@ -142,5 +95,117 @@
 
       meta.mainProgram = "zsh";
     })) {};
+  };
+
+  flake = {
+    configOptions.zsh = {
+      lib,
+      config,
+      ...
+    }: {
+      options = {
+        keymap = lib.mkOption {
+          type = lib.types.enum [
+            "viins"
+            "vicmd"
+            "emacs"
+          ];
+
+          default = "viins";
+        };
+
+        editor = lib.mkOption {
+          type = lib.types.nullOr lib.types.nonEmptyStr;
+          default = null;
+        };
+
+        autosuggestion = {
+          strategies = lib.mkOption {
+            type = lib.types.listOf (lib.types.enum ["history" "completion"]);
+          };
+
+          highlight = lib.mkOption {
+            type = lib.types.enum [
+              "black"
+              "red"
+              "green"
+              "yellow"
+              "blue"
+              "magenta"
+              "cyan"
+              "white"
+            ];
+            default = "magenta";
+            apply = value: "fg=${value}";
+          };
+        };
+
+        keys = lib.mkOption {
+          type = lib.types.attrsOf lib.types.nonEmptyStr;
+          default = {
+            "^Y" = "autosuggest-accept";
+          };
+        };
+
+        aliases = lib.mkOption {
+          type = lib.types.attrsOf lib.types.nonEmptyStr;
+          default = {
+            "gc" = "git checkout";
+            "gca" = "git commit -a";
+            "glm" = "git pull origin main";
+            "gsm" = "git push origin main";
+            "ls" = "ls --color=auto -h --group-directories-first";
+            "ns" = "nix-shell --run zsh";
+          };
+        };
+
+        history = let
+          mkEnableOption = default: description:
+            lib.mkOption {
+              type = lib.types.bool;
+              inherit default description;
+            };
+        in {
+          size = lib.mkOption {
+            type = lib.types.int;
+            default = 1000;
+          };
+
+          save = lib.mkOption {
+            type = lib.types.int;
+            default = 1000;
+          };
+
+          append = mkEnableOption false "Append to the history file instead of overwriting it.";
+          fcntlLock = mkEnableOption true "Use fcntl() to lock the history file instead of the built-in locking.";
+          ignoreDups = mkEnableOption true "Don't record a command identical to the previous one.";
+          ignoreSpace = mkEnableOption true "Don't record commands that start with a space.";
+          share = mkEnableOption true "Share history between all running sessions.";
+          extended = mkEnableOption false "Save timestamps and durations in the history file.";
+          saveByCopy = mkEnableOption false "Write a new history file and rename it instead of overwriting in place.";
+          expireDuplicatesFirst = mkEnableOption false "Expire duplicates first when the history exceeds its size.";
+          findNoDups = mkEnableOption false "Skip duplicates when searching history.";
+          ignoreAllDups = mkEnableOption false "Remove older duplicates when a new command is added.";
+          saveNoDups = mkEnableOption false "Omit duplicates when writing the history file.";
+        };
+      };
+
+      config = {
+        assertions = [
+          {
+            assertion = 0 <= config.history.save;
+            message = ''
+              History save size can't be a negative number.
+            '';
+          }
+          {
+            assertion = 0 <= config.history.size;
+            message = ''
+              History size can't be a negative number.
+            '';
+          }
+        ];
+      };
+    };
   };
 }

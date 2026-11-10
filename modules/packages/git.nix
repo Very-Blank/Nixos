@@ -7,32 +7,54 @@
     packages.git = lib.makeOverridable (module: let
       cfg = self.lib.evalConfig pkgs self.configOptions.tmux module;
 
-      config = lib.strings.concatStringsSep "\n" [
-        ''
-          [core]
-            editor = "${cfg.core.editor}"
-        ''
-        ''
-          [init]
-          	defaultBranch = "${cfg.init.defaultBranch}"
-        ''
+      sectionToValue = name: let
+        values =
+          lib.mapAttrsToList
+          (name: value: let
+            string =
+              if lib.isString value
+              then value
+              else if lib.isBool value
+              then
+                (
+                  if value
+                  then "true"
+                  else "false"
+                )
+              else if lib.isInt value
+              then lib.toString value
+              else throw "Type not supported.";
+          in "${name}=${string}")
+          (lib.filterAttrs
+            (_: value: (value != null) && value != [])
+            cfg.${name});
+      in
+        if lib.hasAttr name cfg && values != []
+        then [
+          (lib.concatStringsSep
+            "\n"
+            (
+              [
+                "[${name}]"
+              ]
+              ++ values
+            ))
+        ]
+        else [];
 
-        ''
-          [pull]
-          	rebase = false
-        ''
-        (
-          lib.optionalString (user != null)
-          ''
-            [user]
-            	name = "${user.name}"
-            	email = "${user.email}"
-          ''
+      configFile = pkgs.writeText "config" (
+        lib.concatStringsSep "\n" (
+          (lib.concatMap
+            sectionToValue
+            [
+              "core"
+              "init"
+              "pull"
+              "user"
+            ])
+          ++ [cfg.extraConfig]
         )
-        cfg.extraConfig
-      ];
-
-      configFile = pkgs.writeText "config" config;
+      );
     in (pkgs.symlinkJoin {
       name = "git";
       paths = [pkgs.git];
@@ -61,6 +83,13 @@
           defaultBranch = lib.mkOption {
             type = lib.types.nonEmptyStr;
             default = "main";
+          };
+        };
+
+        pull = {
+          rebase = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
           };
         };
 
