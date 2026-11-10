@@ -46,4 +46,33 @@
       };
     })) {};
   };
+
+  flake = {
+    configOptions.git = {lib, ...}: {
+      options = {
+        core = {
+          edit
+        };
+
+        init = {
+          defaultBranch = lib.mkOption {
+            type = lib.types.nonEmptyStr;
+            default = "main";
+          };
+        };
+
+        user = {
+          name = lib.mkOption {
+            type = lib.types.nullOr lib.types.nonEmptyStr;
+            default = null;
+          };
+
+          email = lib.mkOption {
+            type = lib.types.nullOr lib.types.nonEmptyStr;
+            default = null;
+          };
+        };
+      };
+    };
+  };
 }
