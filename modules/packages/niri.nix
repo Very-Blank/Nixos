@@ -118,6 +118,129 @@
       };
     };
 
+    configOptions.niri = {
+      lib,
+      pkgs,
+      ...
+    }: {
+      options = {
+        outputs = lib.mkOption {
+          type = lib.types.attrsOf (
+            lib.types.submodule {
+              options = {
+                mode = lib.mkOption {
+                  type = lib.types.submodule {
+                    options = {
+                      width = lib.mkOption {
+                        type = lib.types.int;
+                        description = "Display width in pixels";
+                      };
+                      height = lib.mkOption {
+                        type = lib.types.int;
+                        description = "Display height in pixels";
+                      };
+                      refresh = lib.mkOption {
+                        type = lib.types.float;
+                        description = "Refresh rate in Hz";
+                      };
+                    };
+                  };
+                  description = "Display mode configuration";
+                };
+
+                scale = lib.mkOption {
+                  type = lib.types.float;
+                  default = 1.0;
+                };
+
+                position = lib.mkOption {
+                  type = lib.types.submodule {
+                    options = {
+                      x = lib.mkOption {
+                        type = lib.types.int;
+                        description = "Display position in pixels";
+                        default = 0;
+                      };
+                      y = lib.mkOption {
+                        type = lib.types.int;
+                        description = "Display position in pixels";
+                        default = 0;
+                      };
+                    };
+                  };
+                  description = "Display position configuration";
+                };
+
+                main = lib.mkEnableOption "Main output.";
+              };
+            }
+          );
+        };
+
+        cursor = lib.mkOption {
+          type = lib.type.submodule {
+            options = {
+              package = lib.mkOption {
+                type = lib.types.package;
+              };
+
+              theme = lib.mkOption {
+                type = lib.types.nonEmptyStr;
+              };
+
+              size = lib.mkOption {
+                type = lib.types.int;
+              };
+            };
+          };
+
+          default = {
+            package = pkgs.bibata-cursors;
+            theme = "Bibata-Modern-Classic";
+            size = 13;
+          };
+        };
+
+        terminal = lib.mkOption {
+          type = lib.types.nullOr lib.types.nonEmptyStr;
+        };
+
+        launcher = lib.mkOption {
+          type = lib.types.nullOr lib.types.nonEmptyStr;
+        };
+
+        audio = lib.mkEnableOption ''
+          Enables audio controll keybinds using wireplumber's wpctl tool.
+        '';
+
+        brightness = lib.mkEnableOption ''
+          Enables brightness controll keybinds using brightnessctl.
+        '';
+
+        screenshots = lib.mkOption {
+          type = lib.types.nullOr (lib.types.submodule {
+            options = {
+              path = lib.mkOption {
+                type = lib.types.nonEmptyStr;
+                example = "~/Pictures/Screenshots/";
+              };
+
+              format = lib.mkOption {
+                type = lib.types.nonEmptyStr;
+                example = "screenshot_%Y-%m-%d_%Hh%Mm%Ss.png";
+              };
+            };
+          });
+
+          default = null;
+        };
+
+        spawnAtStartUp = lib.mkOption {
+          type = lib.types.listOf (lib.types.listOf lib.types.nonEmptyStr);
+        };
+      };
+    };
+
     settings.niri = {
       lib,
       pkgs,

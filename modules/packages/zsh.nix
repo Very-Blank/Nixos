@@ -122,6 +122,7 @@
         autosuggestion = {
           strategies = lib.mkOption {
             type = lib.types.listOf (lib.types.enum ["history" "completion"]);
+            default = ["history"];
           };
 
           highlight = lib.mkOption {
