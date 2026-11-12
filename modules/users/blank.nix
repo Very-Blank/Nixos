@@ -74,7 +74,7 @@
               };
             })
             (ssh.override {
-              settings = [
+              hosts = [
                 {
                   match = "github.com";
                   name = "github.com";
