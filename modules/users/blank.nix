@@ -69,8 +69,8 @@
             nvim
             (git.override {
               user = {
-                email = "aapeli.saarelainen.76@gmail.com";
                 name = "very-blank";
+                email = "aapeli.saarelainen.76@gmail.com";
               };
             })
             (ssh.override {

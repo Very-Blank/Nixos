@@ -5,7 +5,7 @@
     ...
   }: {
     packages.git = lib.makeOverridable (module: let
-      cfg = self.lib.evalConfig pkgs self.configOptions.tmux module;
+      cfg = self.lib.evalConfig pkgs self.configOptions.git module;
 
       sectionToValue = name: let
         values =
