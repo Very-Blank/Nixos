@@ -41,7 +41,7 @@
                   "HIST_IGNORE_ALL_DUPS" = cfg.history.ignoreAllDups;
                   "HIST_SAVE_NO_DUPS" = cfg.history.saveNoDups;
                 })
-              + ["HIST_FCNTL_LOCK"])}
+              ++ ["HIST_FCNTL_LOCK"])}
           ''
           (lib.optionalString (cfg.editor != null)
             ''
