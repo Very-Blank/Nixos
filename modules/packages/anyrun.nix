@@ -193,7 +193,7 @@
           };
         };
 
-        hideIcons = mkEnableOption false ''
+        hideIcons = mkEnableOption true ''
           If icons will be shown.
         '';
 
