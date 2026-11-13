@@ -8,15 +8,9 @@
     pkgs,
     ...
   }: {
-    packages.ghostty = lib.makeOverridable ({
-      title ? "Ghostty",
-      font ? {
-        package = pkgs.nerd-fonts._0xproto;
-        family = "0xProto Nerd Font";
-        size = 11;
-      },
-      extraConfig ? null,
-    }: let
+    packages.ghostty = lib.makeOverridable (module: let
+      cfg = self.lib.evalConfig pkgs self.configOptions.ghostty module;
+
       validate = ghostty-package: config:
         pkgs.runCommand "config"
         {
@@ -31,15 +25,15 @@
 
       config =
         ''
-          title = ${title}
-          font-family = ${font.family}
-          font-size = ${lib.toString font.size}
+          title = ${cfg.title}
+          font-family = ${cfg.font.family}
+          font-size = ${lib.toString cfg.font.size}
         ''
-        + lib.optionalString (extraConfig != null) extraConfig;
+        + cfg.extraConfig;
 
       fontsConf = pkgs.makeFontsConf {
         fontDirectories = [
-          font.package
+          cfg.font.package
         ];
       };
 
@@ -78,19 +72,71 @@
           "--theme=${validate pkgs.ghostty theme}"
         ];
       in
-        lib.strings.concatStringsSep " " (
-          [
-            "wrapProgram $out/bin/ghostty"
-            "--add-flags \"${lib.strings.concatStringsSep " " flags}\""
-          ]
-          ++ (
-            lib.optional
-            (font != null)
-            "--set FONTCONFIG_FILE ${fontsConf}"
-          )
-        );
+        lib.strings.concatStringsSep " " [
+          "wrapProgram $out/bin/ghostty"
+          "--add-flags \"${lib.strings.concatStringsSep " " flags}\""
+          "--set FONTCONFIG_FILE ${fontsConf}"
+        ];
 
-      meta.mainProgram = "ghostty";
+      meta = {
+        mainProgram = "ghostty";
+      };
     })) {};
+  };
+
+  flake = {
+    configOptions.ghostty = {
+      lib,
+      pkgs,
+      config,
+      ...
+    }: {
+      options = {
+        title = lib.mkOption {
+          type = lib.types.nonEmptyStr;
+          default = "Ghostty";
+        };
+
+        font = lib.mkOption {
+          type = lib.types.submodule {
+            options = {
+              package = lib.mkOption {
+                type = lib.types.package;
+              };
+
+              family = lib.mkOption {
+                type = lib.types.nonEmptyStr;
+              };
+
+              size = lib.mkOption {
+                type = lib.types.int;
+              };
+            };
+          };
+
+          default = {
+            package = pkgs.nerd-fonts._0xproto;
+            family = "0xProto Nerd Font";
+            size = 11;
+          };
+        };
+
+        extraConfig = lib.mkOption {
+          type = lib.types.lines;
+          default = "";
+        };
+      };
+
+      config = {
+        assertions = [
+          {
+            assertion = 0 < config.font.size;
+            message = ''
+              Font size must be bigger than zero.
+            '';
+          }
+        ];
+      };
+    };
   };
 }
