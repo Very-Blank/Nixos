@@ -4,14 +4,15 @@
     pkgs,
     ...
   }: {
-    packages.swaybg = lib.makeOverridable ({background ? ../../resources/wallpapers/nixos-logo-ascii.png}: let
+    packages.swaybg = lib.makeOverridable (module: let
+      cfg = self.lib.evalConfig pkgs self.configOptions.swaybg module;
     in (pkgs.symlinkJoin {
       name = "swaybg";
       paths = [pkgs.swaybg];
       buildInputs = [pkgs.makeWrapper];
       postBuild = let
         flags = [
-          "--image ${background}"
+          "--image ${cfg.background}"
         ];
       in
         lib.strings.concatStringsSep " " [
@@ -26,6 +27,15 @@
   };
 
   flake = {
+    configOptions.swaybg = {lib, ...}: {
+      options = {
+        background = lib.mkOption {
+          type = lib.types.path;
+          default = ../../resources/wallpapers/nixos-logo-ascii.png;
+        };
+      };
+    };
+
     userModules.swaybgService = user: {
       lib,
       pkgs,
