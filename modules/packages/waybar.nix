@@ -8,40 +8,24 @@
     pkgs,
     ...
   }: {
-    packages.waybar = lib.makeOverridable ({
-      font ? {
-        package = pkgs.nerd-fonts._0xproto;
-        family = "0xProto Nerd Font";
-      },
-      icons ? {
-        package = pkgs.papirus-icon-theme;
-        theme = "Papirus";
-      },
-      features ? [
-        "audio"
-        "backlight"
-        "system-info"
-        "battery"
-        "tray"
-      ],
-      leftModules ? ["niri/workspaces"],
-    }: let
+    packages.waybar = lib.makeOverridable (module: let
+      cfg = self.lib.evalConfig pkgs self.configOptions.waybar module;
+
       config = (pkgs.formats.json {}).generate "config.json" (self.settings.waybar {
         inherit lib;
         inherit pkgs;
-        inherit leftModules;
-        inherit features;
+        inherit cfg;
       });
 
       style = pkgs.writeText "style.css" (self.css.waybar {
         theme = inputs.colors.lib.withHash self.globals.theme.palette;
-        fontFamily = font.family;
+        fontFamily = cfg.font.family;
         fontWeight = "normal";
       });
 
       fontsConf = pkgs.makeFontsConf {
         fontDirectories = [
-          font.package
+          cfg.font.package
         ];
       };
 
@@ -56,7 +40,7 @@
         {
           gschema = ''
             [org.gnome.desktop.interface]
-            icon-theme='${icons.theme}'
+            icon-theme='${cfg.icons.theme}'
           '';
 
           passAsFile = ["gschema"];
@@ -80,21 +64,14 @@
           "--style ${style}"
         ];
       in
-        lib.strings.concatStringsSep " " (
-          [
-            "wrapProgram $out/bin/waybar"
-            "--add-flags \"${lib.strings.concatStringsSep " " flags}\""
-          ]
-          ++ (
-            lib.optional (font != null)
-            "--set FONTCONFIG_FILE ${fontsConf}"
-          )
-          ++ lib.optionals (icons != null) [
-            "--prefix XDG_DATA_DIRS : ${icons.package}/share"
-            "--set GSETTINGS_SCHEMA_DIR ${gsettings}"
-            "--set GSETTINGS_BACKEND memory"
-          ]
-        );
+        lib.strings.concatStringsSep " " [
+          "wrapProgram $out/bin/waybar"
+          "--add-flags \"${lib.strings.concatStringsSep " " flags}\""
+          "--set FONTCONFIG_FILE ${fontsConf}"
+          "--prefix XDG_DATA_DIRS : ${cfg.icons.package}/share"
+          "--set GSETTINGS_SCHEMA_DIR ${gsettings}"
+          "--set GSETTINGS_BACKEND memory"
+        ];
 
       meta.mainProgram = "waybar";
     })) {};
@@ -144,13 +121,81 @@
         );
     };
 
+    configOptions.waybar = {
+      lib,
+      pkgs,
+      ...
+    }: {
+      options = {
+        font = lib.mkOption {
+          type = lib.types.submodule {
+            options = {
+              package = lib.mkOption {
+                type = lib.types.package;
+              };
+
+              family = lib.mkOption {
+                type = lib.types.nonEmptyStr;
+              };
+            };
+          };
+
+          default = {
+            package = pkgs.nerd-fonts._0xproto;
+            family = "0xProto Nerd Font";
+          };
+        };
+
+        icons = lib.mkOption {
+          type = lib.types.submodule {
+            options = {
+              package = lib.mkOption {
+                type = lib.types.package;
+              };
+
+              theme = lib.mkOption {
+                type = lib.types.nonEmptyStr;
+              };
+            };
+          };
+
+          default = {
+            package = pkgs.papirus-icon-theme;
+            theme = "Papirus";
+          };
+        };
+
+        features = lib.mkOption {
+          type = lib.types.listOf (lib.types.enum [
+            "audio"
+            "backlight"
+            "system-info"
+            "battery"
+            "tray"
+          ]);
+
+          default = [
+            "audio"
+            "backlight"
+            "system-info"
+            "battery"
+            "tray"
+          ];
+        };
+
+        leftModules = lib.mkOption {
+          type = lib.types.listOf lib.types.nonEmptyStr;
+          default = ["niri/workspaces"];
+        };
+      };
+    };
+
     settings.waybar = {
       lib,
       pkgs,
-      leftModules,
-      features,
+      cfg,
     }: let
-      enabled = f: (builtins.elem f features);
+      enabled = f: (builtins.elem f cfg.features);
     in
       {
         layer = "top";
@@ -161,7 +206,7 @@
         modules-center = ["clock"];
 
         modules-left =
-          leftModules
+          cfg.leftModules
           ++ [
             "keyboard-state"
             "custom/poweroff"
@@ -209,7 +254,7 @@
           tooltip = false;
         };
       }
-      // (lib.optionalAttrs (enabled "pulseaudio") {
+      // (lib.optionalAttrs (enabled "audio") {
         "pulseaudio" = {
           reverse-scrolling = 1;
           format = "{volume}% {icon}  {format_source}";
