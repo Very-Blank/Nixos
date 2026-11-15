@@ -69,7 +69,17 @@
         ]
       );
 
-      zshrc = pkgs.writeText "zsh" config;
+      zshrc =
+        pkgs.runCommand "zshrc"
+        {
+          inherit config;
+          passAsFile = ["config"];
+          nativeBuildInputs = [pkgs.zsh];
+        }
+        ''
+          zsh -n $configPath
+          cp $configPath $out
+        '';
       zshenv = pkgs.writeText "zsh" "";
 
       zdotdir = pkgs.linkFarm "zsh-config" [

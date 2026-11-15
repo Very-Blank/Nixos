@@ -42,19 +42,27 @@
         ]
         else [];
 
-      configFile = pkgs.writeText "config" (
-        lib.concatStringsSep "\n" (
-          (lib.concatMap
-            sectionToValue
-            [
-              "core"
-              "init"
-              "pull"
-              "user"
-            ])
-          ++ [cfg.extraConfig]
-        )
-      );
+      configFile =
+        pkgs.runCommand "config"
+        {
+          config = lib.concatStringsSep "\n" (
+            (lib.concatMap
+              sectionToValue
+              [
+                "core"
+                "init"
+                "pull"
+                "user"
+              ])
+            ++ [cfg.extraConfig]
+          );
+          passAsFile = ["config"];
+          nativeBuildInputs = [pkgs.git];
+        }
+        ''
+          git config --file $configPath --list > /dev/null
+          cp $configPath $out
+        '';
     in (pkgs.symlinkJoin {
       name = "git";
       paths = [pkgs.git];

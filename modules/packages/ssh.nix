@@ -7,13 +7,23 @@
     packages.ssh = lib.makeOverridable (module: let
       cfg = self.lib.evalConfig pkgs self.configOptions.ssh module;
 
-      configFile = pkgs.writeText "config" (lib.strings.concatStringsSep "\n" (map (host: ''
-          Host ${host.match}
-            HostName ${host.name}
-            IdentityFile ${host.identityFile}
-            User ${host.user}
-        '')
-        cfg.hosts));
+      configFile =
+        pkgs.runCommand "config"
+        {
+          config = lib.strings.concatStringsSep "\n" (map (host: ''
+              Host ${host.match}
+                HostName ${host.name}
+                IdentityFile ${host.identityFile}
+                User ${host.user}
+            '')
+            cfg.hosts);
+          passAsFile = ["config"];
+          nativeBuildInputs = [pkgs.openssh];
+        }
+        ''
+          ssh -T -G -F $configPath localhost > /dev/null
+          cp $configPath $out
+        '';
     in (pkgs.symlinkJoin {
       name = "ssh";
       paths = [pkgs.openssh];
