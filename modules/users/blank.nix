@@ -9,12 +9,14 @@
         config,
         ...
       }: let
-        niri = self.packages.${pkgs.stdenv.hostPlatform.system}.niri.override {
+        packages = self.packages.${pkgs.stdenv.hostPlatform.system};
+
+        niri = packages.niri.override {
           outputs = config.core.host.outputs;
           audio = builtins.elem "audio" config.core.host.features;
           brightness = builtins.elem "brightness" config.core.host.features;
-          terminal = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.ghostty}";
-          launcher = "${lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.anyrun}";
+          terminal = "${lib.getExe packages.ghostty}";
+          launcher = "${lib.getExe packages.anyrun}";
 
           screenshots = {
             path = "~/Pictures/Screenshots/";
@@ -49,7 +51,7 @@
         };
 
         users.users."${user}" = {
-          shell = self.packages.${pkgs.stdenv.hostPlatform.system}.zsh;
+          shell = packages.zsh;
 
           hashedPasswordFile = lib.mkIf (config.core.host.type == "live") config.sops.secrets."users/${user}/password-hash".path;
           password = lib.mkIf (config.core.host.type == "vm") "test";
@@ -63,7 +65,7 @@
             "audio"
           ];
 
-          packages = with self.packages.${pkgs.stdenv.hostPlatform.system}; [
+          packages = with packages; [
             librewolf
 
             nvim
