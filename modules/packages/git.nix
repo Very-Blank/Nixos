@@ -7,54 +7,17 @@
     packages.git = lib.makeOverridable (module: let
       cfg = self.lib.evalConfig pkgs self.configOptions.git module;
 
-      sectionToValue = name: let
-        values =
-          lib.mapAttrsToList
-          (name: value: let
-            string =
-              if lib.isString value
-              then value
-              else if lib.isBool value
-              then
-                (
-                  if value
-                  then "true"
-                  else "false"
-                )
-              else if lib.isInt value
-              then lib.toString value
-              else throw "Type not supported.";
-          in "${name}=${string}")
-          (lib.filterAttrs
-            (_: value: (value != null) && value != [])
-            cfg.${name});
-      in
-        if lib.hasAttr name cfg && values != []
-        then [
-          (lib.strings.concatStringsSep
-            "\n"
-            (
-              [
-                "[${name}]"
-              ]
-              ++ values
-            ))
-        ]
-        else [];
-
       configFile = pkgs.writeTextFile {
         name = "config";
-        text = lib.strings.concatStringsSep "\n" (
-          (lib.concatMap
-            sectionToValue
-            [
-              "core"
-              "init"
-              "pull"
-              "user"
-            ])
-          ++ [cfg.extraConfig]
-        );
+        text =
+          lib.generators.toGitINI (
+            lib.filterAttrs (_: section: section != {}) (
+              lib.mapAttrs (_: lib.filterAttrs (_: value: value != null)) {
+                inherit (cfg) core init pull user;
+              }
+            )
+          )
+          + cfg.extraConfig;
         checkPhase = ''
           ${lib.getExe pkgs.git} config --file $target --list > /dev/null
         '';
