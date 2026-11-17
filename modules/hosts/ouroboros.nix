@@ -30,7 +30,7 @@
       ];
     };
 
-    nixosModules.ouroboros = {...}: {
+    nixosModules.ouroboros = {
       imports = with self.nixosModules; [
         networking
         openssh

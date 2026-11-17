@@ -462,14 +462,12 @@
 
   flake = {
     userModules.librewolfPersistent = user: {
-      config = {
-        preservation = {
-          preserveAt."/persistent" = {
-            users.${user} = {
-              directories = [
-                ".librewolf"
-              ];
-            };
+      preservation = {
+        preserveAt."/persistent" = {
+          users.${user} = {
+            directories = [
+              ".librewolf"
+            ];
           };
         };
       };

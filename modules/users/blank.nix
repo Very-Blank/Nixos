@@ -50,7 +50,7 @@
           neededForUsers = true;
         };
 
-        users.users."${user}" = {
+        users.users.${user} = {
           shell = packages.zsh;
 
           hashedPasswordFile = lib.mkIf (config.core.host.type == "live") config.sops.secrets."users/${user}/password-hash".path;
@@ -108,7 +108,7 @@
 
         core = {
           greeter = {
-            users."${user}" = let
+            users.${user} = let
               niri-session = pkgs.writeShellScript "niri-session" ''
                 if systemctl --user -q is-active niri.service; then
                   systemctl --user stop niri.service

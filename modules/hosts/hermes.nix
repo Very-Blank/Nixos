@@ -30,7 +30,7 @@
       ];
     };
 
-    nixosModules.hermes = {...}: {
+    nixosModules.hermes = {
       imports = with self.nixosModules; [
         networking
         bluetooth

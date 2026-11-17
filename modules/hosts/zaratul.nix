@@ -30,7 +30,7 @@
       ];
     };
 
-    nixosModules.zaratul = {...}: {
+    nixosModules.zaratul = {
       imports = with self.nixosModules; [
         networking
         audio

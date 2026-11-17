@@ -41,7 +41,7 @@
 
       ini = pkgs.formats.ini {};
     in {
-      users.users."${user}" = {
+      users.users.${user} = {
         packages = [
           pkgs.adw-gtk3
           iconTheme.package
