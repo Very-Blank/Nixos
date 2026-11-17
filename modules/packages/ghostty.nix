@@ -11,25 +11,19 @@
     packages.ghostty = lib.makeOverridable (module: let
       cfg = self.lib.evalConfig pkgs self.configOptions.ghostty module;
 
-      validate = ghostty-package: config:
-        pkgs.runCommand "config"
-        {
-          inherit config;
-          passAsFile = ["config"];
-          buildInputs = [ghostty-package];
-        }
-        ''
-          ghostty +validate-config --config-file=$configPath
-          cp $configPath $out
+      configFile = pkgs.writeTextFile {
+        name = "config";
+        text =
+          ''
+            title = ${cfg.title}
+            font-family = ${cfg.font.family}
+            font-size = ${lib.toString cfg.font.size}
+          ''
+          + cfg.extraConfig;
+        checkPhase = ''
+          ${lib.getExe pkgs.ghostty} +validate-config --config-file=$target
         '';
-
-      config =
-        ''
-          title = ${cfg.title}
-          font-family = ${cfg.font.family}
-          font-size = ${lib.toString cfg.font.size}
-        ''
-        + cfg.extraConfig;
+      };
 
       fontsConf = pkgs.makeFontsConf {
         fontDirectories = [
@@ -37,46 +31,48 @@
         ];
       };
 
-      theme = let
+      themeFile = let
         palette = inputs.colors.lib.withHash self.globals.theme.palette;
-      in ''
-        background = ${palette.base00}
-        cursor-color = ${palette.base05}
-        foreground = ${palette.base0B}
-        palette = 0=${palette.base00}
-        palette = 1=${palette.base08}
-        palette = 2=${palette.base0B}
-        palette = 3=${palette.base0A}
-        palette = 4=${palette.base0D}
-        palette = 5=${palette.base0E}
-        palette = 6=${palette.base0C}
-        palette = 7=${palette.base05}
-        palette = 8=${palette.base03}
-        palette = 9=${palette.base08}
-        palette = 10=${palette.base0B}
-        palette = 11=${palette.base0A}
-        palette = 12=${palette.base0D}
-        palette = 13=${palette.base0E}
-        palette = 14=${palette.base0C}
-        palette = 15=${palette.base07}
-        selection-background = ${palette.base01}
-        selection-foreground = ${palette.base05}
-      '';
+      in
+        pkgs.writeTextFile {
+          name = "theme";
+          text = ''
+            background = ${palette.base00}
+            cursor-color = ${palette.base05}
+            foreground = ${palette.base0B}
+            palette = 0=${palette.base00}
+            palette = 1=${palette.base08}
+            palette = 2=${palette.base0B}
+            palette = 3=${palette.base0A}
+            palette = 4=${palette.base0D}
+            palette = 5=${palette.base0E}
+            palette = 6=${palette.base0C}
+            palette = 7=${palette.base05}
+            palette = 8=${palette.base03}
+            palette = 9=${palette.base08}
+            palette = 10=${palette.base0B}
+            palette = 11=${palette.base0A}
+            palette = 12=${palette.base0D}
+            palette = 13=${palette.base0E}
+            palette = 14=${palette.base0C}
+            palette = 15=${palette.base07}
+            selection-background = ${palette.base01}
+            selection-foreground = ${palette.base05}
+          '';
+          checkPhase = ''
+            ${lib.getExe pkgs.ghostty} +validate-config --config-file=$target
+          '';
+        };
     in (pkgs.symlinkJoin {
       name = "ghostty";
       paths = [pkgs.ghostty];
       buildInputs = [pkgs.makeWrapper];
-      postBuild = let
-        flags = [
-          "--config-file=${validate pkgs.ghostty config}"
-          "--theme=${validate pkgs.ghostty theme}"
-        ];
-      in
-        lib.strings.concatStringsSep " " [
-          "wrapProgram $out/bin/ghostty"
-          "--add-flags \"${lib.strings.concatStringsSep " " flags}\""
-          "--set FONTCONFIG_FILE ${fontsConf}"
-        ];
+      postBuild = ''
+        wrapProgram $out/bin/ghostty \
+          --add-flag --config-file=${configFile} \
+          --add-flag --theme=${themeFile} \
+          --set FONTCONFIG_FILE ${fontsConf}
+      '';
 
       meta = {
         mainProgram = "ghostty";
@@ -88,7 +84,6 @@
     configOptions.ghostty = {
       lib,
       pkgs,
-      config,
       ...
     }: {
       options = {
@@ -109,7 +104,7 @@
               };
 
               size = lib.mkOption {
-                type = lib.types.int;
+                type = lib.types.ints.positive;
               };
             };
           };
@@ -125,17 +120,6 @@
           type = lib.types.lines;
           default = "";
         };
-      };
-
-      config = {
-        assertions = [
-          {
-            assertion = 0 < config.font.size;
-            message = ''
-              Font size must be bigger than zero.
-            '';
-          }
-        ];
       };
     };
   };

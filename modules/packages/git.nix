@@ -42,33 +42,30 @@
         ]
         else [];
 
-      configFile =
-        pkgs.runCommand "config"
-        {
-          config = lib.concatStringsSep "\n" (
-            (lib.concatMap
-              sectionToValue
-              [
-                "core"
-                "init"
-                "pull"
-                "user"
-              ])
-            ++ [cfg.extraConfig]
-          );
-          passAsFile = ["config"];
-          nativeBuildInputs = [pkgs.git];
-        }
-        ''
-          git config --file $configPath --list > /dev/null
-          cp $configPath $out
+      configFile = pkgs.writeTextFile {
+        name = "config";
+        text = lib.concatStringsSep "\n" (
+          (lib.concatMap
+            sectionToValue
+            [
+              "core"
+              "init"
+              "pull"
+              "user"
+            ])
+          ++ [cfg.extraConfig]
+        );
+        checkPhase = ''
+          ${lib.getExe pkgs.git} config --file $target --list > /dev/null
         '';
+      };
     in (pkgs.symlinkJoin {
       name = "git";
       paths = [pkgs.git];
       buildInputs = [pkgs.makeWrapper];
       postBuild = ''
-        wrapProgram $out/bin/git --set GIT_CONFIG_GLOBAL ${configFile}
+        wrapProgram $out/bin/git \
+          --set GIT_CONFIG_GLOBAL ${configFile}
       '';
 
       meta = {

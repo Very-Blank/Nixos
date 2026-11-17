@@ -69,17 +69,14 @@
         ]
       );
 
-      zshrc =
-        pkgs.runCommand "zshrc"
-        {
-          inherit config;
-          passAsFile = ["config"];
-          nativeBuildInputs = [pkgs.zsh];
-        }
-        ''
-          zsh -n $configPath
-          cp $configPath $out
+      zshrc = pkgs.writeTextFile {
+        name = "zshrc";
+        text = config;
+        checkPhase = ''
+          ${lib.getExe pkgs.zsh} -n $target
         '';
+      };
+
       zshenv = pkgs.writeText "zsh" "";
 
       zdotdir = pkgs.linkFarm "zsh-config" [
@@ -98,21 +95,19 @@
       buildInputs = [pkgs.makeWrapper];
       passthru.shellPath = "/bin/zsh";
 
-      postBuild = lib.strings.concatStringsSep " " [
-        "wrapProgram $out/bin/zsh"
-        "--set ZDOTDIR ${zdotdir}"
-      ];
+      postBuild = ''
+        wrapProgram $out/bin/zsh \
+          --set ZDOTDIR ${zdotdir}
+      '';
 
-      meta.mainProgram = "zsh";
+      meta = {
+        mainProgram = "zsh";
+      };
     })) {};
   };
 
   flake = {
-    configOptions.zsh = {
-      lib,
-      config,
-      ...
-    }: {
+    configOptions.zsh = {lib, ...}: {
       options = {
         keymap = lib.mkOption {
           type = lib.types.enum [
@@ -171,50 +166,33 @@
         };
 
         history = let
-          mkEnableOption = default: description:
+          mkBoolOption = default: description:
             lib.mkOption {
               type = lib.types.bool;
               inherit default description;
             };
         in {
           size = lib.mkOption {
-            type = lib.types.int;
+            type = lib.types.ints.unsigned;
             default = 1000;
           };
 
           save = lib.mkOption {
-            type = lib.types.int;
+            type = lib.types.ints.unsigned;
             default = 1000;
           };
 
-          append = mkEnableOption false "Append to the history file instead of overwriting it.";
-          ignoreDups = mkEnableOption true "Don't record a command identical to the previous one.";
-          ignoreSpace = mkEnableOption true "Don't record commands that start with a space.";
-          share = mkEnableOption true "Share history between all running sessions.";
-          extended = mkEnableOption false "Save timestamps and durations in the history file.";
-          saveByCopy = mkEnableOption false "Write a new history file and rename it instead of overwriting in place.";
-          expireDuplicatesFirst = mkEnableOption false "Expire duplicates first when the history exceeds its size.";
-          findNoDups = mkEnableOption false "Skip duplicates when searching history.";
-          ignoreAllDups = mkEnableOption false "Remove older duplicates when a new command is added.";
-          saveNoDups = mkEnableOption false "Omit duplicates when writing the history file.";
+          append = mkBoolOption false "Append to the history file instead of overwriting it.";
+          ignoreDups = mkBoolOption true "Don't record a command identical to the previous one.";
+          ignoreSpace = mkBoolOption true "Don't record commands that start with a space.";
+          share = mkBoolOption true "Share history between all running sessions.";
+          extended = mkBoolOption false "Save timestamps and durations in the history file.";
+          saveByCopy = mkBoolOption false "Write a new history file and rename it instead of overwriting in place.";
+          expireDuplicatesFirst = mkBoolOption false "Expire duplicates first when the history exceeds its size.";
+          findNoDups = mkBoolOption false "Skip duplicates when searching history.";
+          ignoreAllDups = mkBoolOption false "Remove older duplicates when a new command is added.";
+          saveNoDups = mkBoolOption false "Omit duplicates when writing the history file.";
         };
-      };
-
-      config = {
-        assertions = [
-          {
-            assertion = 0 <= config.history.save;
-            message = ''
-              History save size can't be a negative number.
-            '';
-          }
-          {
-            assertion = 0 <= config.history.size;
-            message = ''
-              History size can't be a negative number.
-            '';
-          }
-        ];
       };
     };
   };

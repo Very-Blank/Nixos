@@ -38,8 +38,14 @@
         buildInputs = [pkgs.makeWrapper];
         paths = [pkgs.tmux];
         postBuild = ''
-          wrapProgram $out/bin/tmux --append-flags "-f ${pkgs.writeText "config" tmuxConfig} -L ${cfg.name}"
+          wrapProgram $out/bin/tmux \
+            --add-flag -f --add-flag ${pkgs.writeText "config" tmuxConfig} \
+            --add-flag -L --add-flag ${cfg.name}
         '';
+
+        meta = {
+          mainProgram = "tmux";
+        };
       }) {};
   };
   flake = {

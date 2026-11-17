@@ -47,18 +47,21 @@
       paths = [niri-package];
       buildInputs = [pkgs.makeWrapper];
       postBuild = ''
-        wrapProgram $out/bin/niri --add-flags "--config ${kdlConfig}" \
-            --set NIXOS_OZONE_WL 1 \
-            --set XCURSOR_PATH ${cursorTheme}/share/icons:${cfg.cursor.package}/share/icons \
-            --set XCURSOR_THEME ${cfg.cursor.theme} \
-            --set XCURSOR_SIZE ${toString cfg.cursor.size}
+        wrapProgram $out/bin/niri \
+          --add-flag --config --add-flag ${kdlConfig} \
+          --set NIXOS_OZONE_WL 1 \
+          --set XCURSOR_PATH ${cursorTheme}/share/icons:${cfg.cursor.package}/share/icons \
+          --set XCURSOR_THEME ${cfg.cursor.theme} \
+          --set XCURSOR_SIZE ${toString cfg.cursor.size}
 
         rm "$out/share/systemd/user/niri.service"
 
         substitute "${niriService}" "$out/share/systemd/user/niri.service" --replace-fail '@niri@' "$out/bin/niri"
       '';
 
-      meta.mainProgram = "niri";
+      meta = {
+        mainProgram = "niri";
+      };
     })) {};
   };
 
@@ -102,7 +105,6 @@
     configOptions.niri = {
       lib,
       pkgs,
-      config,
       ...
     }: {
       options = {
@@ -173,7 +175,7 @@
               };
 
               size = lib.mkOption {
-                type = lib.types.int;
+                type = lib.types.ints.unsigned;
               };
             };
           };
@@ -222,17 +224,6 @@
         spawnAtStartUp = lib.mkOption {
           type = lib.types.listOf (lib.types.listOf lib.types.nonEmptyStr);
         };
-      };
-
-      config = {
-        assertions = [
-          {
-            assertion = 0 <= config.cursor.size;
-            message = ''
-              Cursor size can't be a negative number.
-            '';
-          }
-        ];
       };
     };
 

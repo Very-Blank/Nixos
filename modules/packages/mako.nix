@@ -16,8 +16,12 @@
       config =
         ''
           default-timeout=${lib.toString cfg.timeout}
+        ''
+        + lib.optionalString (cfg.border != null) ''
           border-radius=${lib.toString cfg.border.radius}
           border-size=${lib.toString cfg.border.size}
+        ''
+        + ''
 
           font=${cfg.font.family} ${lib.toString cfg.font.size}
         ''
@@ -47,18 +51,15 @@
       name = "mako";
       paths = [pkgs.mako];
       buildInputs = [pkgs.makeWrapper];
-      postBuild = let
-        flags = [
-          "--config ${pkgs.writeText "config" config}"
-        ];
-      in
-        lib.strings.concatStringsSep " " [
-          "wrapProgram $out/bin/mako"
-          "--add-flags \"${lib.strings.concatStringsSep " " flags}\""
-          "--set FONTCONFIG_FILE ${fontsConf}"
-        ];
+      postBuild = ''
+        wrapProgram $out/bin/mako \
+          --add-flag --config --add-flag ${pkgs.writeText "config" config} \
+          --set FONTCONFIG_FILE ${fontsConf}
+      '';
 
-      meta.mainProgram = "mako";
+      meta = {
+        mainProgram = "mako";
+      };
     })) {};
   };
 
@@ -66,12 +67,11 @@
     configOptions.mako = {
       lib,
       pkgs,
-      config,
       ...
     }: {
       options = {
         timeout = lib.mkOption {
-          type = lib.types.int;
+          type = lib.types.ints.unsigned;
           default = 1500;
         };
 
@@ -79,11 +79,11 @@
           type = lib.types.nullOr (lib.types.submodule {
             options = {
               radius = lib.mkOption {
-                type = lib.types.int;
+                type = lib.types.ints.unsigned;
               };
 
               size = lib.mkOption {
-                type = lib.types.int;
+                type = lib.types.ints.unsigned;
               };
             };
           });
@@ -107,7 +107,7 @@
               };
 
               size = lib.mkOption {
-                type = lib.types.int;
+                type = lib.types.ints.unsigned;
               };
             };
           };
@@ -118,35 +118,6 @@
             size = 10;
           };
         };
-      };
-
-      config = {
-        assertions = [
-          {
-            assertion = 0 <= config.font.size;
-            message = ''
-              Font size can't be a negative number.
-            '';
-          }
-          {
-            assertion = 0 <= config.timeout;
-            message = ''
-              Timeout can't be a negative number.
-            '';
-          }
-          {
-            assertion = 0 <= config.border.size;
-            message = ''
-              Border size can't be a negative number.
-            '';
-          }
-          {
-            assertion = 0 <= config.border.radius;
-            message = ''
-              Border radius can't be a negative number.
-            '';
-          }
-        ];
       };
     };
 

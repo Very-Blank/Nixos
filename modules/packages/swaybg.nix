@@ -10,15 +10,10 @@
       name = "swaybg";
       paths = [pkgs.swaybg];
       buildInputs = [pkgs.makeWrapper];
-      postBuild = let
-        flags = [
-          "--image ${cfg.background}"
-        ];
-      in
-        lib.strings.concatStringsSep " " [
-          "wrapProgram $out/bin/swaybg"
-          "--add-flags \"${lib.strings.concatStringsSep " " flags}\""
-        ];
+      postBuild = ''
+        wrapProgram $out/bin/swaybg \
+          --add-flag --image --add-flag ${cfg.background}
+      '';
 
       meta = {
         mainProgram = "swaybg";

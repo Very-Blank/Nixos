@@ -19,19 +19,13 @@
 
       cargoHash = "sha256-beKONgUIDLi83mRQxVEv41vhSNWQsNXsMt6P6I79I6A=";
 
-      meta.mainProgram = "ron-schema";
+      meta = {
+        mainProgram = "ron-schema";
+      };
     };
   in {
     packages.anyrun = lib.makeOverridable (module: let
       cfg = self.lib.evalConfig pkgs self.configOptions.anyrun module;
-
-      validate = schema: file:
-        pkgs.runCommand "validated-${file.name}"
-        {nativeBuildInputs = [ron-schema];}
-        ''
-          ron-schema validate --schema ${schema} ${file}
-          cp ${file} $out
-        '';
 
       schema = pkgs.writeText "anyrun.ronschema" ''
         (
@@ -73,7 +67,7 @@
         (key: value: ''(key: "${key}", action: ${value.action}, ${lib.strings.concatStringsSep ", " (map (modifier: "${modifier}: ${lib.boolToString (lib.elem modifier value.modifiers)}") ["shift" "ctrl" "alt"])})'')
         cfg.keybinds;
 
-      config = pkgs.writeText "config.ron" ''
+      config = ''
         (
           x: ${numToString cfg.position.x},
           y: ${numToString cfg.position.y},
@@ -101,6 +95,14 @@
         )
       '';
 
+      configFile = pkgs.writeTextFile {
+        name = "config.ron";
+        text = config;
+        checkPhase = ''
+          ${lib.getExe ron-schema} validate --schema ${schema} $target
+        '';
+      };
+
       style = pkgs.writeText "style.css" (self.css.anyrun {
         palette = inputs.colors.lib.withHash self.globals.theme.palette;
         fontFamily = cfg.font.family;
@@ -109,7 +111,7 @@
       configDir = pkgs.linkFarm "anyrun-config" [
         {
           name = "config.ron";
-          path = validate schema config;
+          path = configFile;
         }
         {
           name = "style.css";
@@ -126,18 +128,15 @@
       name = "anyrun";
       paths = [pkgs.anyrun];
       buildInputs = [pkgs.makeWrapper];
-      postBuild = let
-        flags = [
-          "--config-dir=${configDir}"
-        ];
-      in
-        lib.strings.concatStringsSep " " [
-          "wrapProgram $out/bin/anyrun"
-          "--add-flags \"${lib.strings.concatStringsSep " " flags}\""
-          "--set FONTCONFIG_FILE ${fontsConf}"
-        ];
+      postBuild = ''
+        wrapProgram $out/bin/anyrun \
+          --add-flag --config-dir=${configDir} \
+          --set FONTCONFIG_FILE ${fontsConf}
+      '';
 
-      meta.mainProgram = "anyrun";
+      meta = {
+        mainProgram = "anyrun";
+      };
     })) {};
   };
 
@@ -149,21 +148,24 @@
       ...
     }: {
       options = let
-        mkEnableOption = default: description:
+        mkBoolOption = default: description:
           lib.mkOption {
             type = lib.types.bool;
             inherit default description;
           };
+
+        # NOTE: An integer is an absolute size in pixels, a float is a fraction of the screen.
+        dimension = lib.types.either lib.types.ints.unsigned (lib.types.numbers.between 0.0 1.0);
       in {
         position = lib.mkOption {
           type = lib.types.submodule {
             options = {
               x = lib.mkOption {
-                type = lib.types.either lib.types.float lib.types.int;
+                type = dimension;
               };
 
               y = lib.mkOption {
-                type = lib.types.either lib.types.float lib.types.int;
+                type = dimension;
               };
             };
           };
@@ -178,11 +180,11 @@
           type = lib.types.submodule {
             options = {
               width = lib.mkOption {
-                type = lib.types.either lib.types.float lib.types.int;
+                type = dimension;
               };
 
               height = lib.mkOption {
-                type = lib.types.either lib.types.float lib.types.int;
+                type = dimension;
               };
             };
           };
@@ -193,23 +195,23 @@
           };
         };
 
-        hideIcons = mkEnableOption true ''
+        hideIcons = mkBoolOption true ''
           If icons will be hidden.
         '';
 
-        ignoreExclusiveZones = mkEnableOption false ''
+        ignoreExclusiveZones = mkBoolOption false ''
           If exclusive zones should be ignored.
         '';
 
-        hidePluginInfo = mkEnableOption true ''
+        hidePluginInfo = mkBoolOption true ''
           If plugin info is shown.
         '';
 
-        closeOnClick = mkEnableOption true ''
+        closeOnClick = mkBoolOption true ''
           If anyrun closes when clicking outside of it.
         '';
 
-        showResultsImmediately = mkEnableOption true ''
+        showResultsImmediately = mkBoolOption true ''
           If results should be shown immediately.
         '';
 
@@ -275,7 +277,7 @@
         };
 
         maxEntries = lib.mkOption {
-          type = lib.types.either (lib.types.enum ["None"]) lib.types.int;
+          type = lib.types.either (lib.types.enum ["None"]) lib.types.ints.unsigned;
           default = "None";
         };
 
@@ -302,63 +304,9 @@
       config = {
         assertions = [
           {
-            assertion = 0 <= config.position.x;
-            message = ''
-              Position x can't be a negative number.
-            '';
-          }
-          {
-            assertion = 0 <= config.position.y;
-            message = ''
-              Position y can't be a negative number.
-            '';
-          }
-          {
-            assertion = (!lib.isFloat config.position.x) || (0.0 <= config.position.x && config.position.x <= 1.0);
-            message = ''
-              Position x is fractional thus it must be less than or equal to 1.0.
-            '';
-          }
-          {
-            assertion = (!lib.isFloat config.position.y) || (0.0 <= config.position.y && config.position.y <= 1.0);
-            message = ''
-              Position y is fractional thus it must be less than or equal to 1.0.
-            '';
-          }
-          {
-            assertion = 0 <= config.size.width;
-            message = ''
-              Width can't be a negative number.
-            '';
-          }
-          {
-            assertion = 0 <= config.size.height;
-            message = ''
-              Height can't be a negative number.
-            '';
-          }
-          {
-            assertion = (!lib.isFloat config.size.width) || (0.0 <= config.size.width && config.size.width <= 1.0);
-            message = ''
-              Width is fractional thus it must be less than or equal to 1.0.
-            '';
-          }
-          {
-            assertion = (!lib.isFloat config.size.height) || (0.0 <= config.size.height && config.size.height <= 1.0);
-            message = ''
-              Height is fractional thus it must be less than or equal to 1.0.
-            '';
-          }
-          {
             assertion = lib.all (modifiers: lib.allUnique modifiers) (lib.mapAttrsToList (_: value: value.modifiers) config.keybinds);
             message = ''
               Each keybind may list a given modifier at most once.
-            '';
-          }
-          {
-            assertion = (lib.isString config.maxEntries) || 0 <= config.maxEntries;
-            message = ''
-              Max entries can't be less than zero.
             '';
           }
         ];

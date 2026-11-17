@@ -58,22 +58,19 @@
       name = "waybar";
       paths = [pkgs.waybar];
       buildInputs = [pkgs.makeWrapper];
-      postBuild = let
-        flags = [
-          "--config ${config}"
-          "--style ${style}"
-        ];
-      in
-        lib.strings.concatStringsSep " " [
-          "wrapProgram $out/bin/waybar"
-          "--add-flags \"${lib.strings.concatStringsSep " " flags}\""
-          "--set FONTCONFIG_FILE ${fontsConf}"
-          "--prefix XDG_DATA_DIRS : ${cfg.icons.package}/share"
-          "--set GSETTINGS_SCHEMA_DIR ${gsettings}"
-          "--set GSETTINGS_BACKEND memory"
-        ];
+      postBuild = ''
+        wrapProgram $out/bin/waybar \
+          --add-flag --config --add-flag ${config} \
+          --add-flag --style --add-flag ${style} \
+          --set FONTCONFIG_FILE ${fontsConf} \
+          --prefix XDG_DATA_DIRS : ${cfg.icons.package}/share \
+          --set GSETTINGS_SCHEMA_DIR ${gsettings} \
+          --set GSETTINGS_BACKEND memory
+      '';
 
-      meta.mainProgram = "waybar";
+      meta = {
+        mainProgram = "waybar";
+      };
     })) {};
   };
 
