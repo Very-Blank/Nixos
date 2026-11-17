@@ -1,8 +1,8 @@
 {self, ...}: {
   flake = {
-    core.host.features = ["bluetooth"];
-
     nixosModules.bluetooth = {
+      core.host.features = ["bluetooth"];
+
       hardware = {
         bluetooth = {
           enable = true;

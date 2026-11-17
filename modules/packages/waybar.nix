@@ -283,7 +283,6 @@
       })
       // (lib.optionalAttrs (enabled "backlight") {
         "backlight" = {
-          device = "intel_backlight";
           format = "{percent}% {icon}";
           format-icons = [
             "󰛩"

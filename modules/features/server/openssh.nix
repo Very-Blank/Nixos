@@ -45,7 +45,7 @@
       };
 
       config = let
-        cfg = config.modules.server.openssh;
+        cfg = config.modules.openssh;
       in {
         services = {
           openssh = {

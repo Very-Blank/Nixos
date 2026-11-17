@@ -402,10 +402,10 @@
           })
           // (lib.optionalAttrs cfg.audio {
             "XF86AudioRaiseVolume" = {
-              spawn = ["${lib.getExe' pkgs.wireplumber "wpctl"}" "set-volume" "@DEFAULT_AUDIO_SINK@" " 0.1+"];
+              spawn = ["${lib.getExe' pkgs.wireplumber "wpctl"}" "set-volume" "-l" "1.0" "@DEFAULT_AUDIO_SINK@" "0.1+"];
             };
             "XF86AudioLowerVolume" = {
-              spawn = ["${lib.getExe' pkgs.wireplumber "wpctl"}" "set-volume" "@DEFAULT_AUDIO_SINK@" " 0.1+"];
+              spawn = ["${lib.getExe' pkgs.wireplumber "wpctl"}" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1-"];
             };
             "XF86AudioMute" = {
               spawn = ["${lib.getExe' pkgs.wireplumber "wpctl"}" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"];

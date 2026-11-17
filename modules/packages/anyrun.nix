@@ -194,7 +194,7 @@
         };
 
         hideIcons = mkEnableOption true ''
-          If icons will be shown.
+          If icons will be hidden.
         '';
 
         ignoreExclusiveZones = mkEnableOption false ''
@@ -206,7 +206,7 @@
         '';
 
         closeOnClick = mkEnableOption true ''
-          If plugin info is shown.
+          If anyrun closes when clicking outside of it.
         '';
 
         showResultsImmediately = mkEnableOption true ''

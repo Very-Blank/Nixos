@@ -111,7 +111,6 @@
         lib.mkOption {
           type = lib.types.nonEmptyStr;
           description = description;
-          default = null;
         };
 
       mkNullOrStrOption = description:

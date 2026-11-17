@@ -119,14 +119,15 @@
                 };
               }
               (lib.mapAttrs (
-                  _: opts: {
+                  name: opts: {
                     device = "/dev/disk/by-id/${opts.id}";
                     type = "disk";
 
                     content = {
                       type = "gpt";
                       partitions = {
-                        games = {
+                        ${name} = {
+                          label = "disk-${name}";
                           size = "100%";
                           content = {
                             type = "filesystem";
