@@ -33,6 +33,7 @@
     nixosModules.ouroboros = {
       imports = with self.nixosModules; [
         networking
+        ignoreLid
         openssh
         cloudflareDyndns
         nginx
