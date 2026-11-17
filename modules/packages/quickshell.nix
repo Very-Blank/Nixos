@@ -14,54 +14,35 @@
       config,
       ...
     }: {
-      hjem.users.${user}.files = let
-        wants = ["graphical-session.target"];
-        name = "quickshell.service";
+      core.services.${user}.quickshell = {
+        Unit = {
+          Description = "Quickshell service";
+          PartOf = ["graphical-session.target"];
+          After = ["graphical-session.target"];
+        };
 
-        unit = self.lib.mkUnitFile pkgs name (
-          {
-            lib,
-            pkgs,
-            ...
-          }: {
-            Unit = {
-              Description = "Quickshell service";
-              PartOf = ["graphical-session.target"];
-              After = ["graphical-session.target"];
-            };
+        Service = {
+          Type = "exec";
+          ExecStart = [
+            "${lib.getExe (self.packages.${pkgs.stdenv.hostPlatform.system}.quickshell.override {
+              palette = inputs.colors.lib.withHash self.globals.theme.palette;
 
-            Service = {
-              Type = "exec";
-              ExecStart = [
-                "${lib.getExe (self.packages.${pkgs.stdenv.hostPlatform.system}.quickshell.override {
-                  palette = inputs.colors.lib.withHash self.globals.theme.palette;
+              features = {
+                # TODO: This should check what display manager the user uses.
+                niriWorkspaces = true;
+                audio = builtins.elem "audio" config.core.host.features;
+                brightness = builtins.elem "brightness" config.core.host.features;
+                battery = builtins.elem "battery" config.core.host.features;
+              };
+            })}"
+          ];
+          Restart = "on-failure";
+          RestartSec = "1s";
+          KillMode = "process";
+        };
 
-                  features = {
-                    # TODO: This should check what display manager the user uses.
-                    niriWorkspaces = true;
-                    audio = builtins.elem "audio" config.core.host.features;
-                    brightness = builtins.elem "brightness" config.core.host.features;
-                    battery = builtins.elem "battery" config.core.host.features;
-                  };
-                })}"
-              ];
-              Restart = "on-failure";
-              RestartSec = "1s";
-              KillMode = "process";
-            };
-          }
-        );
-      in
-        lib.mkMerge (
-          [
-            {
-              ".config/systemd/user/${name}".source = unit;
-            }
-          ]
-          ++ (map
-            (wants: {".config/systemd/user/${wants}.wants/${name}".source = unit;})
-            wants)
-        );
+        Install.WantedBy = ["graphical-session.target"];
+      };
     };
   };
 }
