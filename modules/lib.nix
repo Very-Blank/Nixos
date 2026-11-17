@@ -12,7 +12,7 @@
             [
               self.nixosModules.sops
               self.nixosModules.disko
-              self.nixosModules.perservation
+              self.nixosModules.preservation
               self.nixosModules.defaults
               self.nixosModules.host
               self.nixosModules.unfree

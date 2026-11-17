@@ -1,6 +1,6 @@
 {inputs, ...}: {
   flake = {
-    nixosModules.perservation = {
+    nixosModules.preservation = {
       lib,
       config,
       ...

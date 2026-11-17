@@ -46,7 +46,7 @@
         ];
 
         sops.secrets."users/${user}/password-hash" = lib.mkIf (config.core.host.type == "live") {
-          sopsFile = ../../secrets/users/. + "/${user}.yaml";
+          sopsFile = ../../secrets/users/${user}.yaml;
           neededForUsers = true;
         };
 
