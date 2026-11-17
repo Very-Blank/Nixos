@@ -34,11 +34,25 @@
       imports = with self.nixosModules; [
         networking
         openssh
+        cloudflareDyndns
+        nginx
+        nginxPersistent
+        borg
+        borgPersistent
+        vaultwarden
+        vaultwardenPersistent
+        vaultwardenNginx
+        vaultwardenBorg
+        nextcloud
+        nextcloudPersistent
+        nextcloudNginx
+        nextcloudBorg
       ];
 
       core = {
         host = {
           name = "ouroboros";
+          domain = "taildevourer.com";
         };
 
         disko = {
@@ -61,6 +75,38 @@
                                              thank you.
 
           '';
+        };
+
+        nginx = {
+          acme = {
+            email = "aapeli.saarelainen.76@gmail.com";
+          };
+        };
+
+        borg = {
+          repo = name: "ssh://u561700@u561700.your-storagebox.de:23/./${name}";
+
+          environment = {
+            BORG_RSH = "ssh -i /root/.ssh/hetzner";
+          };
+        };
+      };
+
+      programs.ssh.knownHosts = {
+        hetzner-storagebox = {
+          hostNames = ["[u561700.your-storagebox.de]:23"];
+          publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIICf9svRenC/PLKIL9nk6K/pxQgoiFC41wTNvoIncOxs";
+        };
+      };
+
+      preservation = {
+        preserveAt."/persistent" = {
+          directories = [
+            {
+              directory = "/root/.ssh";
+              mode = "0700";
+            }
+          ];
         };
       };
     };

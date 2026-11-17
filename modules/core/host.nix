@@ -10,6 +10,12 @@
               type = lib.types.nonEmptyStr;
             };
 
+            domain = lib.mkOption {
+              description = "Main domain of the host.";
+              type = lib.types.nonEmptyStr;
+              example = "example.com";
+            };
+
             type = lib.mkOption {
               type = lib.types.enum [
                 "live"
