@@ -18,7 +18,7 @@
           )
           ''
             source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-            ZSH_AUTOSUGGEST_STRATEGY=(${lib.concatStringsSep " " cfg.autosuggestion.strategies})
+            ZSH_AUTOSUGGEST_STRATEGY=(${lib.strings.concatStringsSep " " cfg.autosuggestion.strategies})
             ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="${cfg.autosuggestion.highlight}"
           ''
           ''
@@ -43,7 +43,7 @@
                 })
               ++ ["HIST_FCNTL_LOCK"])}
           ''
-          (lib.optionalString (cfg.editor != null)
+          (lib.strings.optionalString (cfg.editor != null)
             ''
               export EDITOR="${cfg.editor}"
               export VISUAL="${cfg.editor}"

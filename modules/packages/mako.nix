@@ -17,7 +17,7 @@
         ''
           default-timeout=${lib.toString cfg.timeout}
         ''
-        + lib.optionalString (cfg.border != null) ''
+        + lib.strings.optionalString (cfg.border != null) ''
           border-radius=${lib.toString cfg.border.radius}
           border-size=${lib.toString cfg.border.size}
         ''
@@ -103,7 +103,7 @@
 
               family = lib.mkOption {
                 type = lib.types.nonEmptyStr;
-                apply = lib.replaceStrings [" "] [""];
+                apply = lib.strings.replaceStrings [" "] [""];
               };
 
               size = lib.mkOption {

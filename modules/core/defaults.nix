@@ -13,6 +13,14 @@
         mutableUsers = lib.mkDefault false;
       };
 
+      security = {
+        sudo = {
+          extraConfig = ''
+            Defaults lecture="never"
+          '';
+        };
+      };
+
       programs = {
         nano.enable = false;
         vim.enable = true;

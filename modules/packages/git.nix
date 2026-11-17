@@ -31,7 +31,7 @@
       in
         if lib.hasAttr name cfg && values != []
         then [
-          (lib.concatStringsSep
+          (lib.strings.concatStringsSep
             "\n"
             (
               [
@@ -44,7 +44,7 @@
 
       configFile = pkgs.writeTextFile {
         name = "config";
-        text = lib.concatStringsSep "\n" (
+        text = lib.strings.concatStringsSep "\n" (
           (lib.concatMap
             sectionToValue
             [

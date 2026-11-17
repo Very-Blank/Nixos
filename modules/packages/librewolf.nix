@@ -173,7 +173,7 @@
             "sidebar.revamp" = lock true;
             "sidebar.verticalTabs" = lock true;
             "sidebar.main.tools" = lock (
-              lib.concatStringsSep "," (map (extension: "${addons.${extension.name}.addonId}") (lib.filter (extension: extension.tool) cfg.extensions))
+              lib.strings.concatStringsSep "," (map (extension: "${addons.${extension.name}.addonId}") (lib.filter (extension: extension.tool) cfg.extensions))
             );
 
             # clear up nav-bar
@@ -282,7 +282,7 @@
 
             @-moz-document url("about:newtab"), url("about:home") {
               ${
-              lib.optionalString (cfg.background != null) ''
+              lib.strings.optionalString (cfg.background != null) ''
                 body {
                   background-image: url("file://${cfg.background}") !important;
                   background-position: center center !important;
@@ -349,7 +349,7 @@
             done
           fi
             
-          for uuid in ${lib.escapeShellArgs uuids}; do
+          for uuid in ${lib.strings.escapeShellArgs uuids}; do
             ${saveExtensions} "$src"/storage/default/moz-extension+++"$uuid" "$tmp"
 
             for dir in "$src"/storage/default/moz-extension+++"$uuid"^userContextId=*; do
@@ -609,7 +609,7 @@
             Sites whose cookies and site data are kept when the browser closes.
           '';
           apply = map (site:
-            if lib.hasInfix "://" site
+            if lib.strings.hasInfix "://" site
             then site
             else "https://" + site);
         };

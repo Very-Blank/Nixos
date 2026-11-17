@@ -13,24 +13,16 @@
 
           set-option -g status-keys ${cfg.keyMode}
           set-option -g mode-keys ${cfg.keyMode}
-          set-option -s escape-time ${toString cfg.escapeTime}
+          set-option -s escape-time ${lib.toString cfg.escapeTime}
         ''
-        + (
-          if cfg.prefix != null
-          then ''
-            unbind C-b
-            set-option -g prefix ${cfg.prefix}
-            bind-key ${cfg.prefix} send-prefix
-          ''
-          else ""
-        )
-        + (
-          if cfg.shell != null
-          then ''
-            set-option -g default-shell "${cfg.shell}"
-          ''
-          else ""
-        )
+        + lib.strings.optionalString (cfg.prefix != null) ''
+          unbind C-b
+          set-option -g prefix ${cfg.prefix}
+          bind-key ${cfg.prefix} send-prefix
+        ''
+        + lib.strings.optionalString (cfg.shell != null) ''
+          set-option -g default-shell "${cfg.shell}"
+        ''
         + cfg.extraConfig;
     in
       pkgs.symlinkJoin {

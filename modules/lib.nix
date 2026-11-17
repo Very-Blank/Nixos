@@ -20,11 +20,6 @@
               self.nixosModules.boot
               self.nixosModules.services
               inputs.hjem.nixosModules.default
-              ({...}: {
-                security.sudo.extraConfig = ''
-                  Defaults lecture="never"
-                '';
-              })
             ]
             ++ modules;
         };

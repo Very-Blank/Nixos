@@ -52,7 +52,7 @@
           --set NIXOS_OZONE_WL 1 \
           --set XCURSOR_PATH ${cursorTheme}/share/icons:${cfg.cursor.package}/share/icons \
           --set XCURSOR_THEME ${cfg.cursor.theme} \
-          --set XCURSOR_SIZE ${toString cfg.cursor.size}
+          --set XCURSOR_SIZE ${lib.toString cfg.cursor.size}
 
         rm "$out/share/systemd/user/niri.service"
 
@@ -376,7 +376,7 @@
             };
           }
           // (lib.listToAttrs (map (num: {
-            name = "Mod+${toString num}";
+            name = "Mod+${lib.toString num}";
             value.focus-workspace = num;
           }) (lib.range 1 9)))
           // (lib.optionalAttrs (cfg.terminal != null) {

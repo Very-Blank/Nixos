@@ -32,12 +32,12 @@
             lib.mapAttrsToList
             (key: value:
               if lib.isList value
-              then lib.concatMapStringsSep "\n" (v: "${key}=${v}") value
+              then lib.strings.concatMapStringsSep "\n" (v: "${key}=${v}") value
               else "${key}=${value}")
             (lib.filterAttrs (_: value: value != null && value != []) unit.${sectionName});
         in
-          lib.optional (values != []) (lib.concatStringsSep "\n" (["[${sectionName}]"] ++ values));
-      in "${pkgs.writeTextDir name (lib.concatStringsSep "\n\n" (lib.concatMap section ["Unit" "Service" "Install"]))}/${name}";
+          lib.optional (values != []) (lib.strings.concatStringsSep "\n" (["[${sectionName}]"] ++ values));
+      in "${pkgs.writeTextDir name (lib.strings.concatStringsSep "\n\n" (lib.concatMap section ["Unit" "Service" "Install"]))}/${name}";
     in {
       options = {
         core = {

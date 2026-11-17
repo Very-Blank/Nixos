@@ -46,7 +46,7 @@
               default_session = let
                 commands =
                   lib.mapAttrsToList
-                  (user: cmd: "${lib.escapeShellArg user}) exec ${cmd} ;;")
+                  (user: cmd: "${lib.strings.escapeShellArg user}) exec ${cmd} ;;")
                   cfg.users;
 
                 chooser = pkgs.writeShellScript "session-chooser" ''

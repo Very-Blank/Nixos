@@ -68,7 +68,7 @@
 
     css.gtk = {palette}: let
       channel = offset: hex: lib.fromHexString (builtins.substring offset 2 hex) / 255.0;
-      rgb = hex: "${toString (channel 1 hex)}, ${toString (channel 3 hex)}, ${toString (channel 5 hex)}";
+      rgb = hex: "${lib.toString (channel 1 hex)}, ${lib.toString (channel 3 hex)}, ${lib.toString (channel 5 hex)}";
     in ''
       @define-color accent_color ${palette.base0D};
       @define-color accent_bg_color ${palette.base0D};

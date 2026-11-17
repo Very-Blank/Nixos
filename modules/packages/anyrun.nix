@@ -82,7 +82,7 @@
           max_entries: ${
           if lib.isString cfg.maxEntries
           then cfg.maxEntries
-          else toString cfg.maxEntries
+          else lib.toString cfg.maxEntries
         },
           plugins: [
             "${pkgs.anyrun}/lib/libapplications.so",
