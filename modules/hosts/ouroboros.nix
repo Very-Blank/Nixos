@@ -48,6 +48,7 @@
         nextcloudPersistent
         nextcloudNginx
         nextcloudBorg
+        sillysnake
       ];
 
       core = {
@@ -63,6 +64,15 @@
 
       features = {
         openssh = {
+          users = {
+            sillysnake = {
+              authorizedKeys = [
+                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGU4pH0jqPg+3y2k0OqKhFZyw5MvQ7Z3y9A85QK2cNPu hermes"
+                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICJGMpg3Izk3qIBUIRmMTR6YF2uwnHY1xr1xU2pi4ftX zaratul"
+              ];
+            };
+          };
+
           banner = ''
 
              ██████╗ ██╗   ██╗██████╗  ██████╗ ██████╗  ██████╗ ██████╗  ██████╗ ███████╗

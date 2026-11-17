@@ -88,6 +88,7 @@
                   identityFile = "~/.ssh/github";
                 }
 
+                # TODO: Change user to "sillysnake" once ouroboros is reinstalled with the new config.
                 {
                   match = "taildevourer.com";
                   name = "taildevourer.com";

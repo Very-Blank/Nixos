@@ -8,6 +8,10 @@ creation_rules:
       - age:
         - *zaratul
         - *hermes
+  - path_regex: secrets/users/sillysnake.yaml$
+    key_groups:
+      - age:
+        - *ouroboros
   - path_regex: secrets/services/(cloudflare|borg|vaultwarden|nextcloud).yaml$
     key_groups:
       - age:
