@@ -7,7 +7,7 @@
       ...
     }: {
       options = {
-        modules = {
+        features = {
           openssh = {
             port = lib.mkOption {
               type = lib.types.ints.unsigned;
@@ -45,7 +45,7 @@
       };
 
       config = let
-        cfg = config.modules.openssh;
+        cfg = config.features.openssh;
       in {
         services = {
           openssh = {

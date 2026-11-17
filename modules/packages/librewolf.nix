@@ -271,14 +271,14 @@
           name = "chrome/userChrome.css";
           path = pkgs.writeText "userChrome.css" ''
             @import "${inputs.firefox-gnome-theme}/userChrome.css";
-            ${self.css.librewolf (inputs.colors.lib.withHash self.globals.theme.palette)}
+            ${self.css.librewolf {palette = inputs.colors.lib.withHash self.globals.theme.palette;}}
           '';
         }
         {
           name = "chrome/userContent.css";
           path = pkgs.writeText "userContent.css" ''
             @import "${inputs.firefox-gnome-theme}/userContent.css";
-            ${self.css.librewolf (inputs.colors.lib.withHash self.globals.theme.palette)}
+            ${self.css.librewolf {palette = inputs.colors.lib.withHash self.globals.theme.palette;}}
 
             @-moz-document url("about:newtab"), url("about:home") {
               ${
@@ -638,60 +638,60 @@
       };
     };
 
-    css.librewolf = theme: ''
+    css.librewolf = {palette}: ''
       :root {
-        --gnome-palette-blue-1: ${theme.base0D};
-        --gnome-palette-blue-2: ${theme.base0D};
-        --gnome-palette-blue-3: ${theme.base0D};
-        --gnome-palette-blue-4: ${theme.base0D};
-        --gnome-palette-blue-5: ${theme.base0D};
-        --gnome-palette-green-1: ${theme.base0B};
-        --gnome-palette-green-2: ${theme.base0B};
-        --gnome-palette-green-3: ${theme.base0B};
-        --gnome-palette-green-4: ${theme.base0B};
-        --gnome-palette-green-5: ${theme.base0B};
-        --gnome-palette-yellow-1: ${theme.base0A};
-        --gnome-palette-yellow-2: ${theme.base0A};
-        --gnome-palette-yellow-3: ${theme.base0A};
-        --gnome-palette-yellow-4: ${theme.base0A};
-        --gnome-palette-yellow-5: ${theme.base0A};
-        --gnome-palette-orange-1: ${theme.base09};
-        --gnome-palette-orange-2: ${theme.base09};
-        --gnome-palette-orange-3: ${theme.base09};
-        --gnome-palette-orange-4: ${theme.base09};
-        --gnome-palette-orange-5: ${theme.base09};
-        --gnome-palette-red-1: ${theme.base08};
-        --gnome-palette-red-2: ${theme.base08};
-        --gnome-palette-red-3: ${theme.base08};
-        --gnome-palette-red-4: ${theme.base08};
-        --gnome-palette-red-5: ${theme.base08};
-        --gnome-palette-purple-1: ${theme.base0E};
-        --gnome-palette-purple-2: ${theme.base0E};
-        --gnome-palette-purple-3: ${theme.base0E};
-        --gnome-palette-purple-4: ${theme.base0E};
-        --gnome-palette-purple-5: ${theme.base0E};
-        --gnome-palette-brown-1: ${theme.base0F};
-        --gnome-palette-brown-2: ${theme.base0F};
-        --gnome-palette-brown-3: ${theme.base0F};
-        --gnome-palette-brown-4: ${theme.base0F};
-        --gnome-palette-brown-5: ${theme.base0F};
-        --gnome-palette-light-1: ${theme.base05};
-        --gnome-palette-light-2: ${theme.base05};
-        --gnome-palette-light-3: ${theme.base05};
-        --gnome-palette-light-4: ${theme.base05};
-        --gnome-palette-light-5: ${theme.base05};
-        --gnome-palette-dark-1: ${theme.base05};
-        --gnome-palette-dark-2: ${theme.base05};
-        --gnome-palette-dark-3: ${theme.base05};
-        --gnome-palette-dark-4: ${theme.base05};
-        --gnome-palette-dark-5: ${theme.base05};
+        --gnome-palette-blue-1: ${palette.base0D};
+        --gnome-palette-blue-2: ${palette.base0D};
+        --gnome-palette-blue-3: ${palette.base0D};
+        --gnome-palette-blue-4: ${palette.base0D};
+        --gnome-palette-blue-5: ${palette.base0D};
+        --gnome-palette-green-1: ${palette.base0B};
+        --gnome-palette-green-2: ${palette.base0B};
+        --gnome-palette-green-3: ${palette.base0B};
+        --gnome-palette-green-4: ${palette.base0B};
+        --gnome-palette-green-5: ${palette.base0B};
+        --gnome-palette-yellow-1: ${palette.base0A};
+        --gnome-palette-yellow-2: ${palette.base0A};
+        --gnome-palette-yellow-3: ${palette.base0A};
+        --gnome-palette-yellow-4: ${palette.base0A};
+        --gnome-palette-yellow-5: ${palette.base0A};
+        --gnome-palette-orange-1: ${palette.base09};
+        --gnome-palette-orange-2: ${palette.base09};
+        --gnome-palette-orange-3: ${palette.base09};
+        --gnome-palette-orange-4: ${palette.base09};
+        --gnome-palette-orange-5: ${palette.base09};
+        --gnome-palette-red-1: ${palette.base08};
+        --gnome-palette-red-2: ${palette.base08};
+        --gnome-palette-red-3: ${palette.base08};
+        --gnome-palette-red-4: ${palette.base08};
+        --gnome-palette-red-5: ${palette.base08};
+        --gnome-palette-purple-1: ${palette.base0E};
+        --gnome-palette-purple-2: ${palette.base0E};
+        --gnome-palette-purple-3: ${palette.base0E};
+        --gnome-palette-purple-4: ${palette.base0E};
+        --gnome-palette-purple-5: ${palette.base0E};
+        --gnome-palette-brown-1: ${palette.base0F};
+        --gnome-palette-brown-2: ${palette.base0F};
+        --gnome-palette-brown-3: ${palette.base0F};
+        --gnome-palette-brown-4: ${palette.base0F};
+        --gnome-palette-brown-5: ${palette.base0F};
+        --gnome-palette-light-1: ${palette.base05};
+        --gnome-palette-light-2: ${palette.base05};
+        --gnome-palette-light-3: ${palette.base05};
+        --gnome-palette-light-4: ${palette.base05};
+        --gnome-palette-light-5: ${palette.base05};
+        --gnome-palette-dark-1: ${palette.base05};
+        --gnome-palette-dark-2: ${palette.base05};
+        --gnome-palette-dark-3: ${palette.base05};
+        --gnome-palette-dark-4: ${palette.base05};
+        --gnome-palette-dark-5: ${palette.base05};
 
 
         /* Accent */
-        --gnome-accent-bg: ${theme.base0D};
-        --gnome-accent: ${theme.base0D};
-        --gnome-accent-bg-hover: ${theme.base0D};
-        --gnome-accent-hover: ${theme.base0D};
+        --gnome-accent-bg: ${palette.base0D};
+        --gnome-accent: ${palette.base0D};
+        --gnome-accent-bg-hover: ${palette.base0D};
+        --gnome-accent-hover: ${palette.base0D};
 
         /* Colors */
         --gnome-destructive-bg: var(--gnome-palette-red-3);
@@ -702,37 +702,37 @@
         --gnome-toolbar-star-button: var(--gnome-palette-yellow-1);
 
         /* Window */
-        --gnome-window-background: ${theme.base00};
-        --gnome-window-color: ${theme.base05};
-        --gnome-view-background: ${theme.base00};
-        --gnome-sidebar-background: ${theme.base01} !important;
-        --gnome-secondary-sidebar-background: ${theme.base01} !important;
+        --gnome-window-background: ${palette.base00};
+        --gnome-window-color: ${palette.base05};
+        --gnome-view-background: ${palette.base00};
+        --gnome-sidebar-background: ${palette.base01} !important;
+        --gnome-secondary-sidebar-background: ${palette.base01} !important;
 
         /* UI Elements */
-        --gnome-entry-background: color-mix(in srgb, ${theme.base01} 40%, ${theme.base02} 100%);
+        --gnome-entry-background: color-mix(in srgb, ${palette.base01} 40%, ${palette.base02} 100%);
 
         /* Card */
-        --gnome-card-background: ${theme.base01};
+        --gnome-card-background: ${palette.base01};
         --gnome-card-shade-color: rgba(0, 0, 0, 0.07);
 
         /* Menu */
-        --gnome-menu-background: ${theme.base01};
+        --gnome-menu-background: ${palette.base01};
 
         /* Headerbar */
-        --gnome-headerbar-background: ${theme.base01};
+        --gnome-headerbar-background: ${palette.base01};
         --gnome-headerbar-shade-color: rgba(0, 0, 0, 0.07);
 
         /* Toolbar */
-        --toolbox-textcolor: ${theme.base05} !important;
-        --toolbox-textcolor-inactive: ${theme.base05} !important;
-        --toolbar-color: ${theme.base05} !important;
-        --gnome-toolbar-icon-fill: ${theme.base05};
+        --toolbox-textcolor: ${palette.base05} !important;
+        --toolbox-textcolor-inactive: ${palette.base05} !important;
+        --toolbar-color: ${palette.base05} !important;
+        --gnome-toolbar-icon-fill: ${palette.base05};
 
         /* Tabs */
-        --gnome-tabbar-tab-hover-background: color-mix(in srgb, ${theme.base01} 50%, ${theme.base02} 52%);
-        --gnome-tabbar-tab-active-background: color-mix(in srgb, ${theme.base01} 40%, ${theme.base02} 100%);
-        --gnome-tabbar-tab-active-background-contrast: ${theme.base02};
-        --gnome-tabbar-tab-active-hover-background: color-mix(in oklab, ${theme.base01} 5.8%, ${theme.base02} 100%);
+        --gnome-tabbar-tab-hover-background: color-mix(in srgb, ${palette.base01} 50%, ${palette.base02} 52%);
+        --gnome-tabbar-tab-active-background: color-mix(in srgb, ${palette.base01} 40%, ${palette.base02} 100%);
+        --gnome-tabbar-tab-active-background-contrast: ${palette.base02};
+        --gnome-tabbar-tab-active-hover-background: color-mix(in oklab, ${palette.base01} 5.8%, ${palette.base02} 100%);
 
         --gnome-tabbar-identity-color-blue: var(--gnome-palette-blue-2);
         --gnome-tabbar-identity-color-green: var(--gnome-palette-green-1);
@@ -742,14 +742,14 @@
         --gnome-tabbar-identity-color-purple: var(--gnome-palette-purple-1);
 
         /* Private Tabs */
-        --gnome-private-wordmark: ${theme.base04};
-        --gnome-private-in-content-page-background: ${theme.base00};
-        --gnome-private-text-primary-color: ${theme.base06};
+        --gnome-private-wordmark: ${palette.base04};
+        --gnome-private-in-content-page-background: ${palette.base00};
+        --gnome-private-text-primary-color: ${palette.base06};
 
         &:-moz-window-inactive {
           --gnome-tabbar-tab-hover-background: var(--gnome-tabbar-tab-hover-background);
-          --gnome-tabbar-tab-active-background: color-mix(in oklab, ${theme.base01} 50%, ${theme.base02} 77.5%);
-          --gnome-entry-background: color-mix(in oklab, ${theme.base01} 50%, ${theme.base02} 77.5%);
+          --gnome-tabbar-tab-active-background: color-mix(in oklab, ${palette.base01} 50%, ${palette.base02} 77.5%);
+          --gnome-entry-background: color-mix(in oklab, ${palette.base01} 50%, ${palette.base02} 77.5%);
         }
       }
     '';

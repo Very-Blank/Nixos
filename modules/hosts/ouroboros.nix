@@ -46,7 +46,7 @@
         };
       };
 
-      modules = {
+      features = {
         openssh = {
           banner = ''
 

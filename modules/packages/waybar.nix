@@ -18,7 +18,7 @@
       });
 
       style = pkgs.writeText "style.css" (self.css.waybar {
-        theme = inputs.colors.lib.withHash self.globals.theme.palette;
+        palette = inputs.colors.lib.withHash self.globals.theme.palette;
         fontFamily = cfg.font.family;
         fontWeight = "normal";
       });
@@ -328,7 +328,7 @@
       });
 
     css.waybar = {
-      theme,
+      palette,
       fontFamily,
       fontWeight,
     }: ''
@@ -352,26 +352,26 @@
           margin-right: 8px;
           border-radius: 10px;
           transition: none;
-          background: ${theme.base00};
+          background: ${palette.base00};
       }
 
       #workspaces button {
           padding: 5px;
           font-size: 18px;
-          color: ${theme.base03};
+          color: ${palette.base03};
           background: transparent;
           transition: none;
       }
 
       #workspaces button.persistent {
-          color: ${theme.base04};
+          color: ${palette.base04};
           font-size: 12px;
       }
 
       #workspaces button:hover {
           border-radius: inherit;
-          color: ${theme.base00};
-          background: ${theme.base03};
+          color: ${palette.base00};
+          background: ${palette.base03};
           box-shadow: inherit;
           text-shadow: inherit;
           transition: none;
@@ -379,8 +379,8 @@
 
       #workspaces button.active {
           border-radius: inherit;
-          color: ${theme.base06};
-          background: ${theme.base01};
+          color: ${palette.base06};
+          background: ${palette.base01};
       }
 
       #keyboard-state,
@@ -396,8 +396,8 @@
           padding-right: 16px;
           border-radius: 10px;
           transition: none;
-          color: ${theme.base06};
-          background: ${theme.base00};
+          color: ${palette.base06};
+          background: ${palette.base00};
       }
 
       #custom-poweroff,
@@ -408,28 +408,28 @@
           padding-right: 18px;
           border-radius: 10px;
           transition: none;
-          color: ${theme.base06};
-          background: ${theme.base00};
+          color: ${palette.base06};
+          background: ${palette.base00};
       }
 
       #pulseaudio.muted {
-          background-color: ${theme.base0E};
-          color: ${theme.base00};
+          background-color: ${palette.base0E};
+          color: ${palette.base00};
       }
 
       #battery.charging {
-          background-color: ${theme.base0B};
-          color: ${theme.base00};
+          background-color: ${palette.base0B};
+          color: ${palette.base00};
       }
 
       #battery.warning:not(.charging) {
-          background-color: ${theme.base0A};
-          color: ${theme.base00};
+          background-color: ${palette.base0A};
+          color: ${palette.base00};
       }
 
       #battery.critical:not(.charging) {
-          background-color: ${theme.base08};
-          color: ${theme.base00};
+          background-color: ${palette.base08};
+          color: ${palette.base00};
           animation-name: blink;
           animation-duration: 0.5s;
           animation-timing-function: linear;
@@ -439,8 +439,8 @@
 
       @keyframes blink {
           to {
-              background-color: ${theme.base06};
-              color: ${theme.base00};
+              background-color: ${palette.base06};
+              color: ${palette.base00};
           }
       }
     '';
