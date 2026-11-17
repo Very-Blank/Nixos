@@ -237,6 +237,12 @@
           keyboard = {
             repeat-delay = 150;
           };
+
+          touchpad = {
+            tap = [];
+            natural-scroll = [];
+            dwt = [];
+          };
         };
 
         hotkey-overlay = {
@@ -255,14 +261,6 @@
           hide-when-typing = true;
           xcursor-theme = cfg.cursor.theme;
           xcursor-size = cfg.cursor.size;
-        };
-
-        input = {
-          touchpad = {
-            tap = [];
-            natural-scroll = [];
-            dwt = [];
-          };
         };
 
         window-rule = {
