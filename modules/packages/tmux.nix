@@ -7,25 +7,16 @@
     packages.tmux = lib.makeOverridable (module: let
       cfg = self.lib.evalConfig pkgs self.configOptions.tmux module;
 
-      # send-keys "nvim" enter
-      some = window: (lib.strings.concatStringsSep " ; " (
-        (
-          lib.optional (window.cmd != null && window.cmd != [])
-          ''send-keys "${lib.escapeShellArgs window.cmd}" enter''
-        )
-        ++ (
-          lib.optional (window.name != null)
-          ''rename-window ${window.name}"''
-        )
-      ));
+      tmuxQuote = value: let
+        tmuxFrom = ["\\" "\"" "$"];
+        tmuxTo = ["\\\\" "\\\"" "\\$"];
 
-      # send-keys "nvim" enter ; new-window ; select-window -t 0
-      wn = lib.strings.concatStringsSep " ; new-window ; " (map some cfg.windows);
-
-      # ''
-      #   send-keys "${lib.escapeShellArgs window.cmd}" enter
-      #
-      # '';
+        quoteArg = arg: "'${lib.strings.replaceStrings (["'"] ++ tmuxFrom) (["'\\\\''"] ++ tmuxTo) arg}'";
+      in ''"${
+          if lib.isList value
+          then lib.strings.concatMapStringsSep " " quoteArg value
+          else lib.strings.replaceStrings tmuxFrom tmuxTo value
+        }"'';
 
       tmuxConfig =
         ''
@@ -35,9 +26,8 @@
           set-option -g mode-keys ${cfg.keyMode}
           set-option -s escape-time ${lib.toString cfg.escapeTime}
 
-          set-hook -g session-created 'select-window -t 0'
-        ''
-        + lib.strings.optionalString (cfg.prefix != null) ''
+          set-hook -g session-created[1] 'select-window -t ${lib.toString cfg.window}'
+
           unbind C-b
           set-option -g prefix ${cfg.prefix}
           bind-key ${cfg.prefix} send-prefix
@@ -45,16 +35,26 @@
         + lib.strings.optionalString (cfg.shell != null) ''
           set-option -g default-shell "${cfg.shell}"
         ''
-        # Or type Ctrl-b : rename-window <new name>.
-        # set-hook -g session-created 'send-keys "nvim" enter ; new-window ; select-window -t 0'
         + (lib.strings.optionalString (cfg.windows != [])
-          "set-hook -g session-created '${wn}'")
-        + cfg.extraConfig;
+          "set-hook -g session-created[0] { ${lib.strings.concatStringsSep " ; new-window ; " (map (
+              window: (lib.strings.concatStringsSep " ; " (
+                (
+                  lib.optional (window.cmd != null && window.cmd != [])
+                  "send-keys ${tmuxQuote window.cmd} enter"
+                )
+                ++ (
+                  lib.optional (window.name != null)
+                  "rename-window ${tmuxQuote window.name}"
+                )
+              ))
+            )
+            cfg.windows)} }\n");
     in
-      pkgs.symlinkJoin {
+      pkgs.symlinkJoin (finalAttrs: {
         name = "tmux";
         buildInputs = [pkgs.makeWrapper];
         paths = [pkgs.tmux];
+        passthru.shellGuard = cfg.shellGuard finalAttrs.finalPackage;
         postBuild = ''
           wrapProgram $out/bin/tmux \
             --add-flag -f --add-flag ${pkgs.writeText "config" tmuxConfig} \
@@ -64,10 +64,14 @@
         meta = {
           mainProgram = "tmux";
         };
-      }) {};
+      })) {};
   };
   flake = {
-    configOptions.tmux = {lib, ...}: {
+    configOptions.tmux = {
+      lib,
+      config,
+      ...
+    }: {
       options = {
         name = lib.mkOption {
           default = "default";
@@ -100,10 +104,9 @@
 
         prefix = lib.mkOption {
           default = "C-a";
-          type = lib.types.nullOr lib.types.str;
-          description = ''
-            Set the prefix key. Overrules the "shortcut" option when set.
-          '';
+          example = "C-b";
+          type = lib.types.nonEmptyStr;
+          description = "Set the prefix key.";
         };
 
         shell = lib.mkOption {
@@ -113,49 +116,78 @@
         };
 
         windows = lib.mkOption {
-          default = [
+          example = [
             {
-              name = "NIXOS";
+              name = "edit";
               cmd = ["nvim"];
             }
-            {
-              name = "NIXOS2";
-              cmd = ["nvim"];
-            }
+            {name = "shell";}
           ];
+          description = ''
+            Windows created in every new session. 
+            Each window must set name, cmd, or both.
+          '';
 
           type = lib.types.listOf (lib.types.submodule {
             options = {
               name = lib.mkOption {
+                default = null;
                 type = lib.types.nullOr lib.types.nonEmptyStr;
+                description = "Name of the window.";
               };
 
               cmd = lib.mkOption {
+                default = null;
+                example = ["nvim" "."];
                 type = lib.types.nullOr (lib.types.listOf lib.types.nonEmptyStr);
+                description = ''
+                  Command run inside the window's shell when the session is created.
+                '';
               };
             };
           });
         };
 
         window = lib.mkOption {
-          default = 1;
+          default = 0;
           type = lib.types.ints.unsigned;
           description = ''
             The selected window.
           '';
         };
 
-        extraConfig = lib.mkOption {
-          type = lib.types.lines;
-          default = "";
-          description = "Additional configuration added to the config.";
+        shellGuard = lib.mkOption {
+          readOnly = true;
+          type = lib.types.functionTo lib.types.lines;
+          default = tmux: ''
+            if [ -z "''${TMUX:-}" ]; then
+              exec ${lib.getExe' tmux "tmux"}
+              exit
+            fi
+          '';
+          example = lib.literalExpression "self.packages.\${system}.tmux.shellGuard";
+          description = ''
+            Shell snippet that replaces the current shell with tmux, unless it
+            is already running inside tmux. Read it from the package as
+            `tmux.shellGuard`; the package passes itself in, so the snippet
+            follows override and overrideAttrs.
+          '';
         };
       };
 
       config = {
         assertions = [
-          # TODO: check window is either 0 or less than window count.
-          # TODO: check that each window at least sets cmd or name!
+          {
+            assertion =
+              if config.windows == []
+              then config.window == 0
+              else config.window < lib.length config.windows;
+            message = "Window = ${lib.toString config.window} is out of range for ${lib.toString (lib.length config.windows)} window(s).";
+          }
+          {
+            assertion = lib.all (window: window.name != null || (window.cmd != null && window.cmd != [])) config.windows;
+            message = "Every entry in windows must set name or a non-empty cmd.";
+          }
         ];
       };
     };
