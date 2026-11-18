@@ -36,17 +36,46 @@
           set-option -g default-shell "${cfg.shell}"
         ''
         + (lib.strings.optionalString (cfg.windows != [])
-          "set-hook -g session-created[0] { ${lib.strings.concatStringsSep " ; new-window ; " (map (
-              window: (lib.strings.concatStringsSep " ; " (
-                (
-                  lib.optional (window.cmd != null && window.cmd != [])
-                  "send-keys ${tmuxQuote window.cmd} enter"
+          "set-hook -g session-created[0] { ${lib.strings.concatStringsSep " ; " (lib.imap0 (
+              index: window: let
+                hasCmd = window.cmd != null && window.cmd != [];
+                cmd = lib.strings.optionalString hasCmd " ${tmuxQuote window.cmd}";
+
+                flags =
+                  lib.strings.optionalString (window.dir != null) " -c ${tmuxQuote window.dir}"
+                  + lib.strings.concatStrings (lib.mapAttrsToList (
+                      key: value: " -e ${tmuxQuote "${key}=${value}"}"
+                    )
+                    window.env);
+
+                name =
+                  if window.name != null
+                  then window.name
+                  else if hasCmd
+                  then baseNameOf (lib.head window.cmd)
+                  else null;
+
+                onExit =
+                  if window.onExit == "close"
+                  then []
+                  else if window.onExit == "remain"
+                  then ["set-option -w remain-on-exit on"]
+                  else [
+                    "set-option -w remain-on-exit on"
+                    "set-hook -w pane-died respawn-pane"
+                  ];
+              in
+                lib.strings.concatStringsSep " ; " (
+                  # Window 0 is created by new-session, so we repalce it.
+                  if index == 0
+                  then
+                    onExit
+                    ++ (lib.optional (hasCmd || flags != "") "respawn-pane -k${flags}${cmd}")
+                    ++ (lib.optional (name != null) "rename-window ${tmuxQuote name}")
+                  else
+                    ["new-window${lib.strings.optionalString (name != null) " -n ${tmuxQuote name}"}${flags}${cmd}"]
+                    ++ onExit
                 )
-                ++ (
-                  lib.optional (window.name != null)
-                  "rename-window ${tmuxQuote window.name}"
-                )
-              ))
             )
             cfg.windows)} }\n");
     in
@@ -141,7 +170,33 @@
                 example = ["nvim" "."];
                 type = lib.types.nullOr (lib.types.listOf lib.types.nonEmptyStr);
                 description = ''
-                  Command run inside the window's shell when the session is created.
+                  Command the window runs instead of a shell. Unnamed windows
+                  are named after its first element.
+                '';
+              };
+
+              dir = lib.mkOption {
+                default = null;
+                example = "/etc/nixos";
+                type = lib.types.nullOr lib.types.nonEmptyStr;
+                description = "Starting directory of the window.";
+              };
+
+              env = lib.mkOption {
+                default = {};
+                example = {
+                  EDITOR = "nvim";
+                };
+                type = lib.types.attrsOf lib.types.str;
+                description = "Environment variables set for the window.";
+              };
+
+              onExit = lib.mkOption {
+                default = "close";
+                type = lib.types.enum ["close" "remain" "respawn"];
+                description = ''
+                  What happens when the window's command exits: close the
+                  window, keep the dead pane open, or restart the command.
                 '';
               };
             };
