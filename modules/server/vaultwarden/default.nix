@@ -142,6 +142,8 @@
       services.nginx.virtualHosts.${"${subdomainName}.${config.modules.server.domain.main}"} = lib.mkIf config.modules.server.nginx.enable {
         useACMEHost = config.modules.server.domain.main;
         forceSSL = true;
+        # FIXME: Disabled because of a possible CVE
+        http2 = false;
 
         locations."/" = {
           proxyPass = "http://127.0.0.1:${toString config.services.vaultwarden.config.ROCKET_PORT}";

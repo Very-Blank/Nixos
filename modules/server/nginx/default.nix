@@ -101,6 +101,8 @@
         virtualHosts.${config.modules.server.domain.main} = {
           useACMEHost = config.modules.server.domain.main;
           forceSSL = true;
+          # FIXME: Disabled because of a possible CVE
+          http2 = false;
 
           root = inputs.sefirah.packages.${pkgs.stdenv.system}.default;
 
@@ -119,6 +121,8 @@
 
         virtualHosts."*.${config.modules.server.domain.main}" = {
           forceSSL = true;
+          # FIXME: Disabled because of a possible CVE
+          http2 = false;
           extraConfig = httpSecurityHeaders;
           useACMEHost = config.modules.server.domain.main;
           globalRedirect = config.modules.server.domain.main;
