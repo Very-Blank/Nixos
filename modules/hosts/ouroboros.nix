@@ -20,19 +20,6 @@
         networking
         ignoreLid
         openssh
-        cloudflareDyndns
-        nginx
-        nginxPersistent
-        borg
-        borgPersistent
-        vaultwarden
-        vaultwardenPersistent
-        vaultwardenNginx
-        vaultwardenBorg
-        nextcloud
-        nextcloudPersistent
-        nextcloudNginx
-        nextcloudBorg
         sillysnake
       ];
 
@@ -71,20 +58,6 @@
                                              thank you.
 
           '';
-        };
-
-        nginx = {
-          acme = {
-            email = "aapeli.saarelainen.76@gmail.com";
-          };
-        };
-
-        borg = {
-          repo = name: "ssh://u561700@u561700.your-storagebox.de:23/./${name}";
-
-          environment = {
-            BORG_RSH = "ssh -i /root/.ssh/hetzner";
-          };
         };
       };
 
