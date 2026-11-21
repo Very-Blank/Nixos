@@ -111,7 +111,11 @@
   };
 
   flake = {
-    configOptions.zsh = {lib, ...}: {
+    configOptions.zsh = {
+      lib,
+      pkgs,
+      ...
+    }: {
       options = {
         keymap = lib.mkOption {
           type = lib.types.enum [
@@ -164,7 +168,7 @@
             "gca" = "git commit -a";
             "glm" = "git pull origin main";
             "gsm" = "git push origin main";
-            "ls" = "ls --color=auto -h --group-directories-first";
+            "ls" = "${lib.getExe pkgs.eza} --icons always --color always --no-quotes --group-directories-first";
             "ns" = "nix-shell --run zsh";
           };
         };
