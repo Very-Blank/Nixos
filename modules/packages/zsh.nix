@@ -63,6 +63,7 @@
             zstyle ':completion:*' menu select
             zstyle ':fzf-tab:*' fzf-command ${lib.getExe pkgs.fzf}
             zstyle ':fzf-tab:*' fzf-flags --color=16,bg+:-1,fg+:magenta,pointer:magenta,border:bright-black --border=rounded --pointer='▎' --gutter='▎'
+            zstyle ':fzf-tab:*' fzf-pad 4
             source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
           ''
           ''
