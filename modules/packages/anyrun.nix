@@ -148,12 +148,6 @@
       ...
     }: {
       options = let
-        mkBoolOption = default: description:
-          lib.mkOption {
-            type = lib.types.bool;
-            inherit default description;
-          };
-
         # NOTE: An integer is an absolute size in pixels, a float is a fraction of the screen.
         dimension = lib.types.either lib.types.ints.unsigned (lib.types.numbers.between 0.0 1.0);
       in {
@@ -195,25 +189,41 @@
           };
         };
 
-        hideIcons = mkBoolOption true ''
-          If icons will be hidden.
-        '';
+        hideIcons =
+          lib.mkEnableOption ''
+            If icons will be hidden.
+          ''
+          // {
+            default = true;
+          };
 
-        ignoreExclusiveZones = mkBoolOption false ''
+        ignoreExclusiveZones = lib.mkEnableOption ''
           If exclusive zones should be ignored.
         '';
 
-        hidePluginInfo = mkBoolOption true ''
-          If plugin info is shown.
-        '';
+        hidePluginInfo =
+          lib.mkEnableOption ''
+            If plugin info is shown.
+          ''
+          // {
+            default = true;
+          };
 
-        closeOnClick = mkBoolOption true ''
-          If anyrun closes when clicking outside of it.
-        '';
+        closeOnClick =
+          lib.mkEnableOption ''
+            If anyrun closes when clicking outside of it.
+          ''
+          // {
+            default = true;
+          };
 
-        showResultsImmediately = mkBoolOption true ''
-          If results should be shown immediately.
-        '';
+        showResultsImmediately =
+          lib.mkEnableOption ''
+            If results should be shown immediately.
+          ''
+          // {
+            default = true;
+          };
 
         layer = lib.mkOption {
           type = lib.types.enum [

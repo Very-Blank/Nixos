@@ -165,13 +165,7 @@
           };
         };
 
-        history = let
-          mkBoolOption = default: description:
-            lib.mkOption {
-              type = lib.types.bool;
-              inherit default description;
-            };
-        in {
+        history = {
           size = lib.mkOption {
             type = lib.types.ints.unsigned;
             default = 1000;
@@ -182,16 +176,29 @@
             default = 1000;
           };
 
-          append = mkBoolOption false "Append to the history file instead of overwriting it.";
-          ignoreDups = mkBoolOption true "Don't record a command identical to the previous one.";
-          ignoreSpace = mkBoolOption true "Don't record commands that start with a space.";
-          share = mkBoolOption true "Share history between all running sessions.";
-          extended = mkBoolOption false "Save timestamps and durations in the history file.";
-          saveByCopy = mkBoolOption false "Write a new history file and rename it instead of overwriting in place.";
-          expireDuplicatesFirst = mkBoolOption false "Expire duplicates first when the history exceeds its size.";
-          findNoDups = mkBoolOption false "Skip duplicates when searching history.";
-          ignoreAllDups = mkBoolOption false "Remove older duplicates when a new command is added.";
-          saveNoDups = mkBoolOption false "Omit duplicates when writing the history file.";
+          append = lib.mkEnableOption "Append to the history file instead of overwriting it.";
+          ignoreDups =
+            lib.mkEnableOption "Don't record a command identical to the previous one."
+            // {
+              default = true;
+            };
+          ignoreSpace =
+            lib.mkEnableOption "Don't record commands that start with a space."
+            // {
+              default = true;
+            };
+          share =
+            lib.mkEnableOption "Share history between all running sessions."
+            // {
+              default = true;
+            };
+
+          extended = lib.mkEnableOption "Save timestamps and durations in the history file.";
+          saveByCopy = lib.mkEnableOption "Write a new history file and rename it instead of overwriting in place.";
+          expireDuplicatesFirst = lib.mkEnableOption "Expire duplicates first when the history exceeds its size.";
+          findNoDups = lib.mkEnableOption "Skip duplicates when searching history.";
+          ignoreAllDups = lib.mkEnableOption "Remove older duplicates when a new command is added.";
+          saveNoDups = lib.mkEnableOption "Omit duplicates when writing the history file.";
         };
       };
     };
