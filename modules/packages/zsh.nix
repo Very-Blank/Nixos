@@ -60,7 +60,7 @@
           ''
           ''
             ${cfg.interactiveShellInit}
-            eval "$(${lib.getExe pkgs.zoxide} init zsh --cmd cd)"
+            eval "$(${lib.getExe pkgs.zoxide} init zsh --cmd cd | sed 's|command zoxide|command ${lib.getExe pkgs.zoxide}|g')"
           ''
         ]
         ++ (lib.mapAttrsToList (key: action: "bindkey '${key}' ${action}") cfg.keys)
@@ -163,14 +163,7 @@
 
         aliases = lib.mkOption {
           type = lib.types.attrsOf lib.types.nonEmptyStr;
-          default = {
-            "gc" = "git checkout";
-            "gca" = "git commit -a";
-            "glm" = "git pull origin main";
-            "gsm" = "git push origin main";
-            "ls" = "${lib.getExe pkgs.eza} --icons always --color always --no-quotes --group-directories-first";
-            "ns" = "nix-shell --run zsh";
-          };
+          default = {};
         };
 
         history = {
@@ -215,6 +208,16 @@
             Shell script code called during interactive zsh shell initialisation.
           '';
           type = lib.types.lines;
+        };
+      };
+
+      config = {
+        aliases = lib.mapAttrs (_: lib.mkDefault) {
+          "gc" = "git checkout";
+          "gca" = "git commit -a";
+          "glm" = "git pull origin main";
+          "gsm" = "git push origin main";
+          "ls" = "${lib.getExe pkgs.eza} --icons always --color always --no-quotes --group-directories-first";
         };
       };
     };
