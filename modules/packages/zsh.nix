@@ -1,4 +1,8 @@
-{self, ...}: {
+{
+  self,
+  inputs,
+  ...
+}: {
   perSystem = {
     lib,
     pkgs,
@@ -6,6 +10,16 @@
   }: {
     packages.zsh = lib.makeOverridable (module: let
       cfg = self.lib.evalConfig pkgs self.configOptions.zsh module;
+
+      palette = inputs.colors.lib.withHash self.globals.theme.palette;
+
+      menuColors = lib.mapAttrsToList (element: color: "${element}:${color}") {
+        "bg+" = palette.base01;
+        "fg+" = palette.base0E;
+        "hl+" = palette.base0D;
+        "pointer" = palette.base0E;
+        "border" = palette.base02;
+      };
 
       config = lib.strings.concatStringsSep "\n" (
         [
@@ -22,8 +36,7 @@
             ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="${cfg.autosuggestion.highlight}"
           ''
           ''
-            setopt ${let
-            in
+            setopt ${
               lib.strings.concatStringsSep " " ((lib.mapAttrsToList
                 (opt: on:
                   if on
@@ -41,7 +54,8 @@
                   "HIST_IGNORE_ALL_DUPS" = cfg.history.ignoreAllDups;
                   "HIST_SAVE_NO_DUPS" = cfg.history.saveNoDups;
                 })
-              ++ ["HIST_FCNTL_LOCK"])}
+              ++ ["HIST_FCNTL_LOCK" "CORRECT"])
+            }
           ''
           (lib.strings.optionalString (cfg.editor != null)
             ''
@@ -62,7 +76,7 @@
             autoload -Uz compinit && compinit
             zstyle ':completion:*' menu select
             zstyle ':fzf-tab:*' fzf-command ${lib.getExe pkgs.fzf}
-            zstyle ':fzf-tab:*' fzf-flags --color=16,bg+:-1,fg+:magenta,pointer:magenta,border:bright-black --border=rounded --pointer='▎' --gutter='▎'
+            zstyle ':fzf-tab:*' fzf-flags --color=16,${lib.strings.concatStringsSep "," menuColors} --border=rounded --pointer='▎' --gutter='▎'
             zstyle ':fzf-tab:*' fzf-pad 4
             source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
           ''
