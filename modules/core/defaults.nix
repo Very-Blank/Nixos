@@ -32,6 +32,7 @@
           pkgs.unzip
           pkgs.tree
           pkgs.rsync
+          pkgs.zoxide
         ];
 
         defaultPackages = lib.mkForce [];

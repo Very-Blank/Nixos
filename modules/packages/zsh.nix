@@ -58,6 +58,10 @@
             autoload -U promptinit && promptinit
             prompt pure
           ''
+          ''
+            ${cfg.interactiveShellInit}
+            eval "$(${lib.getExe pkgs.zoxide} init zsh --cmd cd)"
+          ''
         ]
         ++ (lib.mapAttrsToList (key: action: "bindkey '${key}' ${action}") cfg.keys)
         ++ (lib.mapAttrsToList (alias: action: "alias -- ${alias}='${action}'") cfg.aliases)
@@ -199,6 +203,14 @@
           findNoDups = lib.mkEnableOption "Skip duplicates when searching history.";
           ignoreAllDups = lib.mkEnableOption "Remove older duplicates when a new command is added.";
           saveNoDups = lib.mkEnableOption "Omit duplicates when writing the history file.";
+        };
+
+        interactiveShellInit = lib.mkOption {
+          default = "";
+          description = ''
+            Shell script code called during interactive zsh shell initialisation.
+          '';
+          type = lib.types.lines;
         };
       };
     };
