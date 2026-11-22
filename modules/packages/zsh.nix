@@ -76,8 +76,7 @@
             autoload -Uz compinit && compinit
             zstyle ':completion:*' menu select
             zstyle ':fzf-tab:*' fzf-command ${lib.getExe pkgs.fzf}
-            zstyle ':fzf-tab:*' fzf-flags --color=16,${lib.strings.concatStringsSep "," menuColors} --border=rounded --pointer='▎' --gutter='▎'
-            zstyle ':fzf-tab:*' fzf-pad 4
+            zstyle ':fzf-tab:*' fzf-flags --color=16,${lib.strings.concatStringsSep "," menuColors} --pointer='▎' --gutter='▎'
             source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
           ''
           ''
