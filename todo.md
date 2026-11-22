@@ -1,6 +1,4 @@
-# NOTE
-
-## TODO
+# TODO
 
 - [X] Dendritic pattern.
 - [X] Impermanence.
@@ -8,8 +6,9 @@
 - [X] Disko.
 - [ ] Better secrets handeling.
 
-### Server
+## Server
 
+- [ ] Rewrite legacy modules to the new format.
 - [ ] Deploy-rs.
 - [ ] Authelia.
 - [ ] Navidrome.
